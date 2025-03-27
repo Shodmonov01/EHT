@@ -1,15 +1,17 @@
-import React from "react";
 import { motion } from "framer-motion";
 import "../../styles/Form.css";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
+import { useTranslation } from "react-i18next";
 import yellowBg from "../../assets/images/yellow-bg.png";
-import logo from "../../assets/images/logores.svg";
-
 export default function Form() {
+  const { t } = useTranslation();
+
   return (
     <div className="form-wrapper">
-      <div className="header">
-        <img src={logo} alt="Logo" className="logo" />
-        <h1 className="title">Quiz</h1>
+      <LanguageSwitcher />
+      <div className="quiz-title">
+        <img src={yellowBg} alt="Background" className="yellow-bg" />
+        <h1>Quiz</h1>
       </div>
 
       <motion.div
@@ -18,53 +20,37 @@ export default function Form() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <div className="quiz__description">
-          Привет, вы попали в систему Tesla Education Quiz, 
-          Коротко о правилах - Не знаете ответа, не отвечайте! :)
-        </div>
+        <div className="quiz__description">{t("form.description")}</div>
 
         <div className="form-content">
           <h2 className="form-subtitle">Расскажите нам о себе</h2>
-          
+
           <form id="quizForm">
             <div className="input-group">
-              <input 
-                type="text" 
-                id="parentName" 
+              <input
+                type="text"
+                id="parentName"
                 placeholder="ФИО Родителя"
-                required 
+                required
               />
-              
-              <input 
-                type="text" 
-                id="name" 
-                placeholder="ФИО"
-                required 
-              />
-              
-              <input 
-                type="text" 
-                id="phone" 
+
+              <input type="text" id="name" placeholder="ФИО" required />
+
+              <input
+                type="text"
+                id="phone"
                 placeholder="Номер телефона"
-                required 
+                required
               />
-              
-              <select id="grade" required>
-                <option value="">Выберите класс</option>
-                <option value="1">Класс 1</option>
-                <option value="2">Класс 2</option>
-                <option value="3">Класс 3</option>
-              </select>
             </div>
 
             <div className="agreement">
-              <input 
-                type="checkbox" 
-                id="dataAgreement" 
-                required 
-              />
+              <input type="checkbox" id="dataAgreement" required />
               <label htmlFor="dataAgreement">
-                Я согласен(а) с <a href="#">условиями хранения и обработки персональных данных</a>
+                Я согласен(а) с{" "}
+                <a href="#">
+                  условиями хранения и обработки персональных данных
+                </a>
               </label>
             </div>
 
