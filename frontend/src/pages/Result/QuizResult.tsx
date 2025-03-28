@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import './QuizResult.css';
 import yellowBg from '../../assets/images/yellow-bg.png';
