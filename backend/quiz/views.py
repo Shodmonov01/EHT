@@ -98,9 +98,12 @@ class StartQuizAPIView(APIView):
 
         serializer = UserQuizStarteSerializer(data=request.data)
         if serializer.is_valid():
+            print(serializer.data, 'data ')
+            print(serializer.validated_data, 'valid data')
             google_sheet = get_google_sheet()
             unique_id = str(uuid.uuid4())
-            final_data_to_save = serializer.validated_data
+            final_data_to_save = serializer.data
+            print(final_data_to_save, 'final')
             
             current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
             data_to_save = [
@@ -108,14 +111,14 @@ class StartQuizAPIView(APIView):
                 final_data_to_save["parents_fullname"],
                 final_data_to_save["name"],
                 final_data_to_save["phone_number"],
-                final_data_to_save["category_set_id"],
+                final_data_to_save['formatted_categories'],
                 lang,
                 '',
                 '',
                 '',
                 unique_id, 
             ]
-
+            print(data_to_save, 'data')
             google_sheet.append_row(data_to_save)
 
             return Response({"token": f"{unique_id}"}, status=201)
