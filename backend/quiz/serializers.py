@@ -3,10 +3,21 @@
 from rest_framework import serializers
 from .models import Quiz, Question, Answer, Category, QuizResult, SubCategory, CategorySet
 
+
+class UserQuizStarteSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length = 64)
+    parents_fullname = serializers.CharField(max_length=128)
+    phone_number = serializers.CharField(max_length=32)
+    category_set_id = serializers.IntegerField()
+    is_agreed = serializers.BooleanField()
+
+
+
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
         fields = ['id', 'text', 'image', 'is_correct']
+
 
 class QuestionSerializer(serializers.ModelSerializer):
     # Include related answers; note that in your models, Question has a related_name "questions" on Quiz.

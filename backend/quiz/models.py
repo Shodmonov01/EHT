@@ -31,12 +31,6 @@ class SubCategory(models.Model):
         return self.name
 
 class Quiz(models.Model):
-    LANGUAGE_CHOICES = [
-        ('kz', 'Kazakh'),
-        ('ru', 'Russian'),
-    ]
-
-    language = models.CharField(max_length=4, choices=LANGUAGE_CHOICES)
     title = models.CharField(max_length=255)
     subtitle = models.TextField()
     category_set = models.ForeignKey(CategorySet, on_delete=models.CASCADE)

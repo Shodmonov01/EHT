@@ -1,11 +1,12 @@
 from django.urls import path
 from .views import (
     QuizDetailAPIView, CategorySetListAPIView, SubmitQuizAPIView,
-    QuizResultAPIView, SummaryAPIView, TableAPIView
+    QuizResultAPIView, SummaryAPIView, TableAPIView, StartQuizAPIView
 )
 
 urlpatterns = [
     path('api/category-set/', CategorySetListAPIView.as_view(), name='category_set_list'),
+    path('api/quizzes/start', StartQuizAPIView.as_view(), name='quiz-create'),
     path('api/quizzes/<int:quiz_id>/', QuizDetailAPIView.as_view(), name='api_quiz_detail'),
     path('api/quizzes/<int:quiz_id>/submit/', SubmitQuizAPIView.as_view(), name='api_submit_quiz'),
     path('api/quiz_result/<int:quiz_result_id>/', QuizResultAPIView.as_view(), name='api_quiz_result'),
