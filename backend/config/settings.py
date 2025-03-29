@@ -54,6 +54,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -94,11 +95,33 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Quiz project API',
+    'TITLE': 'Quiz Project API',
     'DESCRIPTION': 'Tried to make it better for use, tg: @u_one23',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    # OTHER SETTINGS
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
+    'SERVE_AUTHENTICATION': ['rest_framework.authentication.SessionAuthentication'],
+    'PREPROCESSING_HOOKS': [],
+    'POSTPROCESSING_HOOKS': [],
+    'APPEND_COMPONENTS': {
+        'parameters': {
+            'Accept-Language': {
+                'name': 'Accept-Language',
+                'in': 'header',
+                'description': 'Language selection (ru, kz, en)',
+                'required': False,
+                'schema': {
+                    'type': 'string',
+                    'enum': ['ru', 'kz', 'en'],
+                    'default': 'ru'
+                }
+            }
+        }
+    },
 }
 
 # Database

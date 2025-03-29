@@ -1,14 +1,23 @@
 from collections import defaultdict
 from django.shortcuts import get_object_or_404
+from django.utils import translation
+import uuid
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Quiz, Question, Answer, Category, QuizResult, SubCategory, CategorySet
 from .serializers import QuizSerializer, QuestionSerializer, AnswerSerializer, QuizResultSerializer,\
-                            CategorySetHomeSerializer
+                            CategorySetHomeSerializer, UserQuizStarteSerializer
 import gspread
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.permissions import AllowAny
+import os
+from django.conf import settings
+from .utils import get_google_sheet
+from datetime import datetime, timedelta
+
 
 class QuizDetailAPIView(APIView):
     """
@@ -38,13 +47,80 @@ class CategorySetListAPIView(APIView):
     GET /api/quiz_form/<lang>/
     Returns the language (in display form) and available grades.
     """
-
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="Accept-Language",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                description="Select response language (ru, kz)",
+                required=False,
+                enum=["ru", "kz",],
+            )
+        ]
+    )
     def get(self, request):
+        lang = request.headers.get("Accept-Language", 'ru')
+        if lang not in ['kz', 'ru']:
+            lang = 'ru'
+        
+        translation.activate(lang)
+
         # language = 'Русский' if lang == 'ru' else 'Қазақша' if lang == 'kz' else lang
         category_sets = CategorySet.objects.all()
-        
         serializer = CategorySetHomeSerializer(category_sets, many=True)
+
         return Response(serializer.data)
+    
+class StartQuizAPIView(APIView):
+    
+    @extend_schema(
+        request=UserQuizStarteSerializer,  # Specifies the request body schema
+        responses={201: UserQuizStarteSerializer, 400: None},  # Expected responses
+        description="Create a new quiz",
+        parameters=[
+            OpenApiParameter(
+                name="Accept-Language",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                description="Select response language (ru, kz)",
+                required=False,
+                enum=["ru", "kz",],
+            )
+        ]
+    )
+    def post(self, request):
+        lang = request.headers.get("Accept-Language", 'ru')
+        if lang not in ['kz', 'ru']:
+            lang = 'ru'
+
+        serializer = UserQuizStarteSerializer(data=request.data)
+        if serializer.is_valid():
+            google_sheet = get_google_sheet()
+            unique_id = str(uuid.uuid4())
+            final_data_to_save = serializer.validated_data
+            
+            current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
+            data_to_save = [
+                current_time,
+                final_data_to_save["parents_fullname"],
+                final_data_to_save["name"],
+                final_data_to_save["phone_number"],
+                final_data_to_save["category_set_id"],
+                lang,
+                '',
+                '',
+                '',
+                unique_id, 
+            ]
+
+            google_sheet.append_row(data_to_save)
+
+            return Response({"token": f"{unique_id}"}, status=201)
+        else:
+            return Response(serializer.errors, status=400)
+
+
 
 class SubmitQuizAPIView(APIView):
     """
