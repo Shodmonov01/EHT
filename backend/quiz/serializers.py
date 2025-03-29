@@ -8,11 +8,20 @@ class UserQuizStarteSerializer(serializers.Serializer):
     name = serializers.CharField(max_length = 64)
     parents_fullname = serializers.CharField(max_length=128)
     phone_number = serializers.CharField(max_length=32)
-    category_set_id = serializers.IntegerField()
+    category_set_id = serializers.PrimaryKeyRelatedField(
+        queryset=CategorySet.objects.all(),
+        write_only=True
+    )
+    formatted_categories = serializers.SerializerMethodField()  # Add this field
     is_agreed = serializers.BooleanField()
 
-
-
+    def get_formatted_categories(self, obj):
+        print(obj, 'this is obj')
+        # Get the CategorySet object from the validated data
+        category_set = obj['category_set_id']
+        
+        # Access the related categories through the relationship
+        return " + ".join(category_set.categories.values_list("name", flat=True))
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
@@ -70,9 +79,7 @@ class CategorySetHomeSerializer(serializers.ModelSerializer):
     formatted_categories = serializers.SerializerMethodField()
 
     def get_formatted_categories(self, obj):
-        print(obj, 'this is obj')
-        print(obj.categories.name, 'categories')
-        print(obj.categories.values_list('name', flat=True)),
+
         return " + ".join(obj.categories.values_list("name", flat=True))
 
     class Meta:
