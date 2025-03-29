@@ -57,7 +57,9 @@ class CategorySetListAPIView(APIView):
                 required=False,
                 enum=["ru", "kz",],
             )
-        ]
+        ],
+         responses={200: CategorySetHomeSerializer(many=True)},
+         description="Returns list of category set"
     )
     def get(self, request):
         lang = request.headers.get("Accept-Language", 'ru')
