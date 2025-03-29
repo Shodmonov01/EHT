@@ -1,0 +1,19 @@
+{
+  "form": {
+    "title": "Пішін",
+    "description": "Сәлем, сіз Tesla Education Quiz жүйесіне кірдіңіз...",
+    "parentNamePlaceholder": "Ата-ананың аты-жөні",
+    "namePlaceholder": "ФИО",
+    "phonePlaceholder": "Номер телефона",
+    "selectGrade": "Выберите класс",
+    "submit": "Жіберу",
+    "cancel": "Болдырмау",
+    "aboutYou": "Сіздің туралы ақпарат",
+    "parentName": "Ата-ананың аты-жөні",
+    "fullName": "ФИО",
+    "phone": "Телефон номері",
+    "selectClass": "Класс",
+    "dataAgreement": "Я согласен(а) с условиями хранения и обработки персональных данных",
+    "test":"assalomu alaykum"
+  }
+}

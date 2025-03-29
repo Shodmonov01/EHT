@@ -1,0 +1,165 @@
+body {
+  font-family: "Hind", sans-serif;
+  color: #333333;
+  background-color: #f4f4f4;
+  margin: 0;
+  padding: 0;
+}
+
+.form-wrapper {
+  width: 960px;
+  margin: 0 auto;
+  padding: 35px;
+}
+.quiz-title {
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.quiz-title img {
+  width: 200px;
+  position: absolute;
+  z-index: -2;
+}
+.quiz-title h1 {
+  font-size: 48px;
+  font-weight: bold;
+  color: #333;
+}
+
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 100px;
+  margin-bottom: 10px;
+}
+
+.title {
+  font-size: 48px;
+  font-weight: bold;
+  color: #333;
+}
+
+.form-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.quiz__description {
+  background-color: #0cae74;
+  color: #fff;
+  padding: 16px 24px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.form-content {
+  padding: 0 20px;
+}
+
+.form-subtitle {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 25px;
+  font-weight: 500;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 16px;
+  color: #333;
+  background: #fff;
+  transition: all 0.3s ease;
+}
+
+input[type="text"]:focus,
+select:focus {
+  border-color: #0cae74;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(12, 174, 116, 0.1);
+}
+
+.agreement {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.agreement input[type="checkbox"] {
+  margin-top: 4px;
+}
+
+.agreement label {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.agreement a {
+  color: #0cae74;
+  text-decoration: none;
+}
+
+.agreement a:hover {
+  text-decoration: underline;
+}
+
+.submit-button {
+  background: #3a4be2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 32px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(58, 75, 226, 0.2);
+  transition: all 0.3s ease;
+}
+
+.submit-button:hover {
+  background: #2e3bbf;
+  box-shadow: 0 6px 20px rgba(58, 75, 226, 0.3);
+}
+
+@media (max-width: 768px) {
+  .form-wrapper {
+    padding: 10px;
+  }
+
+  .title {
+    font-size: 36px;
+  }
+
+  .quiz__description {
+    margin: 0 15px 25px;
+    padding: 12px 20px;
+  }
+
+  .form-content {
+    padding: 0 15px 30px;
+  }
+}
