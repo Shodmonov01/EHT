@@ -1,0 +1,11 @@
+asgiref
+Django
+django-modeltranslation
+django-nested-inline
+djangorestframework
+pillow
+psycopg2
+python-dotenv
+sqlparse
+typing-extensions
+drf_spectacular
