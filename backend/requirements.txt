@@ -9,3 +9,4 @@ python-dotenv
 sqlparse
 typing-extensions
 drf_spectacular
+gspread
