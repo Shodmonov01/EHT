@@ -16,27 +16,11 @@
         }
     },
     {
-        "model": "quiz.category",
-        "pk": 3,
+        "model": "quiz.categoryset",
+        "pk": 1,
         "fields": {
-            "name": "History",
-            "type": "NTR"
-        }
-    },
-    {
-        "model": "quiz.category",
-        "pk": 4,
-        "fields": {
-            "name": "Geography",
-            "type": "EXC"
-        }
-    },
-    {
-        "model": "quiz.category",
-        "pk": 5,
-        "fields": {
-            "name": "Technology",
-            "type": "NTR"
+            "name": "General Knowledge",
+            "categories": [1, 2]
         }
     },
     {
@@ -45,38 +29,6 @@
         "fields": {
             "name": "Physics",
             "category": 1
-        }
-    },
-    {
-        "model": "quiz.subcategory",
-        "pk": 2,
-        "fields": {
-            "name": "Algebra",
-            "category": 2
-        }
-    },
-    {
-        "model": "quiz.subcategory",
-        "pk": 3,
-        "fields": {
-            "name": "World History",
-            "category": 3
-        }
-    },
-    {
-        "model": "quiz.subcategory",
-        "pk": 4,
-        "fields": {
-            "name": "Continents",
-            "category": 4
-        }
-    },
-    {
-        "model": "quiz.subcategory",
-        "pk": 5,
-        "fields": {
-            "name": "Programming",
-            "category": 5
         }
     },
     {
@@ -89,43 +41,6 @@
         }
     },
     {
-        "model": "quiz.quiz",
-        "pk": 2,
-        "fields": {
-            "title": "Math Quiz",
-            "subtitle": "Test your knowledge in mathematics",
-            "category_set": 2
-        }
-    },
-    {
-        "model": "quiz.quiz",
-        "pk": 3,
-        "fields": {
-            "title": "History Quiz",
-            "subtitle": "Test your knowledge in history",
-            "category_set": 3
-        }
-    },
-    {
-        "model": "quiz.quiz",
-        "pk": 4,
-        "fields": {
-            "title": "Geography Quiz",
-            "subtitle": "Test your knowledge in geography",
-            "category_set": 4
-        }
-    },
-    {
-        "model": "quiz.quiz",
-        "pk": 5,
-        "fields": {
-            "title": "Technology Quiz",
-            "subtitle": "Test your knowledge in technology",
-            "category_set": 5
-        }
-    },
-
-    {
         "model": "quiz.question",
         "pk": 1,
         "fields": {
@@ -134,43 +49,6 @@
             "theme": 1
         }
     },
-    {
-        "model": "quiz.question",
-        "pk": 2,
-        "fields": {
-            "text": "Who developed the theory of relativity?",
-            "quiz": 1,
-            "theme": 1
-        }
-    },
-    {
-        "model": "quiz.question",
-        "pk": 3,
-        "fields": {
-            "text": "What is the chemical symbol for water?",
-            "quiz": 1,
-            "theme": 1
-        }
-    },
-    {
-        "model": "quiz.question",
-        "pk": 4,
-        "fields": {
-            "text": "What planet is known as the Red Planet?",
-            "quiz": 1,
-            "theme": 1
-        }
-    },
-    {
-        "model": "quiz.question",
-        "pk": 5,
-        "fields": {
-            "text": "What is Newton's First Law of Motion?",
-            "quiz": 1,
-            "theme": 1
-        }
-    },
-
     {
         "model": "quiz.answer",
         "pk": 1,
@@ -186,78 +64,6 @@
         "fields": {
             "text": "150,000 km/s",
             "question": 1,
-            "is_correct": false
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 3,
-        "fields": {
-            "text": "Albert Einstein",
-            "question": 2,
-            "is_correct": true
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 4,
-        "fields": {
-            "text": "Isaac Newton",
-            "question": 2,
-            "is_correct": false
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 5,
-        "fields": {
-            "text": "H2O",
-            "question": 3,
-            "is_correct": true
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 6,
-        "fields": {
-            "text": "CO2",
-            "question": 3,
-            "is_correct": false
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 7,
-        "fields": {
-            "text": "Mars",
-            "question": 4,
-            "is_correct": true
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 8,
-        "fields": {
-            "text": "Jupiter",
-            "question": 4,
-            "is_correct": false
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 9,
-        "fields": {
-            "text": "An object in motion stays in motion unless acted upon by an external force.",
-            "question": 5,
-            "is_correct": true
-        }
-    },
-    {
-        "model": "quiz.answer",
-        "pk": 10,
-        "fields": {
-            "text": "For every action, there is an equal and opposite reaction.",
-            "question": 5,
             "is_correct": false
         }
     }

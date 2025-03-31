@@ -11,3 +11,4 @@ typing-extensions
 drf_spectacular
 gspread
 oauth2client
+django-nested-admin

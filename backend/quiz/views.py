@@ -6,8 +6,8 @@ import uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Quiz, Question, Answer, Category, QuizResult, SubCategory, CategorySet
-from .serializers import QuizSerializer, QuestionSerializer, AnswerSerializer,\
+from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet
+from .serializers import  QuestionSerializer, AnswerSerializer,\
                             CategorySetHomeSerializer, UserQuizStarteSerializer
 import gspread
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -107,100 +107,99 @@ class StartQuizAPIView(APIView):
             return Response(serializer.errors, status=400)
 
 
-class QuestionListAPIView(APIView):
-    def get(request, category_set_id):
-            category_set = get_object_or_404(CategorySet, id=category_set_id)
+# class QuestionListAPIView(APIView):
+#     def get(request, category_set_id):
+#             category_set = get_object_or_404(CategorySet, id=category_set_id)
     
-            # Get the Quiz associated with this CategorySet
-            quiz = get_object_or_404(Quiz, category_set=category_set)
+#             # Get the Quiz associated with this CategorySet
+#             quiz = get_object_or_404(Quiz, category_set=category_set)
             
-            # Get all questions for this quiz
-            questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
+#             # Get all questions for this quiz
+#             questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
             
-            # Prepare the data for response
-            data = {
-                'quiz_id': quiz.id,
-                'quiz_title': quiz.title,
-                'quiz_subtitle': quiz.subtitle,
-                'questions': []
-            }
+#             # Prepare the data for response
+#             data = {
+#                 'quiz_id': quiz.id,
+#                 'quiz_title': quiz.title,
+#                 'quiz_subtitle': quiz.subtitle,
+#                 'questions': []
+#             }
             
-            for question in questions:
-                question_data = {
-                    'id': question.id,
-                    'text': question.text,
-                    'category': question.theme.category.name,
-                    'subcategory': question.theme.name,
-                    'image': request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
-                }
+#             for question in questions:
+#                 question_data = {
+#                     'id': question.id,
+#                     'text': question.text,
+#                     'category': question.theme.category.name,
+#                     'subcategory': question.theme.name,
+#                     'image': request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
+#                 }
                 
-                data['questions'].append(question_data)
+#                 data['questions'].append(question_data)
             
-            return Response(data, status=200)
+#             return Response(data, status=200)
 
 
-
-class SubmitQuizAPIView(APIView):
-    """
-    POST /api/quizzes/<quiz_id>/submit/
+# class SubmitQuizAPIView(APIView):
+#     """
+#     POST /api/quizzes/<quiz_id>/submit/
     
-    Expected POST data:
-      - For each question, a key like "question<id>" with the selected answer id.
-      - Additional fields: parent, name, phone, grade, language, location.
+#     Expected POST data:
+#       - For each question, a key like "question<id>" with the selected answer id.
+#       - Additional fields: parent, name, phone, grade, language, location.
     
-    Returns the created QuizResult and score information.
-    """
-    def post(self, request, quiz_id):
-        quiz = get_object_or_404(Quiz, id=quiz_id)
-        questions = Question.objects.filter(quiz=quiz)
-        total_questions = questions.count()
-        correct_answers_by_category = defaultdict(int)
-        selected_answers = {}
-        unanswered_questions_ids = []
+#     Returns the created QuizResult and score information.
+#     """
+#     def post(self, request, quiz_id):
+#         quiz = get_object_or_404(Quiz, id=quiz_id)
+#         questions = Question.objects.filter(quiz=quiz)
+#         total_questions = questions.count()
+#         correct_answers_by_category = defaultdict(int)
+#         selected_answers = {}
+#         unanswered_questions_ids = []
         
-        for question in questions:
-            answer_id = request.data.get(f'question{question.id}')
-            if answer_id:
-                try:
-                    answer = Answer.objects.get(id=answer_id)
-                    selected_answers[question.id] = answer
-                    if answer.is_correct:
-                        correct_answers_by_category[question.theme.name] += 1
-                except Answer.DoesNotExist:
-                    unanswered_questions_ids.append(question.id)
-            else:
-                unanswered_questions_ids.append(question.id)
+#         for question in questions:
+#             answer_id = request.data.get(f'question{question.id}')
+#             if answer_id:
+#                 try:
+#                     answer = Answer.objects.get(id=answer_id)
+#                     selected_answers[question.id] = answer
+#                     if answer.is_correct:
+#                         correct_answers_by_category[question.theme.name] += 1
+#                 except Answer.DoesNotExist:
+#                     unanswered_questions_ids.append(question.id)
+#             else:
+#                 unanswered_questions_ids.append(question.id)
                 
-        score = sum(correct_answers_by_category.values())
-        percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
+#         score = sum(correct_answers_by_category.values())
+#         percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
 
-        # Get additional data from request
-        parent_name = request.data.get('parent', 'Unknown Parent')
-        name = request.data.get('name', 'Anonym')
-        phone_number = request.data.get('phone', 'Unknown Phone')
-        grade = request.data.get('grade', 'Unknown Grade')
-        language = request.data.get('language', 'ru')
-        location = request.data.get('location', 'Unknown')
+#         # Get additional data from request
+#         parent_name = request.data.get('parent', 'Unknown Parent')
+#         name = request.data.get('name', 'Anonym')
+#         phone_number = request.data.get('phone', 'Unknown Phone')
+#         grade = request.data.get('grade', 'Unknown Grade')
+#         language = request.data.get('language', 'ru')
+#         location = request.data.get('location', 'Unknown')
         
-        # Create the QuizResult instance
-        quiz_result = QuizResult.objects.create(
-            quiz=quiz,
-            phone_number=phone_number,
-            name=name,
-            parent_name=parent_name,
-            grade=grade,
-        )
-        # Set many-to-many relationships
-        quiz_result.answers.set(selected_answers.values())
-        quiz_result.unanswered_questions.set(questions.filter(id__in=unanswered_questions_ids))
+#         # Create the QuizResult instance
+#         quiz_result = QuizResult.objects.create(
+#             quiz=quiz,
+#             phone_number=phone_number,
+#             name=name,
+#             parent_name=parent_name,
+#             grade=grade,
+#         )
+#         # Set many-to-many relationships
+#         quiz_result.answers.set(selected_answers.values())
+#         quiz_result.unanswered_questions.set(questions.filter(id__in=unanswered_questions_ids))
         
-        response_data = {
-            'quiz_result_id': quiz_result.id,
-            'percentage_score': percentage_score,
-            'total_questions': total_questions,
-            'score': score,
-        }
-        return Response(response_data, status=status.HTTP_201_CREATED)
+#         response_data = {
+#             'quiz_result_id': quiz_result.id,
+#             'percentage_score': percentage_score,
+#             'total_questions': total_questions,
+#             'score': score,
+#         }
+#         return Response(response_data, status=status.HTTP_201_CREATED)
 
 class SummaryAPIView(APIView):
     """
@@ -272,65 +271,58 @@ from google.oauth2.service_account import Credentials
 from django.shortcuts import get_object_or_404
 from datetime import datetime
 
-from .models import Category, CategorySet, SubCategory, Quiz, Question, Answer, QuizResult
+from .models import Category, CategorySet, SubCategory,  Question, Answer, QuizResult
 from .serializers import (
     CategorySerializer, CategorySetSerializer, SubCategorySerializer,
-    QuizSerializer, QuestionSerializer, AnswerSerializer,
+     QuestionSerializer, AnswerSerializer,
     QuizResultCreateSerializer, QuizResultDetailSerializer
 )
 
-class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Category.objects.all()
-    serializer_class = CategorySerializer
+# class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = Category.objects.all()
+#     serializer_class = CategorySerializer
 
-class CategorySetViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = CategorySet.objects.all()
-    serializer_class = CategorySetSerializer
+# class CategorySetViewSet(viewsets.ReadOnlyModelViewSet):
+#     queryset = CategorySet.objects.all()
+#     serializer_class = CategorySetSerializer
     
-    @action(detail=True, methods=['get'])
-    def quiz(self, request, pk=None):
-        """Get the quiz associated with this category set"""
-        category_set = self.get_object()
-        try:
-            quiz = Quiz.objects.get(category_set=category_set)
-            return Response(QuizSerializer(quiz).data)
-        except Quiz.DoesNotExist:
-            return Response(
-                {"error": "No quiz found for this category set"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+#     @action(detail=True, methods=['get'])
+#     def quiz(self, request, pk=None):
+#         """Get the quiz associated with this category set"""
+#         category_set = self.get_object()
+#         try:
+#             quiz = Quiz.objects.get(category_set=category_set)
+#             return Response(QuizSerializer(quiz).data)
+#         except Quiz.DoesNotExist:
+#             return Response(
+#                 {"error": "No quiz found for this category set"}, 
+#                 status=status.HTTP_404_NOT_FOUND
+#             )
     
-    @action(detail=True, methods=['get'])
-    def questions(self, request, pk=None):
-        """Get questions for the quiz associated with this category set"""
-        category_set = self.get_object()
-        try:
-            quiz = Quiz.objects.get(category_set=category_set)
-            questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
-            return Response(QuestionSerializer(questions, many=True).data)
-        except Quiz.DoesNotExist:
-            return Response(
-                {"error": "No quiz found for this category set"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+#     @action(detail=True, methods=['get'])
+#     def questions(self, request, pk=None):
+#         """Get questions for the quiz associated with this category set"""
+#         category_set = self.get_object()
+#         try:
+#             quiz = Quiz.objects.get(category_set=category_set)
+#             questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
+#             return Response(QuestionSerializer(questions, many=True).data)
+#         except Quiz.DoesNotExist:
+#             return Response(
+#                 {"error": "No quiz found for this category set"}, 
+#                 status=status.HTTP_404_NOT_FOUND
+#             )
 
-class QuizListView(APIView):
-    def get(self, request):
-        """Get list of all quizzes"""
-        quizzes = Quiz.objects.all()
-        serializer = QuizSerializer(quizzes, many=True)
-        return Response(serializer.data)
+# class QuizListView(APIView):
+#     def get(self, request):
+#         """Get list of all quizzes"""
+#         quizzes = Quiz.objects.all()
+#         serializer = QuizSerializer(quizzes, many=True)
+#         return Response(serializer.data)
 
-class QuizQuestionsView(APIView):
-    def get(self, request, quiz_id):
-        """Get questions for a specific quiz"""
-        quiz = get_object_or_404(Quiz, pk=quiz_id)
-        questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
-    
 
-    
+
+
 class QuizResultViewSet(viewsets.ModelViewSet):
     queryset = QuizResult.objects.all()
     
