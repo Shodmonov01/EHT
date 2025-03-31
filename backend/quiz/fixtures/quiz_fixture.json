@@ -32,11 +32,11 @@
         }
     },
     {
-        "model": "quiz.categoryset",
-        "pk": 1,
+        "model": "quiz.category",
+        "pk": 5,
         "fields": {
-            "name": "General Knowledge",
-            "categories": [1, 2, 3, 4]
+            "name": "Technology",
+            "type": "NTR"
         }
     },
     {
@@ -59,7 +59,7 @@
         "model": "quiz.subcategory",
         "pk": 3,
         "fields": {
-            "name": "World Wars",
+            "name": "World History",
             "category": 3
         }
     },
@@ -67,8 +67,16 @@
         "model": "quiz.subcategory",
         "pk": 4,
         "fields": {
-            "name": "Countries & Capitals",
+            "name": "Continents",
             "category": 4
+        }
+    },
+    {
+        "model": "quiz.subcategory",
+        "pk": 5,
+        "fields": {
+            "name": "Programming",
+            "category": 5
         }
     },
     {
@@ -84,29 +92,39 @@
         "model": "quiz.quiz",
         "pk": 2,
         "fields": {
-            "title": "Mathematics Challenge",
-            "subtitle": "Are you good at numbers?",
-            "category_set": 1
+            "title": "Math Quiz",
+            "subtitle": "Test your knowledge in mathematics",
+            "category_set": 2
         }
     },
     {
         "model": "quiz.quiz",
         "pk": 3,
         "fields": {
-            "title": "History Trivia",
-            "subtitle": "How well do you know history?",
-            "category_set": 1
+            "title": "History Quiz",
+            "subtitle": "Test your knowledge in history",
+            "category_set": 3
         }
     },
     {
         "model": "quiz.quiz",
         "pk": 4,
         "fields": {
-            "title": "Geography Mastery",
-            "subtitle": "Test your knowledge of the world",
-            "category_set": 1
+            "title": "Geography Quiz",
+            "subtitle": "Test your knowledge in geography",
+            "category_set": 4
         }
     },
+    {
+        "model": "quiz.quiz",
+        "pk": 5,
+        "fields": {
+            "title": "Technology Quiz",
+            "subtitle": "Test your knowledge in technology",
+            "category_set": 5
+        }
+    },
+
     {
         "model": "quiz.question",
         "pk": 1,
@@ -120,29 +138,39 @@
         "model": "quiz.question",
         "pk": 2,
         "fields": {
-            "text": "What is 5 + 7?",
-            "quiz": 2,
-            "theme": 2
+            "text": "Who developed the theory of relativity?",
+            "quiz": 1,
+            "theme": 1
         }
     },
     {
         "model": "quiz.question",
         "pk": 3,
         "fields": {
-            "text": "Who was the first President of the United States?",
-            "quiz": 3,
-            "theme": 3
+            "text": "What is the chemical symbol for water?",
+            "quiz": 1,
+            "theme": 1
         }
     },
     {
         "model": "quiz.question",
         "pk": 4,
         "fields": {
-            "text": "What is the capital of France?",
-            "quiz": 4,
-            "theme": 4
+            "text": "What planet is known as the Red Planet?",
+            "quiz": 1,
+            "theme": 1
         }
     },
+    {
+        "model": "quiz.question",
+        "pk": 5,
+        "fields": {
+            "text": "What is Newton's First Law of Motion?",
+            "quiz": 1,
+            "theme": 1
+        }
+    },
+
     {
         "model": "quiz.answer",
         "pk": 1,
@@ -165,7 +193,7 @@
         "model": "quiz.answer",
         "pk": 3,
         "fields": {
-            "text": "12",
+            "text": "Albert Einstein",
             "question": 2,
             "is_correct": true
         }
@@ -174,7 +202,7 @@
         "model": "quiz.answer",
         "pk": 4,
         "fields": {
-            "text": "10",
+            "text": "Isaac Newton",
             "question": 2,
             "is_correct": false
         }
@@ -183,7 +211,7 @@
         "model": "quiz.answer",
         "pk": 5,
         "fields": {
-            "text": "George Washington",
+            "text": "H2O",
             "question": 3,
             "is_correct": true
         }
@@ -192,7 +220,7 @@
         "model": "quiz.answer",
         "pk": 6,
         "fields": {
-            "text": "Abraham Lincoln",
+            "text": "CO2",
             "question": 3,
             "is_correct": false
         }
@@ -201,7 +229,7 @@
         "model": "quiz.answer",
         "pk": 7,
         "fields": {
-            "text": "Paris",
+            "text": "Mars",
             "question": 4,
             "is_correct": true
         }
@@ -210,8 +238,26 @@
         "model": "quiz.answer",
         "pk": 8,
         "fields": {
-            "text": "Berlin",
+            "text": "Jupiter",
             "question": 4,
+            "is_correct": false
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 9,
+        "fields": {
+            "text": "An object in motion stays in motion unless acted upon by an external force.",
+            "question": 5,
+            "is_correct": true
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 10,
+        "fields": {
+            "text": "For every action, there is an equal and opposite reaction.",
+            "question": 5,
             "is_correct": false
         }
     }
