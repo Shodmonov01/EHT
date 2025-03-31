@@ -1,7 +1,7 @@
 # serializers.py
 
 from rest_framework import serializers
-from .models import Quiz, Question, Answer, Category, QuizResult, SubCategory, CategorySet
+from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet
 
 
 class UserQuizStarteSerializer(serializers.Serializer):
@@ -43,13 +43,13 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id', 'text', 'image', 'quiz', 'theme', 'category_name', 'answers']
 
-class QuizSerializer(serializers.ModelSerializer):
-    # Nest questions if needed. (Make sure your Quiz model has a related_name for questions, e.g. 'questions'.)
-    questions = QuestionSerializer(many=True, read_only=True)
+# class QuizSerializer(serializers.ModelSerializer):
+#     # Nest questions if needed. (Make sure your Quiz model has a related_name for questions, e.g. 'questions'.)
+#     questions = QuestionSerializer(many=True, read_only=True)
     
-    class Meta:
-        model = Quiz
-        fields = ['id', 'title', 'subtitle', 'questions']
+#     class Meta:
+#         model = Quiz
+#         fields = ['id', 'title', 'subtitle', 'questions']
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
@@ -79,7 +79,7 @@ class CategorySetHomeSerializer(serializers.ModelSerializer):
 
 #####################33
 from rest_framework import serializers
-from .models import Category, CategorySet, SubCategory, Quiz, Question, Answer, QuizResult
+from .models import Category, CategorySet, SubCategory,  Question, Answer, QuizResult
 
 
 

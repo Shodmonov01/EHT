@@ -22,6 +22,7 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),  
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('admin/', admin.site.urls),
-    path('quiz/', include('quiz.urls'), name='quiz')
+    path('quiz/', include('quiz.urls'), name='quiz'),
+    path('nested_admin/', include('nested_admin.urls')),
 
 ]

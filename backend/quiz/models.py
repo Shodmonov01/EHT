@@ -20,6 +20,8 @@ class CategorySet(models.Model):
 
     def __str__(self):
         return self.name
+    
+
 
 class SubCategory(models.Model):
     name = models.TextField(null=True)
@@ -28,22 +30,22 @@ class SubCategory(models.Model):
     def __str__(self):
         return self.name
 
-class Quiz(models.Model):
-    title = models.CharField(max_length=255)
-    subtitle = models.TextField()
-    category_set = models.OneToOneField(CategorySet, on_delete=models.CASCADE)
+# class Quiz(models.Model):
+#     title = models.CharField(max_length=255)
+#     subtitle = models.TextField()
+#     category_set = models.OneToOneField(CategorySet, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.title
+#     def __str__(self):
+#         return self.title
 
 class Question(models.Model):
     text = models.TextField()
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    quiz = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='questions')
     theme = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     
     def quiz_title(self):
-        return self.quiz.title
+        return self.quiz.name
 
     def category_name(self):
         return self.theme.category.name
@@ -64,11 +66,10 @@ class QuizResult(models.Model):
     phone_number = models.CharField(max_length=20)
     name = models.CharField(max_length=100)
     parent_name = models.CharField(max_length=100)  # Добавьте это поле
-    grade = models.CharField(max_length=50)  # Добавьте это поле
     answers = models.ManyToManyField(Answer)
     unanswered_questions = models.ManyToManyField(Question, related_name='unaswered_questions',  blank=True, null=True)
 
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    # quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
 
 
     created_at = models.DateTimeField(auto_now_add=True)

@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'nested_admin',
+
     'rest_framework',
     'modeltranslation',
     'drf_spectacular',
@@ -157,7 +159,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-US'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -170,7 +172,7 @@ gettext = lambda s: s
 LANGUAGES = (
     ('ru', gettext('Russian')),
     ('kz', gettext('Kazak')),
-    ('en', gettext('English')),
+   
 )
 MODELTRANSLATION_LANGUAGES = ('ru', 'kz')  # ModelTranslation works only in these two languages
 MODELTRANSLATION_DEFAULT_LANGUAGE = 'ru'
