@@ -16,11 +16,27 @@
         }
     },
     {
+        "model": "quiz.category",
+        "pk": 3,
+        "fields": {
+            "name": "History",
+            "type": "NTR"
+        }
+    },
+    {
+        "model": "quiz.category",
+        "pk": 4,
+        "fields": {
+            "name": "Geography",
+            "type": "EXC"
+        }
+    },
+    {
         "model": "quiz.categoryset",
         "pk": 1,
         "fields": {
             "name": "General Knowledge",
-            "categories": [1, 2]
+            "categories": [1, 2, 3, 4]
         }
     },
     {
@@ -29,6 +45,30 @@
         "fields": {
             "name": "Physics",
             "category": 1
+        }
+    },
+    {
+        "model": "quiz.subcategory",
+        "pk": 2,
+        "fields": {
+            "name": "Algebra",
+            "category": 2
+        }
+    },
+    {
+        "model": "quiz.subcategory",
+        "pk": 3,
+        "fields": {
+            "name": "World Wars",
+            "category": 3
+        }
+    },
+    {
+        "model": "quiz.subcategory",
+        "pk": 4,
+        "fields": {
+            "name": "Countries & Capitals",
+            "category": 4
         }
     },
     {
@@ -41,12 +81,66 @@
         }
     },
     {
+        "model": "quiz.quiz",
+        "pk": 2,
+        "fields": {
+            "title": "Mathematics Challenge",
+            "subtitle": "Are you good at numbers?",
+            "category_set": 1
+        }
+    },
+    {
+        "model": "quiz.quiz",
+        "pk": 3,
+        "fields": {
+            "title": "History Trivia",
+            "subtitle": "How well do you know history?",
+            "category_set": 1
+        }
+    },
+    {
+        "model": "quiz.quiz",
+        "pk": 4,
+        "fields": {
+            "title": "Geography Mastery",
+            "subtitle": "Test your knowledge of the world",
+            "category_set": 1
+        }
+    },
+    {
         "model": "quiz.question",
         "pk": 1,
         "fields": {
             "text": "What is the speed of light?",
             "quiz": 1,
             "theme": 1
+        }
+    },
+    {
+        "model": "quiz.question",
+        "pk": 2,
+        "fields": {
+            "text": "What is 5 + 7?",
+            "quiz": 2,
+            "theme": 2
+        }
+    },
+    {
+        "model": "quiz.question",
+        "pk": 3,
+        "fields": {
+            "text": "Who was the first President of the United States?",
+            "quiz": 3,
+            "theme": 3
+        }
+    },
+    {
+        "model": "quiz.question",
+        "pk": 4,
+        "fields": {
+            "text": "What is the capital of France?",
+            "quiz": 4,
+            "theme": 4
         }
     },
     {
@@ -64,6 +158,60 @@
         "fields": {
             "text": "150,000 km/s",
             "question": 1,
+            "is_correct": false
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 3,
+        "fields": {
+            "text": "12",
+            "question": 2,
+            "is_correct": true
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 4,
+        "fields": {
+            "text": "10",
+            "question": 2,
+            "is_correct": false
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 5,
+        "fields": {
+            "text": "George Washington",
+            "question": 3,
+            "is_correct": true
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 6,
+        "fields": {
+            "text": "Abraham Lincoln",
+            "question": 3,
+            "is_correct": false
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 7,
+        "fields": {
+            "text": "Paris",
+            "question": 4,
+            "is_correct": true
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 8,
+        "fields": {
+            "text": "Berlin",
+            "question": 4,
             "is_correct": false
         }
     }
