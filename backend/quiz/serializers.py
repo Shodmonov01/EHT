@@ -14,6 +14,10 @@ class UserQuizStarteSerializer(serializers.Serializer):
     )
     formatted_categories = serializers.SerializerMethodField()  # Add this field
     is_agreed = serializers.BooleanField()
+    category_set_id_value = serializers.SerializerMethodField()
+    
+    def get_category_set_id_value(self, obj):
+        return obj['category_set_id'].id 
 
     def get_formatted_categories(self, obj):
         print(obj, 'this is obj')
@@ -22,6 +26,7 @@ class UserQuizStarteSerializer(serializers.Serializer):
         
         # Access the related categories through the relationship
         return " + ".join(category_set.categories.values_list("name", flat=True))
+    
 class AnswerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Answer
@@ -44,19 +49,8 @@ class QuizSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Quiz
-        fields = ['id', 'language', 'title', 'subtitle', 'grade', 'questions']
+        fields = ['id', 'title', 'subtitle', 'questions']
 
-class QuizResultSerializer(serializers.ModelSerializer):
-    answers = AnswerSerializer(many=True, read_only=True)
-    unanswered_questions = QuestionSerializer(many=True, read_only=True)
-    quiz = QuizSerializer(read_only=True)
-    
-    class Meta:
-        model = QuizResult
-        fields = [
-            'id', 'phone_number', 'name', 'parent_name', 'grade',
-            'quiz', 'answers', 'unanswered_questions', 'created_at'
-        ]
 
 class SubCategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -68,12 +62,6 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name', 'type']
 
-class CategorySetSerializer(serializers.ModelSerializer):
-    categories = CategorySerializer(many=True, read_only=True)
-    
-    class Meta:
-        model = CategorySet
-        fields = ['id', 'name', 'categories']
 
 class CategorySetHomeSerializer(serializers.ModelSerializer):
     formatted_categories = serializers.SerializerMethodField()
@@ -85,3 +73,103 @@ class CategorySetHomeSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategorySet
         fields = ['id', 'name', 'formatted_categories']
+
+
+
+
+#####################33
+from rest_framework import serializers
+from .models import Category, CategorySet, SubCategory, Quiz, Question, Answer, QuizResult
+
+
+
+class CategorySetSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True, read_only=True)
+    
+    class Meta:
+        model = CategorySet
+        fields = ['id', 'name', 'categories']
+
+class AnswerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Answer
+        fields = ['id', 'text', 'image']
+        # Note: we exclude is_correct to prevent sending correct answers to client
+
+class QuestionSerializer(serializers.ModelSerializer):
+    category = serializers.SerializerMethodField()
+    subcategory = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Question
+        fields = ['id', 'text', 'image', 'category', 'subcategory']
+    
+    def get_category(self, obj):
+        return obj.theme.category.name if obj.theme and obj.theme.category else None
+    
+    def get_subcategory(self, obj):
+        return obj.theme.name if obj.theme else None
+
+class QuestionWithAnswersSerializer(QuestionSerializer):
+    answers = AnswerSerializer(source='answer_set', many=True, read_only=True)
+    
+    class Meta(QuestionSerializer.Meta):
+        fields = QuestionSerializer.Meta.fields + ['answers']
+
+
+class QuizResultCreateSerializer(serializers.ModelSerializer):
+    answer_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+    unanswered_question_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+    
+    class Meta:
+        model = QuizResult
+        fields = ['id', 'phone_number', 'name', 'parent_name', 'grade', 'quiz', 'answer_ids', 'unanswered_question_ids']
+    
+    def create(self, validated_data):
+        answer_ids = validated_data.pop('answer_ids', [])
+        unanswered_question_ids = validated_data.pop('unanswered_question_ids', [])
+        
+        quiz_result = QuizResult.objects.create(**validated_data)
+        
+        if answer_ids:
+            answers = Answer.objects.filter(id__in=answer_ids)
+            quiz_result.answers.add(*answers)
+        
+        if unanswered_question_ids:
+            unanswered_questions = Question.objects.filter(id__in=unanswered_question_ids)
+            quiz_result.unanswered_questions.add(*unanswered_questions)
+        
+        return quiz_result
+
+class QuizResultDetailSerializer(serializers.ModelSerializer):
+    quiz_title = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
+    total_questions = serializers.SerializerMethodField()
+    correct_answers = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = QuizResult
+        fields = ['id', 'name', 'parent_name', 'grade', 'phone_number', 'quiz', 'quiz_title', 
+                  'score', 'total_questions', 'correct_answers', 'created_at']
+    
+    def get_quiz_title(self, obj):
+        return obj.quiz.title if obj.quiz else None
+    
+    def get_total_questions(self, obj):
+        return Question.objects.filter(quiz=obj.quiz).count()
+    
+    def get_correct_answers(self, obj):
+        return obj.answers.filter(is_correct=True).count()
+    
+    def get_score(self, obj):
+        total = self.get_total_questions(obj)
+        correct = self.get_correct_answers(obj)
+        return (correct / total * 100) if total > 0 else 0

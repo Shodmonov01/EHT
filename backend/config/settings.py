@@ -90,7 +90,7 @@ REST_FRAMEWORK = {
         
     ),
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',  # Require authentication for all views
+        'rest_framework.permissions.AllowAny',  # Require authentication for all views
     ]
 }
 

@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Quiz, Question, Answer, Category, QuizResult, SubCategory, CategorySet
-from .serializers import QuizSerializer, QuestionSerializer, AnswerSerializer, QuizResultSerializer,\
+from .serializers import QuizSerializer, QuestionSerializer, AnswerSerializer,\
                             CategorySetHomeSerializer, UserQuizStarteSerializer
 import gspread
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -19,27 +19,6 @@ from .utils import get_google_sheet
 from datetime import datetime, timedelta
 
 
-class QuizDetailAPIView(APIView):
-    """
-    GET /api/quizzes/<quiz_id>/
-    Returns a quiz and groups its questions by category.
-    """
-    def get(self, request, quiz_id):
-        quiz = get_object_or_404(Quiz, id=quiz_id)
-        questions = Question.objects.filter(quiz=quiz).order_by('theme__category__name')
-        # Group questions by category name
-        categories_dict = defaultdict(list)
-        for question in questions:
-            serialized_q = QuestionSerializer(question).data
-            category = question.theme.category.name
-            categories_dict[category].append(serialized_q)
-            
-        data = {
-            'quiz': QuizSerializer(quiz).data,
-            'categories': list(categories_dict.keys()),
-            'questions_by_category': categories_dict
-        }
-        return Response(data)
 
 class CategorySetListAPIView(APIView):
     permission_classes = [AllowAny,]
@@ -75,7 +54,6 @@ class CategorySetListAPIView(APIView):
         return Response(serializer.data)
     
 class StartQuizAPIView(APIView):
-    
     @extend_schema(
         request=UserQuizStarteSerializer,  # Specifies the request body schema
         responses={201: UserQuizStarteSerializer, 400: None},  # Expected responses
@@ -104,6 +82,9 @@ class StartQuizAPIView(APIView):
             unique_id = str(uuid.uuid4())
             final_data_to_save = serializer.data
             print(final_data_to_save, 'final')
+            category_set = serializer.validated_data['category_set_id']
+            category_set_id = category_set.id
+
             
             current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
             data_to_save = [
@@ -119,11 +100,43 @@ class StartQuizAPIView(APIView):
                 unique_id, 
             ]
             print(data_to_save, 'data')
-            google_sheet.append_row(data_to_save)
+            # google_sheet.append_row(data_to_save)
 
-            return Response({"token": f"{unique_id}"}, status=201)
+            return Response({"token": f"{unique_id}", "category_set_id":f"{category_set_id}"}, status=201)
         else:
             return Response(serializer.errors, status=400)
+
+
+class QuestionListAPIView(APIView):
+    def get(request, category_set_id):
+            category_set = get_object_or_404(CategorySet, id=category_set_id)
+    
+            # Get the Quiz associated with this CategorySet
+            quiz = get_object_or_404(Quiz, category_set=category_set)
+            
+            # Get all questions for this quiz
+            questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
+            
+            # Prepare the data for response
+            data = {
+                'quiz_id': quiz.id,
+                'quiz_title': quiz.title,
+                'quiz_subtitle': quiz.subtitle,
+                'questions': []
+            }
+            
+            for question in questions:
+                question_data = {
+                    'id': question.id,
+                    'text': question.text,
+                    'category': question.theme.category.name,
+                    'subcategory': question.theme.name,
+                    'image': request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
+                }
+                
+                data['questions'].append(question_data)
+            
+            return Response(data, status=200)
 
 
 
@@ -189,16 +202,6 @@ class SubmitQuizAPIView(APIView):
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
-class QuizResultAPIView(APIView):
-    """
-    GET /api/quiz_result/<quiz_result_id>/
-    Returns the details of a quiz result.
-    """
-    def get(self, request, quiz_result_id):
-        quiz_result = get_object_or_404(QuizResult, id=quiz_result_id)
-        serializer = QuizResultSerializer(quiz_result)
-        return Response(serializer.data)
-
 class SummaryAPIView(APIView):
     """
     GET /api/summary/<quiz_result_id>/
@@ -259,3 +262,143 @@ class TableAPIView(APIView):
             'category_stats': category_stats
         }
         return Response(data)
+
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, action
+from rest_framework.response import Response
+import gspread
+from google.oauth2.service_account import Credentials
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+
+from .models import Category, CategorySet, SubCategory, Quiz, Question, Answer, QuizResult
+from .serializers import (
+    CategorySerializer, CategorySetSerializer, SubCategorySerializer,
+    QuizSerializer, QuestionSerializer, AnswerSerializer,
+    QuizResultCreateSerializer, QuizResultDetailSerializer
+)
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class CategorySetViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = CategorySet.objects.all()
+    serializer_class = CategorySetSerializer
+    
+    @action(detail=True, methods=['get'])
+    def quiz(self, request, pk=None):
+        """Get the quiz associated with this category set"""
+        category_set = self.get_object()
+        try:
+            quiz = Quiz.objects.get(category_set=category_set)
+            return Response(QuizSerializer(quiz).data)
+        except Quiz.DoesNotExist:
+            return Response(
+                {"error": "No quiz found for this category set"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+    
+    @action(detail=True, methods=['get'])
+    def questions(self, request, pk=None):
+        """Get questions for the quiz associated with this category set"""
+        category_set = self.get_object()
+        try:
+            quiz = Quiz.objects.get(category_set=category_set)
+            questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
+            return Response(QuestionSerializer(questions, many=True).data)
+        except Quiz.DoesNotExist:
+            return Response(
+                {"error": "No quiz found for this category set"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class QuizViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Quiz.objects.all()
+    serializer_class = QuizSerializer
+    
+    @action(detail=True, methods=['get'])
+    def questions(self, request, pk=None):
+        """Get questions for this quiz"""
+        quiz = self.get_object()
+        questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
+        return Response(QuestionSerializer(questions, many=True).data)
+
+class QuizResultViewSet(viewsets.ModelViewSet):
+    queryset = QuizResult.objects.all()
+    
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return QuizResultCreateSerializer
+        return QuizResultDetailSerializer
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        quiz_result = serializer.save()
+        
+        # Calculate score for the response
+        total_questions = Question.objects.filter(quiz=quiz_result.quiz).count()
+        correct_answers = quiz_result.answers.filter(is_correct=True).count()
+        score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        
+        # Generate result URL
+        result_url = f"/api/quiz-results/{quiz_result.id}/"
+        
+        # Save to Google Sheet
+        try:
+            success = save_to_google_sheet(
+                quiz_result.id, 
+                quiz_result.name, 
+                quiz_result.parent_name, 
+                quiz_result.grade, 
+                quiz_result.phone_number, 
+                score,
+                result_url
+            )
+        except Exception as e:
+            success = False
+            print(f"Error saving to Google Sheet: {e}")
+        
+        # Return response with details
+        return Response(
+            {
+                'result': QuizResultDetailSerializer(quiz_result).data,
+                'score': score,
+                'total_questions': total_questions,
+                'correct_answers': correct_answers,
+                'result_url': result_url,
+                'google_sheet_saved': success
+            },
+            status=status.HTTP_201_CREATED
+        )
+
+def save_to_google_sheet(result_id, name, parent_name, grade, phone_number, score, result_url):
+    # Set up credentials
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+    credentials = Credentials.from_service_account_file(
+        'path/to/your-service-account-key.json',
+        scopes=scopes
+    )
+    
+    # Connect to Google Sheets
+    client = gspread.authorize(credentials)
+    
+    # Open the Google Sheet by its title
+    sheet = client.open('Quiz Results').sheet1
+    
+    # Append the data to the sheet
+    sheet.append_row([
+        result_id,
+        name,
+        parent_name,
+        grade,
+        phone_number,
+        f"{score:.2f}%",
+        result_url,
+        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    ])
+    
+    return True
+
