@@ -33,8 +33,12 @@ class CategorySetAdmin(admin.ModelAdmin):
     def category_list(self, obj):
         return " + ".join(category.name for category in obj.categories.all())
 
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ('title', 'subtitle')
+
+
 admin.site.register(Category)
 admin.site.register(QuizResult)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Question, QuestionAdmin)
-admin.site.register(Quiz)

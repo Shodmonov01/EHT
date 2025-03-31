@@ -14,14 +14,12 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
-    
 class CategorySet(models.Model):
     name = models.CharField(max_length=255, unique=True)  
     categories = models.ManyToManyField(Category, related_name='category_sets')  
 
     def __str__(self):
         return self.name
-
 
 class SubCategory(models.Model):
     name = models.TextField(null=True)
@@ -33,11 +31,10 @@ class SubCategory(models.Model):
 class Quiz(models.Model):
     title = models.CharField(max_length=255)
     subtitle = models.TextField()
-    category_set = models.ForeignKey(CategorySet, on_delete=models.CASCADE)
+    category_set = models.OneToOneField(CategorySet, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
-
 
 class Question(models.Model):
     text = models.TextField()
@@ -72,7 +69,7 @@ class QuizResult(models.Model):
     unanswered_questions = models.ManyToManyField(Question, related_name='unaswered_questions',  blank=True, null=True)
 
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    answers = models.ManyToManyField(Answer)
+
 
     created_at = models.DateTimeField(auto_now_add=True)
 
