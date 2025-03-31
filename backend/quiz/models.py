@@ -40,12 +40,12 @@ class SubCategory(models.Model):
 
 class Question(models.Model):
     text = models.TextField()
-    quiz = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='questions')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='questions')
     theme = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
     
     def quiz_title(self):
-        return self.quiz.name
+        return self.category.name
 
     def category_name(self):
         return self.theme.category.name
