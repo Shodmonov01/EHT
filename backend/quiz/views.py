@@ -314,17 +314,23 @@ class CategorySetViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-class QuizViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Quiz.objects.all()
-    serializer_class = QuizSerializer
-    
-    @action(detail=True, methods=['get'])
-    def questions(self, request, pk=None):
-        """Get questions for this quiz"""
-        quiz = self.get_object()
-        questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
-        return Response(QuestionSerializer(questions, many=True).data)
+class QuizListView(APIView):
+    def get(self, request):
+        """Get list of all quizzes"""
+        quizzes = Quiz.objects.all()
+        serializer = QuizSerializer(quizzes, many=True)
+        return Response(serializer.data)
 
+class QuizQuestionsView(APIView):
+    def get(self, request, quiz_id):
+        """Get questions for a specific quiz"""
+        quiz = get_object_or_404(Quiz, pk=quiz_id)
+        questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
+        serializer = QuestionSerializer(questions, many=True)
+        return Response(serializer.data)
+    
+
+    
 class QuizResultViewSet(viewsets.ModelViewSet):
     queryset = QuizResult.objects.all()
     
