@@ -1,0 +1,70 @@
+[
+    {
+        "model": "quiz.category",
+        "pk": 1,
+        "fields": {
+            "name": "Science",
+            "type": "NTR"
+        }
+    },
+    {
+        "model": "quiz.category",
+        "pk": 2,
+        "fields": {
+            "name": "Mathematics",
+            "type": "EXC"
+        }
+    },
+    {
+        "model": "quiz.categoryset",
+        "pk": 1,
+        "fields": {
+            "name": "General Knowledge",
+            "categories": [1, 2]
+        }
+    },
+    {
+        "model": "quiz.subcategory",
+        "pk": 1,
+        "fields": {
+            "name": "Physics",
+            "category": 1
+        }
+    },
+    {
+        "model": "quiz.quiz",
+        "pk": 1,
+        "fields": {
+            "title": "Science Quiz",
+            "subtitle": "Test your knowledge in science",
+            "category_set": 1
+        }
+    },
+    {
+        "model": "quiz.question",
+        "pk": 1,
+        "fields": {
+            "text": "What is the speed of light?",
+            "quiz": 1,
+            "theme": 1
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 1,
+        "fields": {
+            "text": "299,792 km/s",
+            "question": 1,
+            "is_correct": true
+        }
+    },
+    {
+        "model": "quiz.answer",
+        "pk": 2,
+        "fields": {
+            "text": "150,000 km/s",
+            "question": 1,
+            "is_correct": false
+        }
+    }
+]
