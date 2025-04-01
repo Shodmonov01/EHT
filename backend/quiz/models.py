@@ -1,5 +1,5 @@
 from django.db import models
-
+import uuid
     
 CATEGORY_TYPE = (
     ('EXC', 'Exact'),
@@ -61,19 +61,28 @@ class Answer(models.Model):
     def __str__(self):
         return self.text
 
+
+def quiz_result_pdf_path(instance, filename):
+    """Generate path for storing quiz result PDFs"""
+    return f'quiz_results/user_{instance.user_token}/{filename}'
+
+
 class QuizResult(models.Model):
-    phone_number = models.CharField(max_length=20)
-    name = models.CharField(max_length=100)
-    parent_name = models.CharField(max_length=100)  # Добавьте это поле
-    answers = models.ManyToManyField(Answer)
-    unanswered_questions = models.ManyToManyField(Question, related_name='unaswered_questions',  blank=True, null=True)
-
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-
-
+    user_token = models.UUIDField(default=uuid.uuid4, editable=False)
+    # name = models.CharField(max_length=255)
+    # parent_name = models.CharField(max_length=255, blank=True, null=True)
+    # phone_number = models.CharField(max_length=20)
+    quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE, related_name='results', null=True, blank=True)
+    answers = models.ManyToManyField('Answer', blank=True)
+    unanswered_questions = models.ManyToManyField('Question', blank=True, related_name='unanswered_by')
     created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.name}'s Quiz Result"
+    pdf_file = models.FileField(upload_to=quiz_result_pdf_path, blank=True, null=True)
     
+    # def __str__(self):
+    #     return f"{self.name}'s result for"
+    
+    def get_pdf_url(self):
+        if self.pdf_file:
+            return self.pdf_file.url
+        return None
 

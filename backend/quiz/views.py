@@ -1,6 +1,8 @@
 from collections import defaultdict
 from django.shortcuts import get_object_or_404
 from django.utils import translation
+from django.http import HttpResponse, FileResponse
+
 import uuid
 
 from rest_framework.views import APIView
@@ -15,15 +17,30 @@ from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.permissions import AllowAny
 import os
 from django.conf import settings
-from .utils import get_google_sheet
+from .utils import get_google_sheet, save_to_google_sheet, generate_pdf_content, generate_and_save_pdf
+
 from datetime import datetime, timedelta
 from django.db.models import Prefetch
-
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view, action
+from rest_framework.response import Response
+import gspread
+from google.oauth2.service_account import Credentials
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+
+from .models import Category, CategorySet, SubCategory,  Question, Answer, QuizResult
+from .serializers import (
+    CategorySerializer, CategorySetSerializer, SubCategorySerializer,
+     QuestionSerializer, AnswerSerializer,
+    QuizResultCreateSerializer, QuizResultDetailSerializer
+)
+
 
 
 
@@ -63,7 +80,7 @@ class CategorySetListAPIView(APIView):
 class StartQuizAPIView(APIView):
     @extend_schema(
         request=UserQuizStarteSerializer,  # Specifies the request body schema
-        responses={201: UserQuizStarteSerializer, 400: None},  # Expected responses
+
         description="Create a new quiz",
         parameters=[
             OpenApiParameter(
@@ -89,9 +106,9 @@ class StartQuizAPIView(APIView):
             unique_id = str(uuid.uuid4())
             final_data_to_save = serializer.data
             print(final_data_to_save, 'final')
-            category_set = serializer.validated_data['category_set_id']
-            category_set_id = category_set.id
-            quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], category_set = category_set )
+            category_set_id = serializer.data['category_set_id_value']
+           
+            # quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], category_set_id = category_set_id )
 
 
             current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
@@ -156,190 +173,24 @@ class QuestionListAPIView(APIView):
             return Response(list(category_questions.values()), status=200)
 
 
-# class SubmitQuizAPIView(APIView):
-#     """
-#     POST /api/quizzes/<quiz_id>/submit/
-    
-#     Expected POST data:
-#       - For each question, a key like "question<id>" with the selected answer id.
-#       - Additional fields: parent, name, phone, grade, language, location.
-    
-#     Returns the created QuizResult and score information.
-#     """
-#     def post(self, request, quiz_id):
-#         quiz = get_object_or_404(Quiz, id=quiz_id)
-#         questions = Question.objects.filter(quiz=quiz)
-#         total_questions = questions.count()
-#         correct_answers_by_category = defaultdict(int)
-#         selected_answers = {}
-#         unanswered_questions_ids = []
-        
-#         for question in questions:
-#             answer_id = request.data.get(f'question{question.id}')
-#             if answer_id:
-#                 try:
-#                     answer = Answer.objects.get(id=answer_id)
-#                     selected_answers[question.id] = answer
-#                     if answer.is_correct:
-#                         correct_answers_by_category[question.theme.name] += 1
-#                 except Answer.DoesNotExist:
-#                     unanswered_questions_ids.append(question.id)
-#             else:
-#                 unanswered_questions_ids.append(question.id)
-                
-#         score = sum(correct_answers_by_category.values())
-#         percentage_score = (score / total_questions * 100) if total_questions > 0 else 0
-
-#         # Get additional data from request
-#         parent_name = request.data.get('parent', 'Unknown Parent')
-#         name = request.data.get('name', 'Anonym')
-#         phone_number = request.data.get('phone', 'Unknown Phone')
-#         grade = request.data.get('grade', 'Unknown Grade')
-#         language = request.data.get('language', 'ru')
-#         location = request.data.get('location', 'Unknown')
-        
-#         # Create the QuizResult instance
-#         quiz_result = QuizResult.objects.create(
-#             quiz=quiz,
-#             phone_number=phone_number,
-#             name=name,
-#             parent_name=parent_name,
-#             grade=grade,
-#         )
-#         # Set many-to-many relationships
-#         quiz_result.answers.set(selected_answers.values())
-#         quiz_result.unanswered_questions.set(questions.filter(id__in=unanswered_questions_ids))
-        
-#         response_data = {
-#             'quiz_result_id': quiz_result.id,
-#             'percentage_score': percentage_score,
-#             'total_questions': total_questions,
-#             'score': score,
-#         }
-#         return Response(response_data, status=status.HTTP_201_CREATED)
-
-class SummaryAPIView(APIView):
-    """
-    GET /api/summary/<quiz_result_id>/
-    
-    Returns a summary context for the quiz result.
-    You can extend this view with additional logic (e.g. including recommendations, characterizations).
-    """
-    def get(self, request, quiz_result_id):
-        quiz_result = get_object_or_404(QuizResult, id=quiz_result_id)
-        total_questions = quiz_result.quiz.questions.count()
-        correct_questions = quiz_result.answers.filter(is_correct=True).count()
-        percentage_score = (correct_questions / total_questions * 100) if total_questions > 0 else 0
-        
-        data = {
-            'quiz_result_id': quiz_result.id,
-            'quiz_title': quiz_result.quiz.title,
-            'quiz_grade': quiz_result.quiz.grade,
-            'total_questions': total_questions,
-            'correct_questions': correct_questions,
-            'percentage_score': round(percentage_score, 1),
-            # Additional fields (e.g., recommendations) can be added here.
-        }
-        return Response(data)
-
-class TableAPIView(APIView):
-    """
-    GET /api/table/<quiz_result_id>/
-    
-    Returns detailed statistics (grouped by category and subcategory) for the quiz result.
-    """
-    def get(self, request, quiz_result_id):
-        quiz_result = get_object_or_404(QuizResult, id=quiz_result_id)
-        categories = Category.objects.all().order_by('name')
-        category_stats = []
-        
-        for category in categories:
-            subcategories = SubCategory.objects.filter(category=category).order_by('name')
-            subcategory_stats = []
-            for subcategory in subcategories:
-                sub_answers = quiz_result.answers.filter(question__theme__name=subcategory.name)
-                total = sub_answers.count()
-                if total == 0:
-                    continue
-                correct = sub_answers.filter(is_correct=True).count()
-                subcategory_stats.append({
-                    'subcategory': subcategory.name,
-                    'total_questions': total,
-                    'correct_questions': correct,
-                    'incorrect_questions': total - correct
-                })
-            if subcategory_stats:
-                category_stats.append({
-                    'category': category.name,
-                    'subcategories': subcategory_stats
-                })
-        data = {
-            'quiz_result_id': quiz_result.id,
-            'category_stats': category_stats
-        }
-        return Response(data)
-
-
-from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, action
-from rest_framework.response import Response
-import gspread
-from google.oauth2.service_account import Credentials
-from django.shortcuts import get_object_or_404
-from datetime import datetime
-
-from .models import Category, CategorySet, SubCategory,  Question, Answer, QuizResult
-from .serializers import (
-    CategorySerializer, CategorySetSerializer, SubCategorySerializer,
-     QuestionSerializer, AnswerSerializer,
-    QuizResultCreateSerializer, QuizResultDetailSerializer
-)
-
-# class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = Category.objects.all()
-#     serializer_class = CategorySerializer
-
-# class CategorySetViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = CategorySet.objects.all()
-#     serializer_class = CategorySetSerializer
-    
-#     @action(detail=True, methods=['get'])
-#     def quiz(self, request, pk=None):
-#         """Get the quiz associated with this category set"""
-#         category_set = self.get_object()
-#         try:
-#             quiz = Quiz.objects.get(category_set=category_set)
-#             return Response(QuizSerializer(quiz).data)
-#         except Quiz.DoesNotExist:
-#             return Response(
-#                 {"error": "No quiz found for this category set"}, 
-#                 status=status.HTTP_404_NOT_FOUND
-#             )
-    
-#     @action(detail=True, methods=['get'])
-#     def questions(self, request, pk=None):
-#         """Get questions for the quiz associated with this category set"""
-#         category_set = self.get_object()
-#         try:
-#             quiz = Quiz.objects.get(category_set=category_set)
-#             questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
-#             return Response(QuestionSerializer(questions, many=True).data)
-#         except Quiz.DoesNotExist:
-#             return Response(
-#                 {"error": "No quiz found for this category set"}, 
-#                 status=status.HTTP_404_NOT_FOUND
-#             )
-
-# class QuizListView(APIView):
-#     def get(self, request):
-#         """Get list of all quizzes"""
-#         quizzes = Quiz.objects.all()
-#         serializer = QuizSerializer(quizzes, many=True)
-#         return Response(serializer.data)
-
 from django.db.models import Count, Q
 
+
 class QuizResultCreateAPIView(APIView):
+    @extend_schema(
+        request=QuizResultCreateSerializer,  # Specifies the request body schema
+        description="Create a new quiz",
+        parameters=[
+            OpenApiParameter(
+                name="Accept-Language",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                description="Select response language (ru, kz)",
+                required=False,
+                enum=["ru", "kz",],
+            )
+        ]
+    )
     def post(self, request, *args, **kwargs):
         serializer = QuizResultCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -347,9 +198,9 @@ class QuizResultCreateAPIView(APIView):
 
         # Re-fetch the quiz_result with annotations
         quiz_result = QuizResult.objects.filter(pk=quiz_result.pk).annotate(
-            total_questions=Count('quiz__questions'),
-            correct_answers=Count('answers', filter=Q(answers__is_correct=True))
-        ).first()
+                total_questions=Count('quiz__category_set__categories__questions', distinct=True),
+                correct_answers=Count('answers', filter=Q(answers__is_correct=True))
+            ).first()
 
         # Use the annotated fields
         total_questions = quiz_result.total_questions
@@ -358,14 +209,22 @@ class QuizResultCreateAPIView(APIView):
 
         # Generate result URL
         result_url = f"/api/quiz-results/{quiz_result.id}/"
+        pdf_url = f"/api/quiz-results/{quiz_result.id}/pdf/"
+        print(quiz_result, 'this is quiz result--')
+
+        # Generate PDF and save it (asynchronously if possible)
+        # try:
+        #     # You could use Celery for this in production to make it truly async
+        #     generate_and_save_pdf(quiz_result, request)
+        # except Exception as e:
+        #     print(f"Error generating PDF: {e}")
 
         # Save to Google Sheet
         try:
             success = save_to_google_sheet(
+                
                 quiz_result.id, 
-                quiz_result.name, 
-                quiz_result.parent_name, 
-                quiz_result.phone_number, 
+
                 score,
                 result_url
             )
@@ -379,37 +238,57 @@ class QuizResultCreateAPIView(APIView):
             'total_questions': total_questions,
             'correct_answers': correct_answers,
             'result_url': result_url,
+            'pdf_url': pdf_url,
             'google_sheet_saved': success
         }
         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 
-def save_to_google_sheet(result_id, name, parent_name, grade, phone_number, score, result_url):
-    # Set up credentials
-    scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    credentials = Credentials.from_service_account_file(
-        'path/to/your-service-account-key.json',
-        scopes=scopes
-    )
+class QuizResultPDFAPIView(APIView):
+    """Serve PDF report for quiz results"""
     
-    # Connect to Google Sheets
-    client = gspread.authorize(credentials)
     
-    # Open the Google Sheet by its title
-    sheet = client.open('Quiz Results').sheet1
-    
-    # Append the data to the sheet
-    sheet.append_row([
-        result_id,
-        name,
-        parent_name,
-        grade,
-        phone_number,
-        f"{score:.2f}%",
-        result_url,
-        datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    ])
-    
-    return True
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            quiz_result = QuizResult.objects.get(pk=pk)
+        except QuizResult.DoesNotExist:
+            return Response(
+                {"error": "Quiz result not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Check if PDF already exists
+        if quiz_result.pdf_file and os.path.exists(quiz_result.pdf_file.path):
+            # Serve existing PDF
+            response = FileResponse(
+                open(quiz_result.pdf_file.path, 'rb'),
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'attachment; filename="quiz_result_{quiz_result.id}.pdf"'
+            return response
+        
+        # If PDF doesn't exist, generate it
+        try:
+            pdf_path = generate_and_save_pdf(quiz_result, request)
+            if not pdf_path or not os.path.exists(pdf_path):
+                return Response(
+                    {"error": "Error generating PDF"}, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # Serve the newly generated PDF
+            response = FileResponse(
+                open(pdf_path, 'rb'),
+                content_type='application/pdf'
+            )
+            response['Content-Disposition'] = f'attachment; filename="quiz_result_{quiz_result.id}.pdf"'
+            return response
+            
+        except Exception as e:
+            return Response(
+                {"error": f"Error generating PDF: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 

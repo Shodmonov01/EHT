@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Category, Question, Answer, SubCategory, QuizResult,\
-                        CategorySet
+                        CategorySet, Quiz
 from nested_inline.admin import NestedStackedInline, NestedModelAdmin
 import nested_admin
 
@@ -43,3 +43,4 @@ admin.site.register(QuizResult)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Question, QuestionAdmin)
 
+admin.site.register(Quiz)
