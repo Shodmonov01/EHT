@@ -152,24 +152,16 @@ class QuizResultCreateSerializer(serializers.ModelSerializer):
 class QuizResultDetailSerializer(serializers.ModelSerializer):
     quiz_title = serializers.SerializerMethodField()
     score = serializers.SerializerMethodField()
-    total_questions = serializers.SerializerMethodField()
-    correct_answers = serializers.SerializerMethodField()
     
     class Meta:
         model = QuizResult
-        fields = ['id', 'name', 'parent_name',  'phone_number', 'quiz', 'quiz_title', 
+        fields = ['id', 'name', 'parent_name', 'phone_number', 'quiz', 'quiz_title', 
                   'score', 'total_questions', 'correct_answers', 'created_at']
     
     def get_quiz_title(self, obj):
         return obj.quiz.title if obj.quiz else None
     
-    def get_total_questions(self, obj):
-        return Question.objects.filter(quiz=obj.quiz).count()
-    
-    def get_correct_answers(self, obj):
-        return obj.answers.filter(is_correct=True).count()
-    
     def get_score(self, obj):
-        total = self.get_total_questions(obj)
-        correct = self.get_correct_answers(obj)
+        total = obj.total_questions
+        correct = obj.correct_answers
         return (correct / total * 100) if total > 0 else 0
