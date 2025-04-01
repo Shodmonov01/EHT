@@ -22,7 +22,6 @@ class CategorySet(models.Model):
         return self.name
     
 
-
 class SubCategory(models.Model):
     name = models.TextField(null=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -30,13 +29,13 @@ class SubCategory(models.Model):
     def __str__(self):
         return self.name
 
-# class Quiz(models.Model):
-#     title = models.CharField(max_length=255)
-#     subtitle = models.TextField()
-#     category_set = models.OneToOneField(CategorySet, on_delete=models.CASCADE)
+class Quiz(models.Model):
+    user_token = models.CharField(max_length=128)
+    phone_number = models.CharField(max_length=20)
+    category_set = models.OneToOneField(CategorySet, on_delete=models.CASCADE)
 
-#     def __str__(self):
-#         return self.title
+    def __str__(self):
+        return self.phone_number
 
 class Question(models.Model):
     text = models.TextField()
@@ -69,7 +68,7 @@ class QuizResult(models.Model):
     answers = models.ManyToManyField(Answer)
     unanswered_questions = models.ManyToManyField(Question, related_name='unaswered_questions',  blank=True, null=True)
 
-    # quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
 
 
     created_at = models.DateTimeField(auto_now_add=True)

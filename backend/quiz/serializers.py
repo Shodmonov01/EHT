@@ -131,7 +131,7 @@ class QuizResultCreateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = QuizResult
-        fields = ['id', 'phone_number', 'name', 'parent_name', 'grade', 'quiz', 'answer_ids', 'unanswered_question_ids']
+        fields = ['id', 'phone_number', 'name', 'parent_name', 'answer_ids', 'unanswered_question_ids']
     
     def create(self, validated_data):
         answer_ids = validated_data.pop('answer_ids', [])
@@ -157,7 +157,7 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = QuizResult
-        fields = ['id', 'name', 'parent_name', 'grade', 'phone_number', 'quiz', 'quiz_title', 
+        fields = ['id', 'name', 'parent_name',  'phone_number', 'quiz', 'quiz_title', 
                   'score', 'total_questions', 'correct_answers', 'created_at']
     
     def get_quiz_title(self, obj):

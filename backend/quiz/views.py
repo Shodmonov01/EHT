@@ -6,7 +6,7 @@ import uuid
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet
+from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet, Quiz
 from .serializers import  QuestionSerializer, AnswerSerializer,\
                             CategorySetHomeSerializer, UserQuizStarteSerializer
 import gspread
@@ -84,8 +84,9 @@ class StartQuizAPIView(APIView):
             print(final_data_to_save, 'final')
             category_set = serializer.validated_data['category_set_id']
             category_set_id = category_set.id
+            quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], category_set = category_set )
 
-            
+
             current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
             data_to_save = [
                 current_time,
@@ -107,36 +108,38 @@ class StartQuizAPIView(APIView):
             return Response(serializer.errors, status=400)
 
 
-# class QuestionListAPIView(APIView):
-#     def get(request, category_set_id):
-#             category_set = get_object_or_404(CategorySet, id=category_set_id)
-    
-#             # Get the Quiz associated with this CategorySet
-#             quiz = get_object_or_404(Quiz, category_set=category_set)
-            
-#             # Get all questions for this quiz
-#             questions = Question.objects.filter(quiz=quiz).select_related('theme', 'theme__category')
-            
-#             # Prepare the data for response
-#             data = {
-#                 'quiz_id': quiz.id,
-#                 'quiz_title': quiz.title,
-#                 'quiz_subtitle': quiz.subtitle,
-#                 'questions': []
-#             }
-            
-#             for question in questions:
-#                 question_data = {
-#                     'id': question.id,
-#                     'text': question.text,
-#                     'category': question.theme.category.name,
-#                     'subcategory': question.theme.name,
-#                     'image': request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
-#                 }
+class QuestionListAPIView(APIView):
+    def get(self, request, category_set_id):
+            category_set = get_object_or_404(CategorySet, id=category_set_id)
+            categories = Category.objects.filter(categoryset=category_set)
+
+            questions = (
+                    Question.objects.filter(category__in=categories)
+                    .select_related("category", "theme", "theme__category") 
+                )
+            category_questions = {}
+
+            for question in questions:
+                category_id = question.category.id
+                if category_id not in category_questions:
+                    category_questions[category_id] = {
+                        "category_id": category_id,
+                        "category_name": question.category.name,
+                       
+                        "questions": []
+                    }
                 
-#                 data['questions'].append(question_data)
-            
-#             return Response(data, status=200)
+                question_data = {
+                    "id": question.id,
+                    "text": question.text,
+                    "category": question.theme.category.name,
+                    "subcategory": question.theme.name,
+                    "image": request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
+                }
+                
+                category_questions[category_id]["questions"].append(question_data)
+
+            return Response(list(category_questions.values()), status=200)
 
 
 # class SubmitQuizAPIView(APIView):
@@ -371,6 +374,7 @@ class QuizResultViewSet(viewsets.ModelViewSet):
             },
             status=status.HTTP_201_CREATED
         )
+    
 
 def save_to_google_sheet(result_id, name, parent_name, grade, phone_number, score, result_url):
     # Set up credentials
