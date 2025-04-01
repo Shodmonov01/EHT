@@ -1,17 +1,18 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-     CategorySetListAPIView, StartQuizAPIView, QuestionListAPIView, QuizResultCreateAPIView
+     CategorySetListAPIView, StartQuizAPIView, QuestionListAPIView, QuizResultCreateAPIView, QuizResultPDFAPIView
 )
 
 router = DefaultRouter()
 
-
 urlpatterns = [
     path('api/category-set/', CategorySetListAPIView.as_view(), name='category_set_list'),
     path('api/quizzes/start', StartQuizAPIView.as_view(), name='quiz-create'),
+    path('api/quiz/questions/<int:category_set_id>/', QuestionListAPIView.as_view(), name='questions-list'),
+
     path('api/quiz/submit', QuizResultCreateAPIView.as_view(), name='quiz-result'),
-    path('api/quiz/questions/<int:category_set_id>/', QuestionListAPIView.as_view(), name='questions-list')
+    path('api/quiz-results/<int:pk>/pdf/', QuizResultPDFAPIView.as_view(), name='quiz-result-pdf'),
 
     # path('quizzes/', QuizListView.as_view(), name='quiz-list'),
     # path('quizzes/<int:quiz_id>/questions/', QuizQuestionsView.as_view(), name='quiz-questions'),

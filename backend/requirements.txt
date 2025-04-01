@@ -13,3 +13,4 @@ gspread
 oauth2client
 django-nested-admin
 django-cors-headers
+xhtml2pdf
