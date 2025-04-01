@@ -111,10 +111,10 @@ class StartQuizAPIView(APIView):
 class QuestionListAPIView(APIView):
     def get(self, request, category_set_id):
             category_set = get_object_or_404(CategorySet, id=category_set_id)
-            categories = Category.objects.filter(categoryset=category_set)
+            # categories = Category.objects.filter(categoryset=category_set)
 
             questions = (
-                    Question.objects.filter(category__in=categories)
+                    Question.objects.filter(category__in=category_set.categories.all())
                     .select_related("category", "theme", "theme__category") 
                 )
             category_questions = {}
