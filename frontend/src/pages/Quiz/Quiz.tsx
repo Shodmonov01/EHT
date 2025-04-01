@@ -1,131 +1,210 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import '../../styles/Quiz.css';
-import yellowBg from '../../assets/images/yellow-bg.png';
-import { Category } from '../../types/quizs';
+import { useState } from "react";
+import { useParams, Navigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { motion, AnimatePresence } from "framer-motion";
+import { fetchQuestions } from "../../api/request.api";
+import "../../styles/Quiz.css";
+import yellowBg from "../../assets/images/yellow-bg.png";
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
 
 export default function Quiz() {
-  const [selectedAnswers, setSelectedAnswers] = useState<{[key: number]: number}>({});
-  const categories: Category[] = [
-    {
-      name: "English",
-      questions: [
-        {
-          id: 1,
-          text: 'Complete the sentence: "______ a rainbow in the sky."',
-          answers: [
-            { id: 1, text: 'There was' },
-            { id: 2, text: 'There were' },
-            { id: 3, text: 'There' },
-            { id: 4, text: 'There are' },
-          ]
-        },
-        {
-          id: 2,
-          text: 'What is the past tense of "there are"?',
-          answers: [
-            { id: 5, text: 'There was' },
-            { id: 6, text: 'There were' },
-            { id: 7, text: 'There is' },
-            { id: 8, text: 'There be' },
-          ]
-        }
-      ]
-    }
-  ];
+  const { categorySetId } = useParams<{ categorySetId: string }>();
+  const quizData = useSelector((state: RootState) => state.quiz);
+  const [selectedAnswers, setSelectedAnswers] = useState<{
+    [key: number]: number;
+  }>({});
+  const [showRequired, setShowRequired] = useState<{ [key: number]: boolean }>({});
 
-  const handleAnswerSelect = (questionId: number, answerId: number) => {
-    setSelectedAnswers(prev => ({
-      ...prev,
-      [questionId]: answerId
-    }));
-  };
+  if (!quizData.token) {
+    return <Navigate to="/" />;
+  }
+
+  const {
+    data: questionsData,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["questions", categorySetId],
+    queryFn: () => fetchQuestions(Number(categorySetId)),
+    enabled: !!categorySetId && !!quizData.token,
+  });
+
+  if (isLoading) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="loading"
+      >
+        Savollar yuklanmoqda...
+      </motion.div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="error"
+      >
+        Savollarni yuklashda xatolik yuz berdi
+      </motion.div>
+    );
+  }
+
+  if (!questionsData?.length) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="no-questions"
+      >
+        Bu kategoriya uchun savollar topilmadi
+      </motion.div>
+    );
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(selectedAnswers);
+    
+    // Check if all questions are answered
+    const unansweredQuestions = questionsData.flatMap(category =>
+      category.questions.filter(question => !selectedAnswers[question.id])
+    );
+
+    if (unansweredQuestions.length > 0) {
+      const newShowRequired = { ...showRequired };
+      unansweredQuestions.forEach(question => {
+        newShowRequired[question.id] = true;
+      });
+      setShowRequired(newShowRequired);
+      return;
+    }
+
+    console.log("Selected answers:", selectedAnswers);
+    // TODO: Submit answers logic
   };
 
   return (
-    <motion.div 
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0 }}
       className="quiz-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
     >
-      <div className="title">
-        Quiz
-        <img className="title__img" src={yellowBg} alt="Background" />
-      </div>
-
-      <motion.div 
-        className="quiz__description"
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
+      <motion.div
+        className="title"
+        initial={{ opacity: 0, x: -50 }}
+        animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
       >
-        Привет, вы попали в систему Tesla Education Quizz, Коротко о правилах - будьте честны :)
+        <h1>Quiz</h1>
+        <img className="title__img" src={yellowBg} alt="Background" />
       </motion.div>
 
-      <form id="quizForm" onSubmit={handleSubmit}>
+      <motion.div
+        className="quiz__description"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
+        Привет, вы попали в систему Tesla Education Quizz, Коротко о правилах -
+        будьте честны :)
+      </motion.div>
+
+      <form onSubmit={handleSubmit}>
         <div className="quizContainer">
-          {categories.map((category, index) => (
-            <motion.div 
-              key={category.name}
-              className="category"
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-            >
-              <h2>{category.name}</h2>
-              <ol>
-                {category.questions.map((question, qIndex) => (
-                  <motion.div 
-                    key={question.id}
-                    className="question"
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 + qIndex * 0.1 }}
-                  >
-                    <li>
-                      <div className="question__title">{question.text}</div>
-                    </li>
-                    {question.image && (
-                      <div className="question__image">
-                        <img src={question.image} alt={question.text} />
-                      </div>
-                    )}
-                    <div className="question__answers">
-                      {question.answers.map(answer => (
-                        <motion.div 
-                          key={answer.id}
-                          className="radio-container"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+          <AnimatePresence>
+            {questionsData.map((category, categoryIndex) => (
+              <motion.div
+                key={category.category_id}
+                className="category"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 * categoryIndex }}
+              >
+                <h2>{category.category_name}</h2>
+                <ol>
+                  {category.questions.map((question, questionIndex) => (
+                    <motion.div
+                      key={question.id}
+                      className="question"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * questionIndex }}
+                    >
+                      <li>
+                        <div className="question__title">{question.text}</div>
+                      </li>
+                      {question.image && (
+                        <motion.div
+                          className="question__image"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.2 }}
                         >
-                          <label className="radio-label">
+                          <img src={question.image} alt={question.text} />
+                        </motion.div>
+                      )}
+                      <div className="question__answers">
+                        {question.annwers.map((answer) => (
+                          <motion.label
+                            key={answer.id}
+                            className="radio-container"
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
                             <input
                               type="radio"
                               name={`question${question.id}`}
                               value={answer.id}
                               checked={selectedAnswers[question.id] === answer.id}
-                              onChange={() => handleAnswerSelect(question.id, answer.id)}
+                              onChange={() => {
+                                setSelectedAnswers((prev) => ({
+                                  ...prev,
+                                  [question.id]: answer.id,
+                                }));
+                                setShowRequired((prev) => ({
+                                  ...prev,
+                                  [question.id]: false,
+                                }));
+                              }}
                             />
                             <span className="radio-checkmark"></span>
-                            {answer.text}
-                          </label>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </motion.div>
-                ))}
-              </ol>
-            </motion.div>
-          ))}
-          
+                            <span className="radio-label">{answer.text}</span>
+                            {answer.image && (
+                              <img
+                                src={answer.image}
+                                alt={answer.text}
+                                className="answer-image"
+                              />
+                            )}
+                          </motion.label>
+                        ))}
+                        {showRequired[question.id] && (
+                          <motion.div
+                            className="required-message"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                          >
+                            Bu savolga javob berish majburiy
+                          </motion.div>
+                        )}
+                      </div>
+                    </motion.div>
+                  ))}
+                </ol>
+              </motion.div>
+            ))}
+          </AnimatePresence>
           <motion.button
-            className="submitButton"
             type="submit"
+            className="submitButton"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >

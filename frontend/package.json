@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
+    "@tanstack/react-query": "^5.71.1",
+    "axios": "^1.8.4",
     "framer-motion": "^12.6.2",
     "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^8.0.4",

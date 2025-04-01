@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
 import languageReducer from './features/languageSlice';
+import quizReducer from './features/quizSlice';
 
 export const store = configureStore({
   reducer: {
     language: languageReducer,
+    quiz: quizReducer,
   },
 });
 
