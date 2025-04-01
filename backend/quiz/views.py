@@ -17,6 +17,13 @@ import os
 from django.conf import settings
 from .utils import get_google_sheet
 from datetime import datetime, timedelta
+from django.db.models import Prefetch
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.shortcuts import get_object_or_404
 
 
 
@@ -115,8 +122,14 @@ class QuestionListAPIView(APIView):
 
             questions = (
                     Question.objects.filter(category__in=category_set.categories.all())
-                    .select_related("category", "theme", "theme__category") 
-                )
+                    .select_related("category", "theme", "theme__category")
+                    .prefetch_related(
+                        Prefetch(
+                            "answer_set",
+                            queryset=Answer.objects.filter(is_correct=False).only("id", "text", "image")
+                        )
+                    )
+)
             category_questions = {}
 
             for question in questions:
@@ -128,13 +141,14 @@ class QuestionListAPIView(APIView):
                        
                         "questions": []
                     }
-                
+                answers = Answer.objects.filter(question=question).values("id", "text", "image")
                 question_data = {
                     "id": question.id,
                     "text": question.text,
                     "category": question.theme.category.name,
                     "subcategory": question.theme.name,
                     "image": request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
+                    "annwers" : answers
                 }
                 
                 category_questions[category_id]["questions"].append(question_data)
@@ -323,37 +337,34 @@ from .serializers import (
 #         serializer = QuizSerializer(quizzes, many=True)
 #         return Response(serializer.data)
 
+from django.db.models import Count, Q
 
-
-
-class QuizResultViewSet(viewsets.ModelViewSet):
-    queryset = QuizResult.objects.all()
-    
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return QuizResultCreateSerializer
-        return QuizResultDetailSerializer
-    
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+class QuizResultCreateAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = QuizResultCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         quiz_result = serializer.save()
-        
-        # Calculate score for the response
-        total_questions = Question.objects.filter(quiz=quiz_result.quiz).count()
-        correct_answers = quiz_result.answers.filter(is_correct=True).count()
+
+        # Re-fetch the quiz_result with annotations
+        quiz_result = QuizResult.objects.filter(pk=quiz_result.pk).annotate(
+            total_questions=Count('quiz__questions'),
+            correct_answers=Count('answers', filter=Q(answers__is_correct=True))
+        ).first()
+
+        # Use the annotated fields
+        total_questions = quiz_result.total_questions
+        correct_answers = quiz_result.correct_answers
         score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
-        
+
         # Generate result URL
         result_url = f"/api/quiz-results/{quiz_result.id}/"
-        
+
         # Save to Google Sheet
         try:
             success = save_to_google_sheet(
                 quiz_result.id, 
                 quiz_result.name, 
                 quiz_result.parent_name, 
-                quiz_result.grade, 
                 quiz_result.phone_number, 
                 score,
                 result_url
@@ -361,20 +372,18 @@ class QuizResultViewSet(viewsets.ModelViewSet):
         except Exception as e:
             success = False
             print(f"Error saving to Google Sheet: {e}")
-        
-        # Return response with details
-        return Response(
-            {
-                'result': QuizResultDetailSerializer(quiz_result).data,
-                'score': score,
-                'total_questions': total_questions,
-                'correct_answers': correct_answers,
-                'result_url': result_url,
-                'google_sheet_saved': success
-            },
-            status=status.HTTP_201_CREATED
-        )
-    
+
+        response_data = {
+            'result': QuizResultDetailSerializer(quiz_result, context={'request': request}).data,
+            'score': score,
+            'total_questions': total_questions,
+            'correct_answers': correct_answers,
+            'result_url': result_url,
+            'google_sheet_saved': success
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED)
+
+
 
 def save_to_google_sheet(result_id, name, parent_name, grade, phone_number, score, result_url):
     # Set up credentials

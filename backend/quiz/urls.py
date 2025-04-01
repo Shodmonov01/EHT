@@ -1,17 +1,16 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-     CategorySetListAPIView, StartQuizAPIView,  QuizResultViewSet, QuestionListAPIView
+     CategorySetListAPIView, StartQuizAPIView, QuestionListAPIView, QuizResultCreateAPIView
 )
 
 router = DefaultRouter()
 
-router.register(r'quiz-results', QuizResultViewSet)
 
 urlpatterns = [
     path('api/category-set/', CategorySetListAPIView.as_view(), name='category_set_list'),
     path('api/quizzes/start', StartQuizAPIView.as_view(), name='quiz-create'),
-    # path('api/quizzes/', include(router.urls)),
+    path('api/quiz/submit', QuizResultCreateAPIView.as_view(), name='quiz-result'),
     path('api/quiz/questions/<int:category_set_id>/', QuestionListAPIView.as_view(), name='questions-list')
 
     # path('quizzes/', QuizListView.as_view(), name='quiz-list'),
