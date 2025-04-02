@@ -299,36 +299,36 @@ class QuizResultCreateAPIView(APIView):
         print(quiz_result, 'this is quiz result--')
 
         # Generate PDF and save it (asynchronously if possible)
-        # try:
-        #     # You could use Celery for this in production to make it truly async
-        #     generate_and_save_pdf(quiz_result, request)
-        # except Exception as e:
-        #     print(f"Error generating PDF: {e}")
+        try:
+            # You could use Celery for this in production to make it truly async
+            generate_and_save_pdf(quiz_result, request)
+        except Exception as e:
+            print(f"Error generating PDF: {e}")
 
         # Save to Google Sheet
-        # try:
-        #     success = save_to_google_sheet(
+        try:
+            success = save_to_google_sheet(
                 
-        #         quiz_result.id, 
+                quiz_result.id, 
 
-        #         score,
-        #         result_url
-        #     )
-        # except Exception as e:
-        #     success = False
-        #     print(f"Error saving to Google Sheet: {e}")
+                score,
+                result_url
+            )
+        except Exception as e:
+            success = False
+            print(f"Error saving to Google Sheet: {e}")
 
         
         # Step 7: Async tasks (commented out as examples)
         # - PDF generation
-        # generate_quiz_result_pdf.delay(quiz_result.id)
+        generate_quiz_result_pdf.delay(quiz_result.id)
         
         # - Google Sheets integration
-        # save_to_google_sheet.delay(
-        #     quiz_result.id,
-        #     score,
-        #     response_data['result_url']
-        # )
+        save_to_google_sheet.delay(
+            quiz_result.id,
+            score,
+            response_data['result_url']
+        )
         
         return Response(response_data, status=status.HTTP_201_CREATED)
 
