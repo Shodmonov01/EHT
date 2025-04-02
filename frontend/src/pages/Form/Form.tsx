@@ -5,16 +5,18 @@ import { useTranslation } from "react-i18next";
 import yellowBg from "../../assets/images/yellow-bg.png";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchCategories, startQuiz } from "../../api/request.api";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { QuizStartRequest, QuizResult, Category } from "../../types/quizs";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setQuizData } from "../../redux/features/quizSlice";
 import Select from 'react-select';
+import { RootState } from "../../redux/store";
 
 export default function Form() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const currentLanguage = useSelector((state: RootState) => state.language.currentLanguage);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -28,14 +30,19 @@ export default function Form() {
     data: categories,
     isError,
     isLoading,
+    refetch
   } = useQuery({
-    queryKey: ["categories"],
+    queryKey: ["categories", currentLanguage],
     queryFn: async () => {
       const data = await fetchCategories();
-      console.log(data);
+      console.log('Categories fetched with language:', currentLanguage);
       return data;
     },
   });
+
+  useEffect(() => {
+    refetch();
+  }, [currentLanguage, refetch]);
 
   const { mutate: startQuizMutation, isPending: isStarting } = useMutation<
     QuizResult,

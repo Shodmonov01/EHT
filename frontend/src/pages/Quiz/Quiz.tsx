@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,20 +8,30 @@ import yellowBg from "../../assets/images/yellow-bg.png";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useTranslation } from "react-i18next";
+
 interface Answer {
   id: number;
   text: string;
   image?: string;
 }
+
 export default function Quiz() {
-  
   const { categorySetId } = useParams<{ categorySetId: string }>();
   const quizData = useSelector((state: RootState) => state.quiz);
+  const currentLanguage = useSelector(
+    (state: RootState) => state.language.currentLanguage
+  );
   const [selectedAnswers, setSelectedAnswers] = useState<{
     [key: number]: number;
   }>({});
-  const [showRequired, setShowRequired] = useState<{ [key: number]: boolean }>({});
+  const [showRequired, setShowRequired] = useState<{ [key: number]: boolean }>(
+    {}
+  );
   const { t } = useTranslation();
+
+  useEffect(() => {
+    console.log('Current language on mount:', currentLanguage); // Debug uchun
+  }, [currentLanguage]);
 
   if (!quizData.token) {
     return <Navigate to="/" />;
@@ -31,12 +41,20 @@ export default function Quiz() {
     data: questionsData,
     isLoading,
     isError,
+    refetch,
   } = useQuery({
-    queryKey: ["questions", categorySetId],
+    queryKey: ["questions", categorySetId, currentLanguage],
     queryFn: () => fetchQuestions(Number(categorySetId)),
     enabled: !!categorySetId && !!quizData.token,
   });
-console.log(questionsData);
+
+  useEffect(() => {
+    if (currentLanguage) {
+      refetch();
+    }
+  }, [currentLanguage, refetch]);
+
+  console.log(questionsData);
 
   if (isLoading) {
     return (
@@ -80,10 +98,7 @@ console.log(questionsData);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Collect the selected answer IDs
     const answerIds = Object.values(selectedAnswers);
-    
-    // Log the selected answers for debugging
     console.log("Selected answers:", answerIds);
 
     const userToken = quizData.token;
@@ -92,23 +107,23 @@ console.log(questionsData);
       alert(t("form.tokenError"));
       return;
     }
-
-    // Prepare unanswered question IDs if needed
-    const unansweredQuestionIds = questionsData.flatMap(category =>
+    const unansweredQuestionIds = questionsData.flatMap((category) =>
       category.questions
-        .filter(question => !selectedAnswers[question.id])
-        .map(q => q.id)
+        .filter((question) => !selectedAnswers[question.id])
+        .map((q) => q.id)
     );
 
-    console.log("Sending answers:", { userToken, answerIds, unansweredQuestionIds });
+    console.log("Sending answers:", {
+      userToken,
+      answerIds,
+      unansweredQuestionIds,
+    });
 
-    // Submit the quiz with the selected answers
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
-      .then(response => {
+      .then((response) => {
         console.log("Quiz submitted successfully:", response);
-        // Handle successful submission (e.g., navigate to results page)
       })
-      .catch(error => {
+      .catch((error) => {
         console.error("Error submitting quiz:", error);
         alert(t("form.submitError"));
       });
@@ -186,7 +201,9 @@ console.log(questionsData);
                               type="radio"
                               name={`question${question.id}`}
                               value={answer.id}
-                              checked={selectedAnswers[question.id] === answer.id}
+                              checked={
+                                selectedAnswers[question.id] === answer.id
+                              }
                               onChange={() => {
                                 setSelectedAnswers((prev) => ({
                                   ...prev,

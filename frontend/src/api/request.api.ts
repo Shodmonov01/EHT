@@ -11,14 +11,25 @@ const API_URL = "http://45.66.10.106:8000";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': '*/*'
+  }
 });
 
-// Add request interceptor to set language header
 axiosInstance.interceptors.request.use((config) => {
   const state = store.getState();
-  config.headers["Accept-Language"] = state.language.currentLanguage;
-  config.headers["Content-Type"] = "application/json";
+  const currentLanguage = state.language.currentLanguage;
+  
+  console.log('Sending request with language:', currentLanguage);
+  
+  config.headers['Accept-Language'] = currentLanguage;
+  config.headers['Content-Type'] = 'application/json';
+  
   return config;
+}, (error) => {
+  console.error('Request interceptor error:', error);
+  return Promise.reject(error);
 });
 
 export const fetchCategories = async () => {
@@ -37,12 +48,21 @@ export const startQuiz = async (quizData: QuizStartRequest) => {
 };
 
 export const fetchQuestions = async (categorySetId: number) => {
-  const { data } = await axiosInstance.get<CategoryQuestions[]>(
-    `/quiz/api/quiz/questions/${categorySetId}/`
-  );
-  return data;
-};
+  try {
+    // So'rov yuborishdan oldin headerlarni tekshirish
+    const state = store.getState();
+    console.log('Current language:', state.language.currentLanguage);
+    console.log('Request headers:', axiosInstance.defaults.headers);
 
+    const { data } = await axiosInstance.get<CategoryQuestions[]>(
+      `/quiz/api/quiz/questions/${categorySetId}/`
+    );
+    return data;
+  } catch (error) {
+    console.error('Error fetching questions:', error);
+    throw error;
+  }
+};
 export const submitQuiz = async (userToken: string, answers: number[], unansweredQuestionIds: number[]) => {
   const requestBody = {
     user_token: userToken,
