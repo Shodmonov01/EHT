@@ -106,7 +106,6 @@ console.log(questionsData);
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
       .then(response => {
         console.log("Quiz submitted successfully:", response);
-        // Handle successful submission (e.g., navigate to results page)
       })
       .catch(error => {
         console.error("Error submitting quiz:", error);
