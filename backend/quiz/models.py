@@ -32,7 +32,7 @@ class SubCategory(models.Model):
 class Quiz(models.Model):
     user_token = models.CharField(max_length=128)
     phone_number = models.CharField(max_length=20)
-    category_set = models.OneToOneField(CategorySet, on_delete=models.CASCADE)
+    category_set = models.ForeignKey(CategorySet, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.phone_number

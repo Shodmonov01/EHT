@@ -164,10 +164,14 @@ class QuizResultCreateSerializer(serializers.ModelSerializer):
         required=True
     )
     user_token = serializers.UUIDField(required=True)
+    name = serializers.CharField(required=False)
+    parent_name = serializers.CharField(required=False)
+    phone_number = serializers.CharField(required=False)
     
     class Meta:
         model = QuizResult
-        fields = ['id', 'user_token', 'answer_ids', 'unanswered_question_ids']
+
+        fields = ['id', 'user_token','name', 'parent_name', 'phone_number', 'answer_ids', 'unanswered_question_ids']
     
     def create(self, validated_data):
         answer_ids = validated_data.pop('answer_ids', [])
