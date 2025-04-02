@@ -35,5 +35,6 @@
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
-  }
+  },
+  "proxy": "http://45.66.10.106:8000"
 }
