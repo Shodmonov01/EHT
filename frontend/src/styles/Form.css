@@ -101,21 +101,100 @@ select:focus {
   box-shadow: 0 0 0 2px rgba(12, 174, 116, 0.1);
 }
 
+.category-select {
+  margin-bottom: 24px;
+}
+
+.custom-select {
+  font-family: "Hind", sans-serif;
+}
+
+.custom-select > div:first-of-type {
+  min-height: 48px;
+  border: 2px solid #eaeaea;
+  border-radius: 12px;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.custom-select > div:first-of-type:hover {
+  border-color: #0cae74;
+}
+
+.custom-select > div:first-of-type:focus-within {
+  border-color: #0e6a4a;
+  box-shadow: 0 0 0 3px rgba(58, 75, 226, 0.1);
+}
+
+.custom-select > div[class*="-menu"] {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: none;
+  margin-top: 8px;
+}
+
+.custom-select > div[class*="-option"]:hover {
+  background-color: rgba(18, 118, 43, 0.975);
+}
+
+.custom-select > div[class*="-option"][class*="-selected"] {
+  background-color: #0cae74;
+  color: white;
+}
+
 .agreement {
+  background: #f8f9ff;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin: 24px 0;
+  border: 1px solid #eaeaea;
+  transition: all 0.2s ease;
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  margin: 20px 0;
+  align-items: center;
+}
+
+.agreement:hover {
+  border-color: #0cae74;
 }
 
 .agreement input[type="checkbox"] {
-  margin-top: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #eaeaea;
+  border-radius: 6px;
+  margin: 0;
+  margin-right: 12px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.agreement input[type="checkbox"]:checked {
+  background-color: #0cae74;
+  border-color: #0cae74;
+}
+
+.agreement input[type="checkbox"]:checked::after {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 14px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.agreement input[type="checkbox"]:hover {
+  border-color: #0cae74;
 }
 
 .agreement label {
-  font-size: 14px;
-  color: #666;
-  line-height: 1.4;
+  font-size: 15px;
+  color: #4a4a4a;
+  line-height: 1.5;
+  cursor: pointer;
 }
 
 .agreement a {
@@ -128,7 +207,7 @@ select:focus {
 }
 
 .submit-button {
-  background: #3a4be2;
+  background: #0cae74;
   color: white;
   border: none;
   border-radius: 8px;
@@ -136,12 +215,12 @@ select:focus {
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(58, 75, 226, 0.2);
+  box-shadow: 0 4px 15px rgba(16, 135, 42, 0.95);
   transition: all 0.3s ease;
 }
 
 .submit-button:hover {
-  background: #2e3bbf;
+  background: #169065;
   box-shadow: 0 6px 20px rgba(58, 75, 226, 0.3);
 }
 
@@ -161,5 +240,13 @@ select:focus {
 
   .form-content {
     padding: 0 15px 30px;
+  }
+
+  .agreement {
+    padding: 14px 16px;
+  }
+  
+  .custom-select > div:first-of-type {
+    min-height: 44px;
   }
 }

@@ -3,8 +3,8 @@ export interface Question {
   text: string;
   category: string;
   subcategory: string;
-  image: string | null;
-  annwers: Answer[];
+  image?: string | null;
+  answers: Answer[];
 }
 
 export interface Answer {

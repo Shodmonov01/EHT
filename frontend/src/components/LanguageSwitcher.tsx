@@ -7,7 +7,7 @@ const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const dispatch = useAppDispatch();
 
-  const handleLanguageChange = (language: string) => {
+  const handleLanguageChange = (language: 'ru' | 'kz') => {
     dispatch(setLanguage(language));
     i18n.changeLanguage(language);
   };

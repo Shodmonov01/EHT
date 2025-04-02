@@ -2,19 +2,26 @@ import { useState } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { fetchQuestions } from "../../api/request.api";
+import { fetchQuestions, submitQuiz } from "../../api/request.api";
 import "../../styles/Quiz.css";
 import yellowBg from "../../assets/images/yellow-bg.png";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
-
+import { useTranslation } from "react-i18next";
+interface Answer {
+  id: number;
+  text: string;
+  image?: string;
+}
 export default function Quiz() {
+  
   const { categorySetId } = useParams<{ categorySetId: string }>();
   const quizData = useSelector((state: RootState) => state.quiz);
   const [selectedAnswers, setSelectedAnswers] = useState<{
     [key: number]: number;
   }>({});
   const [showRequired, setShowRequired] = useState<{ [key: number]: boolean }>({});
+  const { t } = useTranslation();
 
   if (!quizData.token) {
     return <Navigate to="/" />;
@@ -29,6 +36,7 @@ export default function Quiz() {
     queryFn: () => fetchQuestions(Number(categorySetId)),
     enabled: !!categorySetId && !!quizData.token,
   });
+console.log(questionsData);
 
   if (isLoading) {
     return (
@@ -38,7 +46,7 @@ export default function Quiz() {
         exit={{ opacity: 0 }}
         className="loading"
       >
-        Savollar yuklanmoqda...
+        {t("form.loadQuestion")}
       </motion.div>
     );
   }
@@ -51,7 +59,7 @@ export default function Quiz() {
         exit={{ opacity: 0 }}
         className="error"
       >
-        Savollarni yuklashda xatolik yuz berdi
+        {t("form.questionError")}
       </motion.div>
     );
   }
@@ -64,7 +72,7 @@ export default function Quiz() {
         exit={{ opacity: 0 }}
         className="no-questions"
       >
-        Bu kategoriya uchun savollar topilmadi
+        {t("form.categoryNotF")}
       </motion.div>
     );
   }
@@ -72,7 +80,6 @@ export default function Quiz() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check if all questions are answered
     const unansweredQuestions = questionsData.flatMap(category =>
       category.questions.filter(question => !selectedAnswers[question.id])
     );
@@ -86,8 +93,26 @@ export default function Quiz() {
       return;
     }
 
-    console.log("Selected answers:", selectedAnswers);
-    // TODO: Submit answers logic
+    const userToken = quizData.token;
+    if (!userToken) {
+      console.error("User token is null");
+      alert(t("form.tokenError"));
+      return;
+    }
+
+    const answerIds = Object.values(selectedAnswers);
+    const unansweredQuestionIds = unansweredQuestions.map(q => q.id); 
+
+    console.log("Sending answers:", { userToken, answerIds, unansweredQuestionIds });
+
+    submitQuiz(userToken, answerIds, unansweredQuestionIds)
+      .then(response => {
+        console.log("Quiz submitted successfully:", response);
+      })
+      .catch(error => {
+        console.error("Error submitting quiz:", error);
+        alert(t("form.submitError"));
+      });
   };
 
   return (
@@ -103,7 +128,7 @@ export default function Quiz() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <h1>Quiz</h1>
+        <h1>{t("form.title")}</h1>
         <img className="title__img" src={yellowBg} alt="Background" />
       </motion.div>
 
@@ -113,8 +138,7 @@ export default function Quiz() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        Привет, вы попали в систему Tesla Education Quizz, Коротко о правилах -
-        будьте честны :)
+        {t("form.description")}
       </motion.div>
 
       <form onSubmit={handleSubmit}>
@@ -152,7 +176,7 @@ export default function Quiz() {
                         </motion.div>
                       )}
                       <div className="question__answers">
-                        {question.annwers.map((answer) => (
+                        {question.answers.map((answer: Answer) => (
                           <motion.label
                             key={answer.id}
                             className="radio-container"
@@ -192,7 +216,7 @@ export default function Quiz() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                           >
-                            Bu savolga javob berish majburiy
+                            {t("form.requiredAnswer")}
                           </motion.div>
                         )}
                       </div>
@@ -208,7 +232,7 @@ export default function Quiz() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            Готово!
+            {t("form.quizReadyBtn")}
           </motion.button>
         </div>
       </form>

@@ -5,8 +5,8 @@ import quizReducer from './features/quizSlice';
 export const store = configureStore({
   reducer: {
     language: languageReducer,
-    quiz: quizReducer,
-  },
+    quiz: quizReducer
+  }
 });
 
 export type RootState = ReturnType<typeof store.getState>;

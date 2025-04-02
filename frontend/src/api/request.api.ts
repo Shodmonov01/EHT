@@ -4,17 +4,21 @@ import {
   QuizStartRequest,
   Category,
   CategoryQuestions,
-  QuizSubmitRequest,
 } from "../types/quizs";
+import { store } from "../redux/store";
 
 const API_URL = "http://45.66.10.106:8000";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
-  headers: {
-    "Content-Type": "application/json",
-    "Accept-Language": "ru",
-  },
+});
+
+// Add request interceptor to set language header
+axiosInstance.interceptors.request.use((config) => {
+  const state = store.getState();
+  config.headers["Accept-Language"] = state.language.currentLanguage;
+  config.headers["Content-Type"] = "application/json";
+  return config;
 });
 
 export const fetchCategories = async () => {
@@ -39,8 +43,14 @@ export const fetchQuestions = async (categorySetId: number) => {
   return data;
 };
 
-export const submitQuiz = async (answers: QuizSubmitRequest) => {
-  const { data } = await axiosInstance.post(`/quiz/api/quiz/submit/`, answers);
+export const submitQuiz = async (userToken: string, answers: number[], unansweredQuestionIds: number[]) => {
+  const requestBody = {
+    user_token: userToken,
+    answer_ids: answers,
+    unanswered_question_ids: unansweredQuestionIds,
+  };
+
+  const { data } = await axiosInstance.post(`/quiz/api/quiz/submit`, requestBody);
   return data;
 };
 

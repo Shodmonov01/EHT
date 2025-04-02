@@ -10,6 +10,7 @@ import { QuizStartRequest, QuizResult, Category } from "../../types/quizs";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setQuizData } from "../../redux/features/quizSlice";
+import Select from 'react-select';
 
 export default function Form() {
   const { t } = useTranslation();
@@ -44,10 +45,12 @@ export default function Form() {
     mutationFn: startQuiz,
     onSuccess: (data) => {
       console.log("Quiz started successfully:", data);
-      dispatch(setQuizData({
-        token: data.token,
-        category_set_id: data.category_set_id
-      }));
+      dispatch(
+        setQuizData({
+          token: data.token,
+          category_set_id: data.category_set_id,
+        })
+      );
       navigate(`/quiz/${data.category_set_id}`);
     },
     onError: (error) => {
@@ -75,7 +78,7 @@ export default function Form() {
         category_set_id: selectedCategory,
         is_agreed: isAgreed,
       };
-      console.log('Sending data:', quizData);
+      console.log("Sending data:", quizData);
       startQuizMutation(quizData);
     }
   };
@@ -83,7 +86,7 @@ export default function Form() {
   if (isLoading) {
     return (
       <div className="loading-container">
-        <div className="loading">Загрузка категорий...</div>
+        <div className="loading">{t("form.loading")}</div>
       </div>
     );
   }
@@ -91,9 +94,7 @@ export default function Form() {
   if (isError) {
     return (
       <div className="error-container">
-        <div className="error">
-          Ошибка при загрузке категорий. Пожалуйста, обновите страницу.
-        </div>
+        <div className="error">{t("form.error")}</div>
       </div>
     );
   }
@@ -103,7 +104,7 @@ export default function Form() {
       <LanguageSwitcher />
       <div className="quiz-title">
         <img src={yellowBg} alt="Background" className="yellow-bg" />
-        <h1>Quiz</h1>
+        <h1>{t("form.title")}</h1>
       </div>
 
       <motion.div
@@ -115,14 +116,14 @@ export default function Form() {
         <div className="quiz__description">{t("form.description")}</div>
 
         <div className="form-content">
-          <h2 className="form-subtitle">Расскажите нам о себе</h2>
+          <h2 className="form-subtitle">{t("form.aboutYou")}</h2>
 
           <form id="quizForm" onSubmit={handleSubmit}>
             <div className="input-group">
               <input
                 type="text"
                 name="parents_fullname"
-                placeholder="ФИО Родителя"
+                placeholder={t("form.parentName")}
                 required
                 value={formData.parents_fullname}
                 onChange={handleChange}
@@ -132,7 +133,7 @@ export default function Form() {
               <input
                 type="text"
                 name="name"
-                placeholder="ФИО"
+                placeholder={t("form.fullName")}
                 required
                 value={formData.name}
                 onChange={handleChange}
@@ -142,7 +143,7 @@ export default function Form() {
               <input
                 type="text"
                 name="phone_number"
-                placeholder="Номер телефона"
+                placeholder={t("form.phone")}
                 required
                 value={formData.phone_number}
                 onChange={handleChange}
@@ -151,21 +152,19 @@ export default function Form() {
             </div>
 
             <div className="input-group category-select">
-              <label htmlFor="category">Выберите предмет:</label>
-              <select
+              <label htmlFor="category">{t("form.selectClass")}:</label>
+              <Select
                 id="category"
-                onChange={(e) => setSelectedCategory(Number(e.target.value))}
+                options={categories?.map((category: Category) => ({
+                  value: category.id,
+                  label: category.name,
+                }))}
+                onChange={(selectedOption) => setSelectedCategory(selectedOption?.value || null)}
                 required
-                disabled={isStarting}
+                isDisabled={isStarting}
                 className="custom-select"
-              >
-                <option value="">Выберите предмет</option>
-                {categories?.map((category: Category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+                placeholder={t("form.selectSubject")}
+              />
             </div>
 
             <div className="agreement">
@@ -177,12 +176,7 @@ export default function Form() {
                 checked={isAgreed}
                 onChange={handleCheckboxChange}
               />
-              <label htmlFor="dataAgreement">
-                Я согласен(а) с{" "}
-                <a href="#">
-                  условиями хранения и обработки персональных данных
-                </a>
-              </label>
+              <label htmlFor="dataAgreement">{t("form.dataAgreement")}</label>
             </div>
 
             <motion.button
@@ -192,7 +186,7 @@ export default function Form() {
               whileTap={{ scale: 0.98 }}
               disabled={isStarting || !selectedCategory}
             >
-              {isStarting ? "Загрузка..." : "Приступить!"}
+              {isStarting ? t("form.startForm2") : t("form.startForm")}
             </motion.button>
           </form>
         </div>
