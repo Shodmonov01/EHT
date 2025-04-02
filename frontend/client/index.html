@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qlient Результаты</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+
+        .result-container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: linear-gradient(to bottom, #f8f9fa, #ffffff);
+        }
+        
+        .title {
+            position: relative;
+            text-align: center;
+            margin: 64px 0;
+            animation: fadeIn 0.5s ease-out, slideDown 0.5s ease-out;
+        }
+        
+        .title h1 {
+            font-size: 48px;
+            font-weight: bold;
+            color: #333333;
+            margin: 0;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .title__img {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            width: 400px;
+            height: auto;
+            filter: drop-shadow(0 5px 15px rgba(255, 193, 7, 0.3));
+        }
+        
+        .result-content {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: scaleIn 0.5s ease-out 0.4s both;
+            perspective: 1000px;
+        }
+        
+        .score-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15), 
+                        0 5px 15px rgba(0, 0, 0, 0.07),
+                        0 1px 3px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+        
+        .score-card:hover {
+            transform: scale(1.02) translateY(-5px) rotateX(2deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), 
+                        0 10px 20px rgba(0, 0, 0, 0.1),
+                        0 1px 5px rgba(0, 0, 0, 0.08);
+        }
+        
+        .score-card h2 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .score-details {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            animation: slideRight 0.5s ease-out 0.6s both;
+            position: relative;
+        }
+        
+        .score-details p {
+            font-size: 18px;
+            color: #666;
+            margin: 0;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+        
+        .score-details p:hover {
+            transform: translateX(5px);
+        }
+        
+        .score-details strong {
+            color: #0cae74;
+            font-weight: 600;
+            text-shadow: 0 1px 1px rgba(12, 174, 116, 0.1);
+        }
+        
+        .download-section {
+            text-align: center;
+            margin-top: 40px;
+            animation: slideUp 0.5s ease-out 0.8s both;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(5px);
+        }
+        
+        .download-section h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.05);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .download-button {
+            display: inline-block;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            text-decoration: none;
+            color: white;
+            background-color: #0cae74;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(12, 174, 116, 0.3),
+                        0 4px 8px rgba(12, 174, 116, 0.2),
+                        0 2px 4px rgba(12, 174, 116, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .download-button:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2), rgba(255,255,255,0));
+            z-index: 1;
+        }
+        
+        .download-button.secondary {
+            background-color: #3a4be1;
+            box-shadow: 0 10px 20px rgba(58, 75, 225, 0.3),
+                        0 4px 8px rgba(58, 75, 225, 0.2),
+                        0 2px 4px rgba(58, 75, 225, 0.1);
+        }
+        
+        .download-button:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 15px 25px rgba(12, 174, 116, 0.4),
+                        0 8px 15px rgba(12, 174, 116, 0.2),
+                        0 4px 6px rgba(12, 174, 116, 0.1);
+        }
+        
+        .download-button.secondary:hover {
+            box-shadow: 0 15px 25px rgba(58, 75, 225, 0.4),
+                        0 8px 15px rgba(58, 75, 225, 0.2),
+                        0 4px 6px rgba(58, 75, 225, 0.1);
+            transform: translateY(-5px) scale(1.03);
+        }
+        
+        @media (max-width: 768px) {
+            .title h1 {
+                font-size: 36px;
+            }
+        
+            .score-card {
+                padding: 20px;
+                margin: 20px;
+            }
+        
+            .button-group {
+                flex-direction: column;
+                gap: 15px;
+            }
+        
+            .download-button {
+                width: 100%;
+            }
+        }
+
+        /* Animatsiyalar */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); }
+            to { transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.8) translateY(50px); opacity: 0; }
+            to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+
+        @keyframes slideRight {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="result-container">
+        <div class="title">
+            <h1>Благодарим за честность!</h1>
+            <img class="title__img" src="../src/assets/images/yellow-bg.png" alt="Background">
+        </div>
+
+        <div class="result-content">
+            <div class="score-card">
+                <h2>Ваши результаты</h2>
+                <div class="score-details">
+                    <p>Правильных ответов: <strong>0 из 0</strong></p>
+                    <p>Процент выполнения: <strong>0%</strong></p>
+                    <p>Название теста: <strong></strong></p>
+                </div>
+            </div>
+
+            <div class="download-section">
+                <h2>Мы уже генерируем ваши результаты!</h2>
+                <div class="button-group">
+                    <a href="/summary-pdf/result123" class="download-button" target="_blank">
+                        Посмотреть диагностику
+                    </a>
+                    <a href="/table-pdf/result123" class="download-button secondary" target="_blank">
+                        Посмотреть результаты по темам
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
