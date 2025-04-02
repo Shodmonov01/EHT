@@ -143,7 +143,25 @@ class StartQuizAPIView(APIView):
 
 
 class QuestionListAPIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="Accept-Language",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                description="Select response language (ru, kz)",
+                required=False,
+                enum=["ru", "kz",],
+            )
+        ],
+         
+    )
     def get(self, request, category_set_id):
+        lang = request.headers.get("Accept-Language", 'ru')
+        if lang not in ['kz', 'ru']:
+            lang = 'ru'
+        
+        translation.activate(lang)
         category_set = get_object_or_404(CategorySet, id=category_set_id)
         
         questions = (
