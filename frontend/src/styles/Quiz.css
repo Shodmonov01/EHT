@@ -4,8 +4,10 @@
 }
 
 .quiz-container {
+  width: 100%;
   max-width: 960px;
-  margin: auto;
+  margin: 0 auto;
+  padding: 1.5rem;
 }
 
 ol {
@@ -17,7 +19,7 @@ ol {
   position: relative;
   font-size: 48px;
   font-weight: bold;
-  margin: 64px 0px;
+  margin: 2rem 0;
 }
 
 .title__img {
@@ -38,7 +40,7 @@ ol {
   -moz-box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
   box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
   z-index: -1;
-  margin-bottom: 18px;
+  margin-bottom: 30px;
 }
 
 .question {
@@ -48,7 +50,7 @@ ol {
   -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
   -moz-box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
   box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
-  margin: 12px 0px;
+  margin: 12px 0;
 }
 
 .question__title {
@@ -65,7 +67,7 @@ ol {
 .quizContainer {
   display: flex;
   flex-direction: column;
-  margin: -12px 0px;
+  margin: -12px 0;
 }
 
 .submitButton {
@@ -182,13 +184,26 @@ ol {
   color: #666;
 }
 
-@media (max-width: 968px) {
+@media (max-width: 768px) {
   .quiz-container {
-    padding: 0px 8px;
+    padding: 1rem;
   }
-  
+
   .title {
     font-size: 36px;
-    margin: 32px 0;
+  }
+
+  .quiz__description {
+    margin: 0 15px 25px;
+    padding: 12px 20px;
+  }
+
+  .question {
+    padding: 10px 20px;
+  }
+
+  .submitButton {
+    width: 100%;
+    padding: 14px;
   }
 }
