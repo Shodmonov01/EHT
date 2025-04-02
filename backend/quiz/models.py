@@ -69,9 +69,9 @@ def quiz_result_pdf_path(instance, filename):
 
 class QuizResult(models.Model):
     user_token = models.UUIDField(default=uuid.uuid4, editable=False)
-    # name = models.CharField(max_length=255)
-    # parent_name = models.CharField(max_length=255, blank=True, null=True)
-    # phone_number = models.CharField(max_length=20)
+    name = models.CharField(max_length=255)
+    parent_name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=20)
     quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE, related_name='results', null=True, blank=True)
     answers = models.ManyToManyField('Answer', blank=True)
     unanswered_questions = models.ManyToManyField('Question', blank=True, related_name='unanswered_by')

@@ -41,6 +41,16 @@ from .serializers import (
     QuizResultCreateSerializer, QuizResultDetailSerializer
 )
 
+from django.db import transaction
+from django.db.models import Count, Q
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from .models import QuizResult, Quiz, Answer, Question
+from .serializers import QuizResultCreateSerializer, QuizResultDetailSerializer
+
 
 
 
@@ -108,7 +118,7 @@ class StartQuizAPIView(APIView):
             print(final_data_to_save, 'final')
             category_set_id = serializer.data['category_set_id_value']
            
-            # quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], category_set_id = category_set_id )
+            quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], category_set_id = category_set_id )
 
 
             current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
@@ -178,34 +188,110 @@ from django.db.models import Count, Q
 
 class QuizResultCreateAPIView(APIView):
     @extend_schema(
-        request=QuizResultCreateSerializer,  # Specifies the request body schema
-        description="Create a new quiz",
+        request=QuizResultCreateSerializer,
+        description="Create a new quiz result with user answers",
         parameters=[
             OpenApiParameter(
                 name="Accept-Language",
                 type=str,
                 location=OpenApiParameter.HEADER,
-                description="Select response language (ru, kz)",
+                description="Language preference (ru, kz)",
                 required=False,
-                enum=["ru", "kz",],
+                enum=["ru", "kz"],
             )
-        ]
+        ],
+        responses={
+            201: QuizResultDetailSerializer,
+            400: {"description": "Invalid input data"},
+            404: {"description": "Quiz not found"},
+        }
     )
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
-        serializer = QuizResultCreateSerializer(data=request.data)
+        # Step 1: Validate and save basic result data
+        serializer = QuizResultCreateSerializer(
+            data=request.data,
+            context={'request': request}
+        )
         serializer.is_valid(raise_exception=True)
-        quiz_result = serializer.save()
+        
+        # Step 2: Get the related quiz
+        try:
+            quiz = Quiz.objects.get(
+                user_token=serializer.validated_data['user_token']
+            )
+        except Quiz.DoesNotExist:
+            return Response(
+                {"error": "No quiz found for this user token"},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
-        # Re-fetch the quiz_result with annotations
+        # Step 3: Validate all answers belong to this quiz's questions
+        answer_ids = serializer.validated_data.get('answer_ids', [])
+        unanswered_question_ids = serializer.validated_data.get('unanswered_question_ids', [])
+        
+        # Get all question IDs for this quiz
+        quiz_question_ids = set(
+            Question.objects.filter(
+                theme__category__category_sets=quiz.category_set
+            ).values_list('id', flat=True)
+        )
+        print(quiz_question_ids, 'question ids')
+        
+        # Validate answered questions
+        answer_question_ids = set(
+            Answer.objects.filter(id__in=answer_ids)
+            .values_list('question_id', flat=True)
+        )
+        if not answer_question_ids.issubset(quiz_question_ids):
+            return Response(
+                {"error": "Some answers don't belong to this quiz's questions"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate unanswered questions
+        if not set(unanswered_question_ids).issubset(quiz_question_ids):
+            return Response(
+                {"error": "Some unanswered questions don't belong to this quiz"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Step 4: Create the quiz result
+        quiz_result = serializer.save(quiz=quiz)
+        
+        # Step 5: Calculate score with optimized queries
         quiz_result = QuizResult.objects.filter(pk=quiz_result.pk).annotate(
-                total_questions=Count('quiz__category_set__categories__questions', distinct=True),
-                correct_answers=Count('answers', filter=Q(answers__is_correct=True))
-            ).first()
-
-        # Use the annotated fields
-        total_questions = quiz_result.total_questions
-        correct_answers = quiz_result.correct_answers
+            total_questions=Count(
+                'quiz__category_set__categories__questions',
+                distinct=True
+            ),
+            correct_answers=Count(
+                'answers',
+                filter=Q(answers__is_correct=True),
+                distinct=True
+            )
+        ).first()
+        
+        total_questions = quiz_result.total_questions or 0
+        correct_answers = quiz_result.correct_answers or 0
         score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        
+        # Step 6: Prepare response data
+        response_data = {
+            'result': QuizResultDetailSerializer(
+                quiz_result,
+                context={'request': request}
+            ).data,
+            'score': round(score, 2),
+            'total_questions': total_questions,
+            'correct_answers': correct_answers,
+            'result_url': request.build_absolute_uri(
+                f"/api/quiz-results/{quiz_result.id}/"
+            ),
+            'pdf_url': request.build_absolute_uri(
+                f"/api/quiz-results/{quiz_result.id}/pdf/"
+            ),
+        }
 
         # Generate result URL
         result_url = f"/api/quiz-results/{quiz_result.id}/"
@@ -220,28 +306,100 @@ class QuizResultCreateAPIView(APIView):
         #     print(f"Error generating PDF: {e}")
 
         # Save to Google Sheet
-        try:
-            success = save_to_google_sheet(
+        # try:
+        #     success = save_to_google_sheet(
                 
-                quiz_result.id, 
+        #         quiz_result.id, 
 
-                score,
-                result_url
-            )
-        except Exception as e:
-            success = False
-            print(f"Error saving to Google Sheet: {e}")
+        #         score,
+        #         result_url
+        #     )
+        # except Exception as e:
+        #     success = False
+        #     print(f"Error saving to Google Sheet: {e}")
 
-        response_data = {
-            'result': QuizResultDetailSerializer(quiz_result, context={'request': request}).data,
-            'score': score,
-            'total_questions': total_questions,
-            'correct_answers': correct_answers,
-            'result_url': result_url,
-            'pdf_url': pdf_url,
-            'google_sheet_saved': success
-        }
+        
+        # Step 7: Async tasks (commented out as examples)
+        # - PDF generation
+        # generate_quiz_result_pdf.delay(quiz_result.id)
+        
+        # - Google Sheets integration
+        # save_to_google_sheet.delay(
+        #     quiz_result.id,
+        #     score,
+        #     response_data['result_url']
+        # )
+        
         return Response(response_data, status=status.HTTP_201_CREATED)
+
+
+
+# class QuizResultCreateAPIView(APIView):
+#     @extend_schema(
+#         request=QuizResultCreateSerializer,  # Specifies the request body schema
+#         description="Create a new quiz",
+#         parameters=[
+#             OpenApiParameter(
+#                 name="Accept-Language",
+#                 type=str,
+#                 location=OpenApiParameter.HEADER,
+#                 description="Select response language (ru, kz)",
+#                 required=False,
+#                 enum=["ru", "kz",],
+#             )
+#         ]
+#     )
+#     def post(self, request, *args, **kwargs):
+#         serializer = QuizResultCreateSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         quiz_result = serializer.save()
+
+#         # Re-fetch the quiz_result with annotations
+#         quiz_result = QuizResult.objects.filter(pk=quiz_result.pk).annotate(
+#                 total_questions=Count('quiz__category_set__categories__questions', distinct=True),
+#                 correct_answers=Count('answers', filter=Q(answers__is_correct=True))
+#             ).first()
+
+#         # Use the annotated fields
+#         total_questions = quiz_result.total_questions
+#         correct_answers = quiz_result.correct_answers
+#         score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+
+#         # Generate result URL
+#         result_url = f"/api/quiz-results/{quiz_result.id}/"
+#         pdf_url = f"/api/quiz-results/{quiz_result.id}/pdf/"
+#         print(quiz_result, 'this is quiz result--')
+
+#         # Generate PDF and save it (asynchronously if possible)
+#         # try:
+#         #     # You could use Celery for this in production to make it truly async
+#         #     generate_and_save_pdf(quiz_result, request)
+#         # except Exception as e:
+#         #     print(f"Error generating PDF: {e}")
+
+#         # Save to Google Sheet
+#         try:
+#             success = save_to_google_sheet(
+                
+#                 quiz_result.id, 
+
+#                 score,
+#                 result_url
+#             )
+#         except Exception as e:
+#             success = False
+#             print(f"Error saving to Google Sheet: {e}")
+
+#         response_data = {
+#             'result': QuizResultDetailSerializer(quiz_result, context={'request': request}).data,
+#             'score': score,
+#             'total_questions': total_questions,
+#             'correct_answers': correct_answers,
+#             'result_url': result_url,
+#             'pdf_url': pdf_url,
+#             'google_sheet_saved': success
+#         }
+#         return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 
