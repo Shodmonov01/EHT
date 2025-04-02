@@ -79,19 +79,12 @@ console.log(questionsData);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const unansweredQuestions = questionsData.flatMap(category =>
-      category.questions.filter(question => !selectedAnswers[question.id])
-    );
 
-    if (unansweredQuestions.length > 0) {
-      const newShowRequired = { ...showRequired };
-      unansweredQuestions.forEach(question => {
-        newShowRequired[question.id] = true;
-      });
-      setShowRequired(newShowRequired);
-      return;
-    }
+    // Collect the selected answer IDs
+    const answerIds = Object.values(selectedAnswers);
+    
+    // Log the selected answers for debugging
+    console.log("Selected answers:", answerIds);
 
     const userToken = quizData.token;
     if (!userToken) {
@@ -100,14 +93,20 @@ console.log(questionsData);
       return;
     }
 
-    const answerIds = Object.values(selectedAnswers);
-    const unansweredQuestionIds = unansweredQuestions.map(q => q.id); 
+    // Prepare unanswered question IDs if needed
+    const unansweredQuestionIds = questionsData.flatMap(category =>
+      category.questions
+        .filter(question => !selectedAnswers[question.id])
+        .map(q => q.id)
+    );
 
     console.log("Sending answers:", { userToken, answerIds, unansweredQuestionIds });
 
+    // Submit the quiz with the selected answers
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
       .then(response => {
         console.log("Quiz submitted successfully:", response);
+        // Handle successful submission (e.g., navigate to results page)
       })
       .catch(error => {
         console.error("Error submitting quiz:", error);
