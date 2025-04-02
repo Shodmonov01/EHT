@@ -187,7 +187,6 @@ class QuizResultCreateSerializer(serializers.ModelSerializer):
         return quiz_result
 
 
-
 class QuizResultDetailSerializer(serializers.ModelSerializer):
     score = serializers.SerializerMethodField()
     total_questions = serializers.SerializerMethodField()
@@ -201,7 +200,12 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
                   'created_at']
     
     def get_total_questions(self, obj):
-        return obj.quiz.questions.count()
+        if not obj.quiz or not obj.quiz.category_set:
+            return 0
+        # Get questions through: Quiz → CategorySet → Categories → SubCategories → Questions
+        return Question.objects.filter(
+            theme__category__in=obj.quiz.category_set.categories.all()
+        ).count()
     
     def get_correct_answers(self, obj):
         return obj.answers.filter(is_correct=True).count()
@@ -209,12 +213,14 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
     def get_score(self, obj):
         total = self.get_total_questions(obj)
         correct = self.get_correct_answers(obj)
-        return (correct / total) * 100 if total > 0 else 0
+        return round((correct / total) * 100, 2) if total > 0 else 0
     
     def get_category_stats(self, obj):
-        # Group questions by category and subcategory
+        if not obj.quiz or not obj.quiz.category_set:
+            return []
+            
         result = []
-        categories = Category.objects.filter(subcategories__questions__quiz=obj.quiz).distinct()
+        categories = obj.quiz.category_set.categories.all()
         
         for category in categories:
             cat_data = {
@@ -223,12 +229,13 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
             }
             
             subcategories = SubCategory.objects.filter(
-                category=category,
-                questions__quiz=obj.quiz
-            ).distinct()
+                category=category
+            )
             
             for subcategory in subcategories:
-                questions = subcategory.questions.filter(quiz=obj.quiz)
+                questions = Question.objects.filter(
+                    theme=subcategory
+                )
                 total = questions.count()
                 correct = obj.answers.filter(
                     question__in=questions,
@@ -239,7 +246,8 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
                     'subcategory': subcategory.name,
                     'total_questions': total,
                     'correct_questions': correct,
-                    'incorrect_questions': total - correct
+                    'incorrect_questions': total - correct,
+                    'percentage': round((correct / total) * 100, 2) if total > 0 else 0
                 }
                 cat_data['subcategories'].append(subcat_data)
             
