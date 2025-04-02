@@ -144,44 +144,48 @@ class StartQuizAPIView(APIView):
 
 class QuestionListAPIView(APIView):
     def get(self, request, category_set_id):
-            category_set = get_object_or_404(CategorySet, id=category_set_id)
-            # categories = Category.objects.filter(categoryset=category_set)
+        category_set = get_object_or_404(CategorySet, id=category_set_id)
+        
+        questions = (
+            Question.objects.filter(
+                theme__category__in=category_set.categories.all()
+            )
+            .select_related("theme", "theme__category")
+            .prefetch_related(
+                Prefetch(
+                    'answer_set',
+                    queryset=Answer.objects.all().only("id", "text", "image")
+                )
+            )
+            .order_by('theme__category__id', 'theme__id')
+        )
 
-            questions = (
-                    Question.objects.filter(category__in=category_set.categories.all())
-                    .select_related("category", "theme", "theme__category")
-                    .prefetch_related(
-                        Prefetch(
-                            "answer_set",
-                            queryset=Answer.objects.filter(is_correct=False).only("id", "text", "image")
-                        )
-                    )
-)
-            category_questions = {}
+        category_questions = {}
 
-            for question in questions:
-                category_id = question.category.id
-                if category_id not in category_questions:
-                    category_questions[category_id] = {
-                        "category_id": category_id,
-                        "category_name": question.category.name,
-                       
-                        "questions": []
-                    }
-                answers = Answer.objects.filter(question=question).values("id", "text", "image")
-                question_data = {
-                    "id": question.id,
-                    "text": question.text,
-                    "category": question.theme.category.name,
-                    "subcategory": question.theme.name,
-                    "image": request.build_absolute_uri(question.image.url) if question.image and question.image.url else None,
-                    "annwers" : answers
+        for question in questions:
+            category = question.theme.category
+            if category.id not in category_questions:
+                category_questions[category.id] = {
+                    "category_id": category.id,
+                    "category_name": category.name,
+                    "questions": []
                 }
-                
-                category_questions[category_id]["questions"].append(question_data)
+            
+            question_data = {
+                "id": question.id,
+                "text": question.text,
+                "subcategory": question.theme.name,
+                "image": request.build_absolute_uri(question.image.url) if question.image else None,
+                "answers": [
+                    {"id": a.id, "text": a.text, "image": request.build_absolute_uri(a.image.url) if a.image else None}
+                    for a in question.answer_set.all()
+                ]
+            }
+            
+            category_questions[category.id]["questions"].append(question_data)
 
-            return Response(list(category_questions.values()), status=200)
-
+        return Response(list(category_questions.values()), status=200)
+    
 
 from django.db.models import Count, Q
 
@@ -271,6 +275,20 @@ class QuizResultCreateAPIView(APIView):
                 distinct=True
             )
         ).first()
+
+        try:
+            # You could use Celery for this in production to make it truly async
+            pdf_path = generate_and_save_pdf(quiz_result, request)
+        except Exception as e:
+            print(f"Error generating PDF: {e}")
+        
+        if not pdf_path:
+            # PDF generation failed, but we still return the result
+            # You might want to log this error
+            pass
+        
+        
+
         
         total_questions = quiz_result.total_questions or 0
         correct_answers = quiz_result.correct_answers or 0
@@ -299,38 +317,34 @@ class QuizResultCreateAPIView(APIView):
         print(quiz_result, 'this is quiz result--')
 
         # Generate PDF and save it (asynchronously if possible)
-        try:
-            # You could use Celery for this in production to make it truly async
-            generate_and_save_pdf(quiz_result, request)
-        except Exception as e:
-            print(f"Error generating PDF: {e}")
+        print(serializer.validated_data, 'data validated')
+        print(serializer.data, 'data')
+        
 
-        # Save to Google Sheet
-        try:
-            success = save_to_google_sheet(
+        # # Save to Google Sheet
+        # try:
+        #     success = save_to_google_sheet(
+        #         serializer.validated_data['user_token'],
+        #         quiz_result.id, 
+            
                 
-                quiz_result.id, 
 
-                score,
-                result_url
-            )
-        except Exception as e:
-            success = False
-            print(f"Error saving to Google Sheet: {e}")
+        #         score,
+        #         result_url
+        #     )
+        # except Exception as e:
+        #     success = False
+        #     print(f"Error saving to Google Sheet: {e}")
 
         
         # Step 7: Async tasks (commented out as examples)
         # - PDF generation
-        generate_quiz_result_pdf.delay(quiz_result.id)
+        # generate_pdf_content(quiz_result.id)
         
         # - Google Sheets integration
-        save_to_google_sheet.delay(
-            quiz_result.id,
-            score,
-            response_data['result_url']
-        )
+
         
-        return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response({"message":"Thank you"}, status=status.HTTP_201_CREATED)
 
 
 
@@ -404,49 +418,36 @@ class QuizResultCreateAPIView(APIView):
 
 
 class QuizResultPDFAPIView(APIView):
-    """Serve PDF report for quiz results"""
-    
-    
-    def get(self, request, pk, *args, **kwargs):
-        try:
-            quiz_result = QuizResult.objects.get(pk=pk)
-        except QuizResult.DoesNotExist:
-            return Response(
-                {"error": "Quiz result not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
+    """
+    API endpoint to view/download generated PDF results
+    """
+    def get(self, request, pk):
+        quiz_result = get_object_or_404(QuizResult, pk=pk)
         
         # Check if PDF already exists
         if quiz_result.pdf_file and os.path.exists(quiz_result.pdf_file.path):
-            # Serve existing PDF
-            response = FileResponse(
+            return FileResponse(
                 open(quiz_result.pdf_file.path, 'rb'),
-                content_type='application/pdf'
+                content_type='application/pdf',
+                as_attachment=True,
+                filename=f'quiz_result_{pk}.pdf'
             )
-            response['Content-Disposition'] = f'attachment; filename="quiz_result_{quiz_result.id}.pdf"'
-            return response
         
-        # If PDF doesn't exist, generate it
-        try:
-            pdf_path = generate_and_save_pdf(quiz_result, request)
-            if not pdf_path or not os.path.exists(pdf_path):
-                return Response(
-                    {"error": "Error generating PDF"}, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
-            
-            # Serve the newly generated PDF
-            response = FileResponse(
-                open(pdf_path, 'rb'),
-                content_type='application/pdf'
-            )
-            response['Content-Disposition'] = f'attachment; filename="quiz_result_{quiz_result.id}.pdf"'
-            return response
-            
-        except Exception as e:
+        # Generate new PDF if it doesn't exist
+        pdf_path = generate_and_save_pdf(quiz_result, request)
+        
+        if not pdf_path or not os.path.exists(pdf_path):
             return Response(
-                {"error": f"Error generating PDF: {str(e)}"}, 
+                {"error": "Failed to generate PDF report"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+        return FileResponse(
+            open(pdf_path, 'rb'),
+            content_type='application/pdf',
+            as_attachment=True,
+            filename=f'quiz_result_{pk}.pdf'
+        )
+
 
 

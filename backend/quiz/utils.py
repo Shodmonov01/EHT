@@ -24,18 +24,18 @@ def get_google_sheet():
 
             return sheet
 
-def save_to_google_sheet(user_token, quiz_result_id, name, parent_name, phone_number, score, result_url):
+def save_to_google_sheet(user_token, quiz_result_id, score, result_url):
     sheet = get_google_sheet()
     
     # Check if user_token already exists in the sheet
     try:
         cell = sheet.find(str(user_token))
         row_num = cell.row
+   
+             
         # Update existing row
         sheet.update_cell(row_num, 2, quiz_result_id)
-        sheet.update_cell(row_num, 3, name)
-        sheet.update_cell(row_num, 4, parent_name)
-        sheet.update_cell(row_num, 5, phone_number)
+       
         sheet.update_cell(row_num, 6, score)
         sheet.update_cell(row_num, 7, result_url)
     except gspread.exceptions.CellNotFound:
@@ -43,9 +43,7 @@ def save_to_google_sheet(user_token, quiz_result_id, name, parent_name, phone_nu
         sheet.append_row([
             str(user_token),
             quiz_result_id,
-            name,
-            parent_name,
-            phone_number,
+   
             score,
             result_url
         ])
@@ -77,19 +75,31 @@ def generate_and_save_pdf(quiz_result, request):
 
 def generate_pdf_content(quiz_result, request):
     """Generate PDF content without saving"""
+    # Get all questions through the category set relationships
+    questions = Question.objects.filter(
+        theme__category__category_sets=quiz_result.quiz.category_set
+    )
+    
+    total_questions = questions.count()
+    correct_answers = quiz_result.answers.filter(is_correct=True).count()
+    
     # Prepare context data for the template
     context = {
-        # 'name': quiz_result.name,
-        'correct_questions': quiz_result.answers.filter(is_correct=True).count(),
-        'total_questions': quiz_result.quiz.questions.count(),
+        'correct_questions': correct_answers,
+        'total_questions': total_questions,
         'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
-        'percentage_score': round((quiz_result.answers.filter(is_correct=True).count() / 
-                                quiz_result.quiz.questions.count()) * 100 if quiz_result.quiz.questions.count() > 0 else 0, 1),
-        'quiz_name': quiz_result.quiz.title,
+        'percentage_score': round(
+            (correct_answers / total_questions * 100) if total_questions > 0 else 0, 
+            1
+        ),
+        'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz.category_set else "Quiz",
     }
     
-    # Process category stats (same as before)
-    categories = Category.objects.filter(subcategories__questions__quiz=quiz_result.quiz).distinct()
+    # Process category stats
+    categories = Category.objects.filter(
+        category_sets=quiz_result.quiz.category_set
+    ).distinct()
+    
     category_stats = []
     
     for category in categories:
@@ -99,15 +109,14 @@ def generate_pdf_content(quiz_result, request):
         }
         
         subcategories = SubCategory.objects.filter(
-            category=category,
-            questions__quiz=quiz_result.quiz
+            category=category
         ).distinct()
         
         for subcategory in subcategories:
-            questions = subcategory.questions.filter(quiz=quiz_result.quiz)
-            total = questions.count()
+            subcat_questions = questions.filter(theme=subcategory)
+            total = subcat_questions.count()
             correct = quiz_result.answers.filter(
-                question__in=questions,
+                question__in=subcat_questions,
                 is_correct=True
             ).count()
             
@@ -115,7 +124,8 @@ def generate_pdf_content(quiz_result, request):
                 'subcategory': subcategory.name,
                 'total_questions': total,
                 'correct_questions': correct,
-                'incorrect_questions': total - correct
+                'incorrect_questions': total - correct,
+                'percentage': round((correct / total * 100) if total > 0 else 0, 1)
             }
             cat_data['subcategories'].append(subcat_data)
         
