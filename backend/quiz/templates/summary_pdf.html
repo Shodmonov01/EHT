@@ -335,17 +335,15 @@
                 margin-right: 20px;
             }
 
-            .end-text {
-
-            }
+            
         </style>
     </head>
     <body>
         <div class="safe-screen-qwwq">
             <div class="page">
                 <div class="page__container">
-                    <img class="logo" src="{% static './assets/logores.svg' %}">
-                    <img class="bg" src="{% static './assets/bgres.png' %}">
+                    <img class="logo" src="{% static '/assets/logores.svg' %}">
+                    <img class="bg" src="{% static '/assets/bgres.png' %}">
                     <br>
                     <h3 class="aaa">
                         Диагностика успеваемости ученика
@@ -453,7 +451,7 @@
                         </div>
                     </div>
                     <div class="warning">
-                        <img height="60px" src="{% static './assets/important.png' %}">
+                        <img height="60px" style="margin-right: 5px;" src="{% static './assets/important.svg' %}">
                         <span>{{ summary_characterization | linebreaks }}</span>
                     </div>
                 </div>
@@ -490,37 +488,7 @@
                         <br>
                         специализированные школы
                     </h1>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th class="no_preparation">Без подготовки</th>
-                                <th></th>
-                                <th class="with_preparation">С подготовкой</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td style="height: 30px;"></td>
-                                <td style="height: 30px;"></td>
-                                <td style="height: 30px;"></td>
-                            </tr>
-                            <tr>
-                                <td class="no_1">{{ probability_without_preparation|get:'NIS' }}%</td>
-                                <td class="preparation_to">НИШ</td>
-                                
-                            </tr>
-                            <tr>
-                                <td class="no_2">{{ probability_without_preparation|get:'RPMS' }}%</td>
-                                <td class="preparation_to">РФМШ</td>
-                                
-                            </tr>
-                            <tr>
-                                <td class="no_3">{{ probability_without_preparation|get:'BIL' }}%</td>
-                                <td class="preparation_to">БИЛ</td>
-                                
-                            </tr>
-                        </tbody>
-                    </table>
+                    
                     <div class="notes">
                         <b>Примечание:</b>
                         <br>

@@ -17,7 +17,7 @@ class QuestionAdmin(nested_admin.NestedModelAdmin):
     ordering = [ 'theme__category__name', 'theme__name', 'text']
     search_fields = ['text',]
     list_per_page = 50
-    list_display = ['text', 'quiz_title', 'category_name']
+    list_display = ['text']
     raw_id_fields = ['theme']
     inlines = [AnswerInline]
 
