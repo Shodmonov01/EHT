@@ -356,7 +356,7 @@ class QuizResultCreateAPIView(APIView):
                 quiz_result,
                 context={'request': request}
             ).data,
-            'score': round(score, 2),
+            'score': round(score_percentage, 2),
             'total_questions': total_questions,
             'correct_answers': correct_answers,
             'admin_statistics_url': admin_statistics_url,
