@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchQuestions, submitQuiz } from "../../api/request.api";
@@ -29,9 +29,7 @@ export default function Quiz() {
   );
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.log('Current language on mount:', currentLanguage); // Debug uchun
-  }, [currentLanguage]);
+  useEffect(() => {}, [currentLanguage]);
 
   if (!quizData.token) {
     return <Navigate to="/" />;
@@ -53,8 +51,6 @@ export default function Quiz() {
       refetch();
     }
   }, [currentLanguage, refetch]);
-
-  console.log(questionsData);
 
   if (isLoading) {
     return (
@@ -99,7 +95,6 @@ export default function Quiz() {
     e.preventDefault();
 
     const answerIds = Object.values(selectedAnswers);
-    console.log("Selected answers:", answerIds);
 
     const userToken = quizData.token;
     if (!userToken) {
@@ -113,20 +108,12 @@ export default function Quiz() {
         .map((q) => q.id)
     );
 
-    console.log("Sending answers:", {
-      userToken,
-      answerIds,
-      unansweredQuestionIds,
-    });
-
-    submitQuiz(userToken, answerIds, unansweredQuestionIds)
-      .then((response) => {
-        console.log("Quiz submitted successfully:", response);
-      })
-      .catch((error) => {
-        console.error("Error submitting quiz:", error);
-        alert(t("form.submitError"));
-      });
+    submitQuiz(userToken, answerIds, unansweredQuestionIds);
+    // .then((response) => {
+    // })
+    // .catch((error) => {
+    //   alert(t("form.submitError"));
+    // });
   };
 
   return (
@@ -242,14 +229,16 @@ export default function Quiz() {
               </motion.div>
             ))}
           </AnimatePresence>
-          <motion.button
-            type="submit"
-            className="submitButton"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            {t("form.quizReadyBtn")}
-          </motion.button>
+          <Link to="/quiz-submit">
+            <motion.button
+              type="submit"
+              className="submitButton"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {t("form.quizReadyBtn")}
+            </motion.button>
+          </Link>
         </div>
       </form>
     </motion.div>

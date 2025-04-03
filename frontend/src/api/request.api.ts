@@ -7,8 +7,8 @@ import {
 } from "../types/quizs";
 import { store } from "../redux/store";
 
-// const API_URL = "http://45.66.10.106:8000";
-const API_URL = "https://e0e4-95-214-210-70.ngrok-free.app";
+const API_URL = "http://45.66.10.106:8000";
+// const API_URL = "https://e0e4-95-214-210-70.ngrok-free.app";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
@@ -22,7 +22,6 @@ axiosInstance.interceptors.request.use((config) => {
   const state = store.getState();
   const currentLanguage = state.language.currentLanguage;
   
-  console.log('Sending request with language:', currentLanguage);
   
   config.headers['Accept-Language'] = currentLanguage;
   config.headers['Content-Type'] = 'application/json';
@@ -50,10 +49,6 @@ export const startQuiz = async (quizData: QuizStartRequest) => {
 
 export const fetchQuestions = async (categorySetId: number) => {
   try {
-    // So'rov yuborishdan oldin headerlarni tekshirish
-    const state = store.getState();
-    console.log('Current language:', state.language.currentLanguage);
-    console.log('Request headers:', axiosInstance.defaults.headers);
 
     const { data } = await axiosInstance.get<CategoryQuestions[]>(
       `/quiz/api/quiz/questions/${categorySetId}/`

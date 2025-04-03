@@ -35,10 +35,10 @@ export default function Form() {
     queryKey: ["categories", currentLanguage],
     queryFn: async () => {
       const data = await fetchCategories();
-      console.log('Categories fetched with language:', currentLanguage);
       return data;
     },
   });
+  
 
   useEffect(() => {
     refetch();
@@ -51,7 +51,6 @@ export default function Form() {
   >({
     mutationFn: startQuiz,
     onSuccess: (data) => {
-      console.log("Quiz started successfully:", data);
       dispatch(
         setQuizData({
           token: data.token,
@@ -85,7 +84,6 @@ export default function Form() {
         category_set_id: selectedCategory,
         is_agreed: isAgreed,
       };
-      console.log("Sending data:", quizData);
       startQuizMutation(quizData);
     }
   };
