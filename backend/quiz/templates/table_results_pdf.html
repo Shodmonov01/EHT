@@ -1,0 +1,226 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tesla Education | Result</title>
+        <link rel="icon" type="image/png" href="{% static './assets/icon.png' %}">
+        <style>
+        body {
+            margin: 0;
+            left: 0;
+            top: 0;
+            font-family: sans-serif;
+            background-color: black;
+        }
+
+        .logo {
+            margin-top: 20px;
+     
+            width: 450px;
+        }
+
+        h1 {
+            display: inline-block;
+        }
+
+        .page {
+            top: 0;
+            left: 0;
+            position: relative;
+            background-color: white;
+            width: 800px;
+            min-height: 1122px;
+            margin: auto;
+        }
+
+        .page__container {
+            width: 92.5%;
+            margin-top: 24px;
+            margin-bottom: 24px;
+            margin: auto;
+        }
+
+        .aaa {
+            margin-left: 24px;
+            font-size: 24px;
+        }
+        
+        .aab {
+            height: 200px;
+            margin: auto;
+            margin-top: 80px;
+            background-color: #EAEAEA;
+            display: flex;
+        }
+
+        .aac {
+            flex:1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .aad {
+            display: flex;
+            flex-direction: column;
+            background-color: #3A4BE2;
+            flex: 1;
+            height: 200px;
+            color: white;
+            justify-content: space-around;
+            align-items: center
+        }
+
+        .aad_res {
+            margin-top: 30px;
+            font-size: 20px;
+        }
+
+        .aad_per {
+            font-weight: bolder;
+            font-size: 90px;
+        }
+
+        .aac_sal {
+            font-size: 78px;
+            font-style: italic;
+            font-weight: bolder;
+            color: #1DCE8E;
+        }
+        .summary {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .summary__desc {
+            margin-top: 18px;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .stats-table th, .stats-table td {
+            padding: 8px;
+            border: 1px solid #ddd;
+        }
+
+        .stats-table th {
+            background-color: #f2f2f2;
+        }
+
+        .stats-table tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .name {
+            font-size: 36px;
+        }
+
+        .grade {
+            font-size: 64px;
+            font-weight: 600;
+        }
+
+        </style>
+    </head>
+    <body>
+        <div class="safe-screen-qwwq">
+            <div class="page page__first">
+                <div class="page__container">
+                    <br>
+                    <br>
+                    <br>
+                    <img src="{% static './assets/logo.png' %}">
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <div class="name">{{ name }}</div>
+                    <div class="grade">Итого: {{ correct_questions }}/{{ total_questions }}</div>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                    <p>
+                        <strong>Дата сдачи:</strong> {{ passed_date }}
+                    </p>
+                    <p>
+                        <strong>Набранный процент:</strong> {{ percentage_score }}%
+                    </p>
+                    <p>
+                        <strong>Quiz Name:</strong> {{ quiz_name }}
+                    </p>
+                </div>
+            </div>
+            {% for category in category_stats %}
+                <div class="page">
+                    <div class="page__container">
+                        <br />
+                        <br />
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4">{{ category.category }}</th>
+                                </tr>
+                                <tr>
+                                    <th>Тема</th>
+                                    <th>Всего вопросов</th>
+                                    <th>Правильных ответов</th>
+                                    <th>Ошибок</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for stats in category.subcategories %}
+                                    <tr>
+                                        <td>{{ stats.subcategory }}</td>
+                                        <td>{{ stats.total_questions }}</td>
+                                        <td>{{ stats.correct_questions }}</td>
+                                        <td>{{ stats.incorrect_questions }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <script>html2pdf().from(document.querySelector('.safe-screen-qwwq')).save();</script>
+    </body>
+</html>

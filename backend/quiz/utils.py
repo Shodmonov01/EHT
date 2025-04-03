@@ -24,7 +24,7 @@ def get_google_sheet():
 
             return sheet
 
-def save_to_google_sheet(user_token, quiz_result_id, score, result_url):
+def save_to_google_sheet(user_token, score, result_url):
     sheet = get_google_sheet()
     
     # Check if user_token already exists in the sheet
@@ -34,15 +34,14 @@ def save_to_google_sheet(user_token, quiz_result_id, score, result_url):
    
              
         # Update existing row
-        sheet.update_cell(row_num, 2, quiz_result_id)
+        
        
-        sheet.update_cell(row_num, 6, score)
+        sheet.update_cell(row_num, 8, score)
         sheet.update_cell(row_num, 7, result_url)
-    except gspread.exceptions.CellNotFound:
+    except Exception:
         # Add new row
         sheet.append_row([
             str(user_token),
-            quiz_result_id,
    
             score,
             result_url
@@ -54,93 +53,102 @@ def save_to_google_sheet(user_token, quiz_result_id, score, result_url):
 from django.core.files.base import ContentFile
 from django.db import transaction
 
-def generate_and_save_pdf(quiz_result, request):
+def generate_and_save_pdfs(quiz_result, request):
     """
-    Generate PDF for quiz result and save it to storage
-    Returns the PDF file path
+    Generate both PDF types and save them to storage
+    Returns tuple of (result_pdf_path, diagnostic_pdf_path)
     """
-    # Generate the PDF
-    pdf_content = generate_pdf_content(quiz_result, request)
-    if not pdf_content:
-        return None
-    
-    # Save PDF to model's FileField
-    filename = f"quiz_result_{quiz_result.id}.pdf"
-    
     with transaction.atomic():
-        # Save to FileField
-        quiz_result.pdf_file.save(filename, ContentFile(pdf_content), save=True)
+        # Generate and save Result PDF
+        result_pdf_content = generate_result_pdf_content(quiz_result, request)
+        result_filename = f"result_{quiz_result.id}.pdf"
+        quiz_result.result_pdf.save(
+            result_filename, 
+            ContentFile(result_pdf_content), 
+            save=False
+        )
+        
+        # Generate and save Diagnostic PDF
+        diagnostic_pdf_content = generate_diagnostic_pdf_content(quiz_result, request)
+        diagnostic_filename = f"diagnostic_{quiz_result.id}.pdf"
+        quiz_result.diagnostic_pdf.save(
+            diagnostic_filename, 
+            ContentFile(diagnostic_pdf_content), 
+            save=False
+        )
+        
+        quiz_result.save()
     
-    return quiz_result.pdf_file.path
+    return quiz_result.result_pdf.url, quiz_result.diagnostic_pdf.url
 
-def generate_pdf_content(quiz_result, request):
-    """Generate PDF content without saving"""
-    # Get all questions through the category set relationships
+
+def generate_result_pdf_content(quiz_result, request):
+    """Generate content for the standard result PDF"""
+    context = get_base_context(quiz_result)
+    context.update({
+        'template_name': 'quiz_result_pdf.html',
+        # Add any result-specific context here
+    })
+    return render_pdf(context)
+
+def generate_diagnostic_pdf_content(quiz_result, request):
+    """Generate content for the diagnostic PDF"""
+    context = get_base_context(quiz_result)
+    context.update({
+        'template_name': 'quiz_diagnostic_pdf.html',
+        # Add diagnostic-specific context here
+        # 'conclusion': get_diagnostic_conclusion(quiz_result),
+        # 'recommendations': get_recommendations(quiz_result),
+    })
+    return render_pdf(context)
+
+def get_base_context(quiz_result):
+    """Shared context for both PDF types"""
     questions = Question.objects.filter(
         theme__category__category_sets=quiz_result.quiz.category_set
     )
-    
     total_questions = questions.count()
     correct_answers = quiz_result.answers.filter(is_correct=True).count()
     
-    # Prepare context data for the template
-    context = {
+    return {
+        'quiz_result': quiz_result,
         'correct_questions': correct_answers,
         'total_questions': total_questions,
-        'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
         'percentage_score': round(
             (correct_answers / total_questions * 100) if total_questions > 0 else 0, 
             1
         ),
-        'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz.category_set else "Quiz",
+        # Add other shared context data
     }
-    
-    # Process category stats
-    categories = Category.objects.filter(
-        category_sets=quiz_result.quiz.category_set
-    ).distinct()
-    
-    category_stats = []
-    
-    for category in categories:
-        cat_data = {
-            'category': category.name,
-            'subcategories': []
-        }
-        
-        subcategories = SubCategory.objects.filter(
-            category=category
-        ).distinct()
-        
-        for subcategory in subcategories:
-            subcat_questions = questions.filter(theme=subcategory)
-            total = subcat_questions.count()
-            correct = quiz_result.answers.filter(
-                question__in=subcat_questions,
-                is_correct=True
-            ).count()
-            
-            subcat_data = {
-                'subcategory': subcategory.name,
-                'total_questions': total,
-                'correct_questions': correct,
-                'incorrect_questions': total - correct,
-                'percentage': round((correct / total * 100) if total > 0 else 0, 1)
-            }
-            cat_data['subcategories'].append(subcat_data)
-        
-        category_stats.append(cat_data)
-    
-    context['category_stats'] = category_stats
-    
-    # Render template to string
-    template = get_template('quiz_result_pdf.html')
+
+def render_pdf(context):
+    """Generic PDF rendering function"""
+    template = get_template(context['template_name'])
     html = template.render(context)
-    
-    # Create PDF
     result = BytesIO()
     pdf = pisa.pisaDocument(BytesIO(html.encode("UTF-8")), result)
-    
-    if not pdf.err:
-        return result.getvalue()
-    return None
+    return result.getvalue() if not pdf.err else None
+
+
+# def generate_and_store_pdfs(quiz_result, request):
+#     """
+#     Generate and store both PDFs during quiz submission
+#     """
+#     with transaction.atomic():
+#         # Generate PDF content
+#         result_content = generate_summary_pdf_content(quiz_result, request)
+#         table_content = generate_table_pdf_content(quiz_result, request)
+        
+#         # Save to model fields
+#         quiz_result.result_pdf.save(
+#             f"result_{quiz_result.id}.pdf", 
+#             ContentFile(result_content),
+#             save=False
+#         )
+#         quiz_result.diagnostic_pdf.save(
+#             f"diagnostic_{quiz_result.id}.pdf",
+#             ContentFile(table_content),
+#             save=False
+#         )
+#         quiz_result.save()
+        
