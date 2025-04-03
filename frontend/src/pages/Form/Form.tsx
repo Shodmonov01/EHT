@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { setQuizData } from "../../redux/features/quizSlice";
 import Select from 'react-select';
 import { RootState } from "../../redux/store";
+import Loader from "../../components/Loader";
+import LoadingButton from "../../components/LoadingButton";
 
 export default function Form() {
   const { t } = useTranslation();
@@ -89,11 +91,7 @@ export default function Form() {
   };
 
   if (isLoading) {
-    return (
-      <div className="loading-container">
-        <div className="loading">{t("form.loading")}</div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (isError) {
@@ -184,15 +182,13 @@ export default function Form() {
               <label htmlFor="dataAgreement">{t("form.dataAgreement")}</label>
             </div>
 
-            <motion.button
+            <LoadingButton
               type="submit"
-              className="submit-button"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={isStarting || !selectedCategory}
+              isLoading={isStarting}
+              disabled={!selectedCategory}
             >
-              {isStarting ? t("form.startForm2") : t("form.startForm")}
-            </motion.button>
+              {t("form.startForm")}
+            </LoadingButton>
           </form>
         </div>
       </motion.div>

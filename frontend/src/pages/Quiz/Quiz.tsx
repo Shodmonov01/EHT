@@ -8,6 +8,8 @@ import yellowBg from "../../assets/images/yellow-bg.png";
 import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useTranslation } from "react-i18next";
+import Loader from "../../components/Loader";
+import LoadingButton from "../../components/LoadingButton";
 
 interface Answer {
   id: number;
@@ -53,16 +55,7 @@ export default function Quiz() {
   }, [currentLanguage, refetch]);
 
   if (isLoading) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="loading"
-      >
-        {t("form.loadQuestion")}
-      </motion.div>
-    );
+    return <Loader />;
   }
 
   if (isError) {
@@ -230,14 +223,12 @@ export default function Quiz() {
             ))}
           </AnimatePresence>
           <Link to="/quiz-submit">
-            <motion.button
+            <LoadingButton
               type="submit"
-              className="submitButton"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              isLoading={false}
             >
               {t("form.quizReadyBtn")}
-            </motion.button>
+            </LoadingButton>
           </Link>
         </div>
       </form>
