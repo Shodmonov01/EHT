@@ -12,7 +12,10 @@ class SubCategoryTranslationOptions(TranslationOptions):
 class QuestionTranslationOptions(TranslationOptions):
     fields = ('text',)
 
+class AnwerTranslationOptions(TranslationOptions):
+    fields = ("text", )
 
 translator.register(Category, CategoryTranslationOptions)
 translator.register(SubCategory, SubCategoryTranslationOptions)
 translator.register(Question, QuestionTranslationOptions)
+translator.register(Answer, AnwerTranslationOptions)

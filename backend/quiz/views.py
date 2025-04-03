@@ -2,7 +2,7 @@ from collections import defaultdict
 from django.shortcuts import get_object_or_404
 from django.utils import translation
 from django.http import HttpResponse, FileResponse
-
+from django.shortcuts import render
 import uuid
 
 from rest_framework.views import APIView
@@ -17,7 +17,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.permissions import AllowAny
 import os
 from django.conf import settings
-from .utils import get_google_sheet, save_to_google_sheet, generate_pdf_content, generate_and_save_pdf
+from .utils import get_google_sheet, save_to_google_sheet
 
 from datetime import datetime, timedelta
 from django.db.models import Prefetch
@@ -41,6 +41,9 @@ from .serializers import (
     QuizResultCreateSerializer, QuizResultDetailSerializer
 )
 
+from django.db.models import Count, Q
+from .data import *
+
 from django.db import transaction
 from django.db.models import Count, Q
 from rest_framework.views import APIView
@@ -50,9 +53,16 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from .models import QuizResult, Quiz, Answer, Question
 from .serializers import QuizResultCreateSerializer, QuizResultDetailSerializer
+from django.http import FileResponse, Http404
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import get_object_or_404
+from django.db.models import Count, Q
+from typing import Dict, List
+from .utils import generate_and_save_pdfs
 
-
-
+from django.conf import settings
+BASE_URL = os.getenv("BASE_URL")
 
 class CategorySetListAPIView(APIView):
     permission_classes = [AllowAny,]
@@ -135,7 +145,7 @@ class StartQuizAPIView(APIView):
                 unique_id, 
             ]
             print(data_to_save, 'data')
-            # google_sheet.append_row(data_to_save)
+            google_sheet.append_row(data_to_save)
 
             return Response({"token": f"{unique_id}", "category_set_id":f"{category_set_id}"}, status=201)
         else:
@@ -204,9 +214,6 @@ class QuestionListAPIView(APIView):
 
         return Response(list(category_questions.values()), status=200)
     
-
-from django.db.models import Count, Q
-
 
 class QuizResultCreateAPIView(APIView):
     @extend_schema(
@@ -294,23 +301,54 @@ class QuizResultCreateAPIView(APIView):
             )
         ).first()
 
-        try:
-            # You could use Celery for this in production to make it truly async
-            pdf_path = generate_and_save_pdf(quiz_result, request)
-        except Exception as e:
-            print(f"Error generating PDF: {e}")
-        
-        if not pdf_path:
-            # PDF generation failed, but we still return the result
-            # You might want to log this error
-            pass
+        # try:
+        #     # You could use Celery for this in production to make it truly async
+        #     pdf_path = generate_and_save_pdf(quiz_result, request)
+        # except Exception as e:
+        #     print(f"Error generating PDF: {e}")
+
+        # try:
+        #     pdf_path = generate_and_save_pdfs(quiz_result, request)
+        # except Exception as e:
+        #      print(f"Error generating PDF: {e}")
+        #     # Handle error if needed
+
+        # if not pdf_path:
+        #     # PDF generation failed, but we still return the result
+        #     # You might want to log this error
+        #     pass
         
         
 
         
         total_questions = quiz_result.total_questions or 0
         correct_answers = quiz_result.correct_answers or 0
-        score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        score_percentage = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        
+        # Format the score display
+        score_display = f"{correct_answers} из {total_questions}"
+        percentage_display = f"{score_percentage:.1f}%"
+        
+        # Generate admin statistics URL with category set name
+        category_set_name = quiz.category_set.name if quiz.category_set else ""
+        admin_statistics_url = (
+            f"{BASE_URL}/admin/statistics/?quiz_result_id={quiz_result.id}"
+            f"&percentage={score_percentage:.1f}"
+            f"&score={score_display}"
+            f"&quiz_name={category_set_name}"
+        )
+        # Update Google Sheet with quiz result data
+        try:
+            user_token = quiz.user_token  # Get the user_token from the quiz object
+            save_to_google_sheet(
+                user_token=user_token,
+                
+                score=round(score_percentage, 2),
+                result_url=admin_statistics_url
+            )
+        except Exception as e:
+            # Log the error but continue with the response
+            print(f"Error updating Google Sheet: {e}")
         
         # Step 6: Prepare response data
         response_data = {
@@ -321,151 +359,232 @@ class QuizResultCreateAPIView(APIView):
             'score': round(score, 2),
             'total_questions': total_questions,
             'correct_answers': correct_answers,
-            'result_url': request.build_absolute_uri(
-                f"/api/quiz-results/{quiz_result.id}/"
-            ),
-            'pdf_url': request.build_absolute_uri(
-                f"/api/quiz-results/{quiz_result.id}/pdf/"
-            ),
+            'admin_statistics_url': admin_statistics_url,
         }
-
-        # Generate result URL
-        result_url = f"/api/quiz-results/{quiz_result.id}/"
-        pdf_url = f"/api/quiz-results/{quiz_result.id}/pdf/"
-        print(quiz_result, 'this is quiz result--')
-
-        # Generate PDF and save it (asynchronously if possible)
-        print(serializer.validated_data, 'data validated')
-        print(serializer.data, 'data')
         
-
-        # # Save to Google Sheet
-        # try:
-        #     success = save_to_google_sheet(
-        #         serializer.validated_data['user_token'],
-        #         quiz_result.id, 
-            
-                
-
-        #         score,
-        #         result_url
-        #     )
-        # except Exception as e:
-        #     success = False
-        #     print(f"Error saving to Google Sheet: {e}")
-
-        
-        # Step 7: Async tasks (commented out as examples)
-        # - PDF generation
-        # generate_pdf_content(quiz_result.id)
-        
-        # - Google Sheets integration
-
-        
-        return Response({"message":"Thank you"}, status=status.HTTP_201_CREATED)
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
-
-# class QuizResultCreateAPIView(APIView):
-#     @extend_schema(
-#         request=QuizResultCreateSerializer,  # Specifies the request body schema
-#         description="Create a new quiz",
-#         parameters=[
-#             OpenApiParameter(
-#                 name="Accept-Language",
-#                 type=str,
-#                 location=OpenApiParameter.HEADER,
-#                 description="Select response language (ru, kz)",
-#                 required=False,
-#                 enum=["ru", "kz",],
-#             )
-#         ]
-#     )
-#     def post(self, request, *args, **kwargs):
-#         serializer = QuizResultCreateSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         quiz_result = serializer.save()
-
-#         # Re-fetch the quiz_result with annotations
-#         quiz_result = QuizResult.objects.filter(pk=quiz_result.pk).annotate(
-#                 total_questions=Count('quiz__category_set__categories__questions', distinct=True),
-#                 correct_answers=Count('answers', filter=Q(answers__is_correct=True))
-#             ).first()
-
-#         # Use the annotated fields
-#         total_questions = quiz_result.total_questions
-#         correct_answers = quiz_result.correct_answers
-#         score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
-
-#         # Generate result URL
-#         result_url = f"/api/quiz-results/{quiz_result.id}/"
-#         pdf_url = f"/api/quiz-results/{quiz_result.id}/pdf/"
-#         print(quiz_result, 'this is quiz result--')
-
-#         # Generate PDF and save it (asynchronously if possible)
-#         # try:
-#         #     # You could use Celery for this in production to make it truly async
-#         #     generate_and_save_pdf(quiz_result, request)
-#         # except Exception as e:
-#         #     print(f"Error generating PDF: {e}")
-
-#         # Save to Google Sheet
-#         try:
-#             success = save_to_google_sheet(
-                
-#                 quiz_result.id, 
-
-#                 score,
-#                 result_url
-#             )
-#         except Exception as e:
-#             success = False
-#             print(f"Error saving to Google Sheet: {e}")
-
-#         response_data = {
-#             'result': QuizResultDetailSerializer(quiz_result, context={'request': request}).data,
-#             'score': score,
-#             'total_questions': total_questions,
-#             'correct_answers': correct_answers,
-#             'result_url': result_url,
-#             'pdf_url': pdf_url,
-#             'google_sheet_saved': success
-#         }
-#         return Response(response_data, status=status.HTTP_201_CREATED)
-
-
-
-class QuizResultPDFAPIView(APIView):
+def summary_pdf(request):
+    quiz_result_id = request.GET.get('quiz_result')
+    print('here is called')
     """
-    API endpoint to view/download generated PDF results
+    Generate summary PDF with performance analysis
+    Args:
+        quiz_result_id: ID of the QuizResult instance
+    Returns:
+        Rendered PDF template
     """
-    def get(self, request, pk):
-        quiz_result = get_object_or_404(QuizResult, pk=pk)
-        
-        # Check if PDF already exists
-        if quiz_result.pdf_file and os.path.exists(quiz_result.pdf_file.path):
-            return FileResponse(
-                open(quiz_result.pdf_file.path, 'rb'),
-                content_type='application/pdf',
-                as_attachment=True,
-                filename=f'quiz_result_{pk}.pdf'
-            )
-        
-        # Generate new PDF if it doesn't exist
-        pdf_path = generate_and_save_pdf(quiz_result, request)
-        
-        if not pdf_path or not os.path.exists(pdf_path):
-            return Response(
-                {"error": "Failed to generate PDF report"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
-        return FileResponse(
-            open(pdf_path, 'rb'),
-            content_type='application/pdf',
-            as_attachment=True,
-            filename=f'quiz_result_{pk}.pdf'
+    quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
+    
+    # Get base context from your existing function
+    context = get_quiz_result_context(quiz_result)
+    
+    # Optimized queries for exact/natural sciences
+    exact_stats = get_category_stats(quiz_result, 'EXC')
+    natural_stats = get_category_stats(quiz_result, 'NTR')
+    
+    # Calculate percentages with safety checks
+    exact_percentage = calculate_percentage(exact_stats)
+    natural_percentage = calculate_percentage(natural_stats)
+    total_percentage = context['percentage_score']
+    
+    # Get closest matching characterization
+    context.update({
+        'exact_stats': exact_stats['categories'],
+        'natural_stats': natural_stats['categories'],
+        'exact_total_stats': f"{exact_stats['total_correct']}/{exact_stats['total_questions']}",
+        'natural_total_stats': f"{natural_stats['total_correct']}/{natural_stats['total_questions']}",
+        'recomendation': get_closest_match(recomendation, total_percentage),
+        'conclusion': get_conclusion_with_score(conclusion, total_percentage),
+        'natural_characterization': get_closest_match(natural_characterization, natural_percentage),
+        'exact_characterization': get_closest_match(exact_characterization, exact_percentage),
+        'summary_characterization': summary_characterization.get(
+            (round(exact_percentage), round(natural_percentage)), 
+            "No summary available"
+        ),
+        'probability_without_preparation': probability_without_preparation.get(
+            (round(exact_percentage), round(natural_percentage)),
+            {}
+        ),
+        # 'probability_with_preparation': probability_with_preparation.get(
+        #     int(context['quiz_grade']), 
+        #     {}
+        # )
+    })
+    
+    return render(request, 'summary_pdf.html', context)
+
+
+def get_category_stats(quiz_result, category_type: str) -> Dict:
+    """
+    Get statistics for a specific category type
+    """
+    # First get all answer IDs for this quiz result
+    answer_ids = quiz_result.answers.values_list('id', flat=True)
+    
+    # Get all question IDs from both answered and unanswered
+    answered_question_ids = quiz_result.answers.values_list('question_id', flat=True)
+    unanswered_question_ids = quiz_result.unanswered_questions.values_list('id', flat=True)
+    all_question_ids = list(answered_question_ids) + list(unanswered_question_ids)
+    
+    # Get categories with stats - fixing the annotation
+    categories = Category.objects.filter(
+        questions__id__in=all_question_ids,
+        type=category_type
+    ).annotate(
+        total_questions=Count(
+            'questions',
+            filter=Q(questions__id__in=all_question_ids),
+            distinct=True
+        ),
+        correct_answers=Count(
+            'questions',
+            filter=Q(
+                questions__answer__id__in=answer_ids,  # Changed from questions__answers to questions__answer
+                questions__answer__is_correct=True     # Changed from questions__answers to questions__answer
+            ),
+            distinct=True
         )
+    ).distinct()
+    
+    stats = {
+        'categories': [],
+        'total_questions': 0,
+        'total_correct': 0
+    }
+    
+    for category in categories:
+        stats['categories'].append({
+            'category': category.name,
+            'total_questions': category.total_questions,
+            'correct_questions': category.correct_answers  # Getting the annotated value
+        })
+        stats['total_questions'] += category.total_questions
+        stats['total_correct'] += category.correct_answers
+    
+    return stats
 
 
+def calculate_percentage(stats: Dict) :
+    """Safe percentage calculation"""
+    if stats['total_questions'] == 0:
+        return 0.0
+    return (stats['total_correct'] / stats['total_questions']) * 100
 
+def get_closest_match(data_dict: Dict, score: float) -> str:
+    """Find closest key match in a dictionary"""
+    closest_key = min(data_dict.keys(), key=lambda x: abs(x - round(score)))
+    return data_dict.get(closest_key, "No data available")
+
+def get_conclusion_with_score(conclusion_dict: Dict, score: float) -> str:
+    """Insert actual score into conclusion template"""
+    base_text = get_closest_match(conclusion_dict, score)
+    return base_text.replace("{}%", f"{round(score)}%")
+
+
+def get_quiz_result_context(quiz_result):
+    """
+    Prepares common context data for quiz result PDFs
+    Args:
+        quiz_result: QuizResult model instance
+    Returns:
+        Dictionary of common template variables
+    """
+    # Calculate total questions from answers + unanswered questions
+    total_questions = (quiz_result.answers.count() + 
+                      quiz_result.unanswered_questions.count())
+    
+    # Calculate correct answers
+    correct_answers = quiz_result.answers.filter(is_correct=True).count()
+    
+    # Calculate percentage score safely
+    percentage_score = 0.0
+    if total_questions > 0:
+        percentage_score = (correct_answers / total_questions) * 100
+
+    context = {
+        'quiz_result': quiz_result,
+        'name': quiz_result.name,
+        # Fixed: Access the correct field in the relationship chain
+        'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz else "Diagnostic Quiz",
+        'quiz_grade': "N/A",  # Add grade field to Quiz model if needed
+        'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
+        'total_questions': total_questions,
+        'correct_questions': correct_answers,
+        'percentage_score': round(percentage_score, 1),
+    }
+    return context
+
+
+def table_pdf(request) -> HttpResponse:
+    quiz_result_id = request.GET.get('quiz_result')
+    """
+    Generate detailed table PDF with subcategory breakdown
+    Args:
+        quiz_result_id: ID of the QuizResult instance
+    Returns:
+        Rendered PDF template with detailed results
+    """
+    quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
+    context = get_quiz_result_context(quiz_result)
+    
+    # Fixed: Adjusted query to match your model relationships
+    categories = Category.objects.filter(
+        questions__in=quiz_result.answers.values_list('question', flat=True)
+    ).distinct().prefetch_related(
+        'subcategory_set',  # Using Django's default reverse relation name
+        'questions',
+        'questions__answer_set'  # Using Django's default reverse relation name
+    ).order_by('name')
+    
+    category_stats = []
+    
+    for category in categories:
+        subcategory_stats = []
+        
+        # Fixed: Use the correct reverse relation name
+        for subcategory in category.subcategory_set.all():
+            answers = quiz_result.answers.filter(
+                question__theme=subcategory
+            )
+            total = answers.count()
+            
+            if total == 0:
+                continue
+                
+            correct = answers.filter(is_correct=True).count()
+            
+            subcategory_stats.append({
+                'subcategory': subcategory.name,
+                'total_questions': total,
+                'correct_questions': correct,
+                'incorrect_questions': total - correct
+            })
+        
+        if subcategory_stats:
+            category_stats.append({
+                'category': category.name,
+                'subcategories': subcategory_stats
+            })
+    
+    context['category_stats'] = category_stats
+    return render(request, 'table_results_pdf.html', context)
+
+from django.shortcuts import render
+
+
+def get_admin_statistics_page(request):
+    quiz_result = request.GET.get('quiz_result_id') 
+
+    score = request.GET.get('score')
+    quiz_categories = request.GET.get('quiz_categories')
+    percent = request.GET.get('percent')
+
+    print(request.user, 'this user')
+    if not request.user.is_staff:
+        return render(request, "admin_statistics_forbidden_page.html")
+
+    
+    print(quiz_result, 'quiz result')
+    return render(request, 'admin_statistics_page.html', context = {'quiz_result_id': quiz_result})

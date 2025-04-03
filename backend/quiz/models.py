@@ -41,7 +41,7 @@ class Question(models.Model):
     text = models.TextField()
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='questions')
     theme = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image = models.ImageField(upload_to='images/questions', null=True, blank=True)
     
     def quiz_title(self):
         return self.category.name
@@ -55,7 +55,7 @@ class Question(models.Model):
 class Answer(models.Model):
     text = models.TextField()
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image = models.ImageField(upload_to='images/answers', null=True, blank=True)
     is_correct = models.BooleanField(default=False)
 
     def __str__(self):
@@ -76,7 +76,10 @@ class QuizResult(models.Model):
     answers = models.ManyToManyField('Answer', blank=True)
     unanswered_questions = models.ManyToManyField('Question', blank=True, related_name='unanswered_by')
     created_at = models.DateTimeField(auto_now_add=True)
-    pdf_file = models.FileField(upload_to=quiz_result_pdf_path, blank=True, null=True)
+    
+
+    result_pdf = models.FileField(upload_to='quiz_results/', null=True, blank=True)
+    diagnostic_pdf = models.FileField(upload_to='quiz_diagnostics/', null=True, blank=True)
     
     # def __str__(self):
     #     return f"{self.name}'s result for"
