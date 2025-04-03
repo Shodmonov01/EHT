@@ -11,12 +11,10 @@ from rest_framework import status
 from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet, Quiz
 from .serializers import  QuestionSerializer, AnswerSerializer,\
                             CategorySetHomeSerializer, UserQuizStarteSerializer
-import gspread
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.permissions import AllowAny
 import os
-from django.conf import settings
 from .utils import get_google_sheet, save_to_google_sheet
 
 from datetime import datetime, timedelta
@@ -62,7 +60,12 @@ from typing import Dict, List
 from .utils import generate_and_save_pdfs
 
 from django.conf import settings
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_URL = os.getenv("BASE_URL")
+print(BASE_URL, 'base url')
 
 class CategorySetListAPIView(APIView):
     permission_classes = [AllowAny,]
@@ -337,6 +340,7 @@ class QuizResultCreateAPIView(APIView):
             f"&score={score_display}"
             f"&quiz_name={category_set_name}"
         )
+        print(admin_statistics_url, 'admin url')
         # Update Google Sheet with quiz result data
         try:
             user_token = quiz.user_token  # Get the user_token from the quiz object
@@ -367,29 +371,70 @@ class QuizResultCreateAPIView(APIView):
 
 def summary_pdf(request):
     quiz_result_id = request.GET.get('quiz_result')
-    print('here is called')
-    """
-    Generate summary PDF with performance analysis
-    Args:
-        quiz_result_id: ID of the QuizResult instance
-    Returns:
-        Rendered PDF template
-    """
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
     
-    # Get base context from your existing function
+    # Get base context
     context = get_quiz_result_context(quiz_result)
     
-    # Optimized queries for exact/natural sciences
-    exact_stats = get_category_stats(quiz_result, 'EXC')
-    natural_stats = get_category_stats(quiz_result, 'NTR')
+    # Get all categories in the quiz's category set
+    categories = Category.objects.filter(
+        category_sets=quiz_result.quiz.category_set
+    ).prefetch_related(
+        Prefetch('subcategory_set', queryset=SubCategory.objects.all())
+    ).order_by('name')
     
-    # Calculate percentages with safety checks
+    # Initialize statsint()
+    exact_stats = {'categories': [], 'total_questions': 0, 'total_correct': 0}
+    natural_stats = {'categories': [], 'total_questions': 0, 'total_correct': 0}
+    
+    for category in categories:
+        category_questions = 0
+        category_correct = 0
+        
+        for subcategory in category.subcategory_set.all():
+            # Get ALL questions in this subcategory
+            questions_in_subcat = Question.objects.filter(
+                theme=subcategory,
+                category=category
+            )
+            
+            total_in_subcat = questions_in_subcat.count()
+            
+            # Count correct answers in this subcategory
+            correct_in_subcat = quiz_result.answers.filter(
+                question__in=questions_in_subcat,
+                is_correct=True
+            ).values('question').distinct().count()
+            
+            category_questions += total_in_subcat
+            category_correct += correct_in_subcat
+        
+        # Add to appropriate category type
+        category_data = {
+            'category': category.name,
+            'total_questions': category_questions,
+            'correct_questions': category_correct
+        }
+        
+        if category.type == 'EXC':
+            exact_stats['categories'].append(category_data)
+            exact_stats['total_questions'] += category_questions
+            exact_stats['total_correct'] += category_correct
+        else:
+            natural_stats['categories'].append(category_data)
+            natural_stats['total_questions'] += category_questions
+            natural_stats['total_correct'] += category_correct
+    
+    # Calculate percentages
     exact_percentage = calculate_percentage(exact_stats)
     natural_percentage = calculate_percentage(natural_stats)
     total_percentage = context['percentage_score']
-    
-    # Get closest matching characterization
+ 
+
+    closest_natural_value = min(natural_characterization.keys(), key=lambda x: abs(x - round(natural_percentage)))
+    closest_exact_value = min(exact_characterization.keys(), key=lambda x: abs(x - round(exact_percentage)))
+    summary_characterization[closest_exact_value][closest_natural_value]
+    print(summary_characterization, 'summary')
     context.update({
         'exact_stats': exact_stats['categories'],
         'natural_stats': natural_stats['categories'],
@@ -399,74 +444,17 @@ def summary_pdf(request):
         'conclusion': get_conclusion_with_score(conclusion, total_percentage),
         'natural_characterization': get_closest_match(natural_characterization, natural_percentage),
         'exact_characterization': get_closest_match(exact_characterization, exact_percentage),
-        'summary_characterization': summary_characterization.get(
-            (round(exact_percentage), round(natural_percentage)), 
-            "No summary available"
-        ),
-        'probability_without_preparation': probability_without_preparation.get(
-            (round(exact_percentage), round(natural_percentage)),
-            {}
-        ),
-        # 'probability_with_preparation': probability_with_preparation.get(
-        #     int(context['quiz_grade']), 
-        #     {}
-        # )
+        'summary_characterization': summary_characterization[closest_exact_value][closest_natural_value],
+        
+       
+        # 'remaining_month': remaining_month.get(int(context.get('quiz_grade', 5)), 0)
     })
+    print(context, 'this is context')
     
     return render(request, 'summary_pdf.html', context)
 
 
-def get_category_stats(quiz_result, category_type: str) -> Dict:
-    """
-    Get statistics for a specific category type
-    """
-    # First get all answer IDs for this quiz result
-    answer_ids = quiz_result.answers.values_list('id', flat=True)
-    
-    # Get all question IDs from both answered and unanswered
-    answered_question_ids = quiz_result.answers.values_list('question_id', flat=True)
-    unanswered_question_ids = quiz_result.unanswered_questions.values_list('id', flat=True)
-    all_question_ids = list(answered_question_ids) + list(unanswered_question_ids)
-    
-    # Get categories with stats - fixing the annotation
-    categories = Category.objects.filter(
-        questions__id__in=all_question_ids,
-        type=category_type
-    ).annotate(
-        total_questions=Count(
-            'questions',
-            filter=Q(questions__id__in=all_question_ids),
-            distinct=True
-        ),
-        correct_answers=Count(
-            'questions',
-            filter=Q(
-                questions__answer__id__in=answer_ids,  # Changed from questions__answers to questions__answer
-                questions__answer__is_correct=True     # Changed from questions__answers to questions__answer
-            ),
-            distinct=True
-        )
-    ).distinct()
-    
-    stats = {
-        'categories': [],
-        'total_questions': 0,
-        'total_correct': 0
-    }
-    
-    for category in categories:
-        stats['categories'].append({
-            'category': category.name,
-            'total_questions': category.total_questions,
-            'correct_questions': category.correct_answers  # Getting the annotated value
-        })
-        stats['total_questions'] += category.total_questions
-        stats['total_correct'] += category.correct_answers
-    
-    return stats
-
-
-def calculate_percentage(stats: Dict) :
+def calculate_percentage(stats: Dict) -> float:
     """Safe percentage calculation"""
     if stats['total_questions'] == 0:
         return 0.0
@@ -482,7 +470,6 @@ def get_conclusion_with_score(conclusion_dict: Dict, score: float) -> str:
     base_text = get_closest_match(conclusion_dict, score)
     return base_text.replace("{}%", f"{round(score)}%")
 
-
 def get_quiz_result_context(quiz_result):
     """
     Prepares common context data for quiz result PDFs
@@ -491,11 +478,12 @@ def get_quiz_result_context(quiz_result):
     Returns:
         Dictionary of common template variables
     """
-    # Calculate total questions from answers + unanswered questions
-    total_questions = (quiz_result.answers.count() + 
-                      quiz_result.unanswered_questions.count())
-    
-    # Calculate correct answers
+    # Get ALL questions that belong to this quiz's category set
+    total_questions = Question.objects.filter(
+        theme__category__category_sets=quiz_result.quiz.category_set
+    ).count()
+
+    # Calculate correct answers from the user's responses
     correct_answers = quiz_result.answers.filter(is_correct=True).count()
     
     # Calculate percentage score safely
@@ -506,7 +494,6 @@ def get_quiz_result_context(quiz_result):
     context = {
         'quiz_result': quiz_result,
         'name': quiz_result.name,
-        # Fixed: Access the correct field in the relationship chain
         'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz else "Diagnostic Quiz",
         'quiz_grade': "N/A",  # Add grade field to Quiz model if needed
         'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
@@ -514,68 +501,88 @@ def get_quiz_result_context(quiz_result):
         'correct_questions': correct_answers,
         'percentage_score': round(percentage_score, 1),
     }
-    return context
 
+    return context
 
 def table_pdf(request) -> HttpResponse:
     quiz_result_id = request.GET.get('quiz_result')
-    """
-    Generate detailed table PDF with subcategory breakdown
-    Args:
-        quiz_result_id: ID of the QuizResult instance
-    Returns:
-        Rendered PDF template with detailed results
-    """
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
     context = get_quiz_result_context(quiz_result)
     
-    # Fixed: Adjusted query to match your model relationships
+    # Get all categories in the quiz's category set
     categories = Category.objects.filter(
-        questions__in=quiz_result.answers.values_list('question', flat=True)
-    ).distinct().prefetch_related(
-        'subcategory_set',  # Using Django's default reverse relation name
-        'questions',
-        'questions__answer_set'  # Using Django's default reverse relation name
+        category_sets=quiz_result.quiz.category_set
+    ).prefetch_related(
+        Prefetch('subcategory_set', queryset=SubCategory.objects.all()),
+        Prefetch('questions', queryset=Question.objects.prefetch_related('answer_set'))
     ).order_by('name')
     
     category_stats = []
+    total_questions = 0
+    total_correct = 0
     
     for category in categories:
         subcategory_stats = []
+        category_questions_count = 0
+        category_correct_count = 0
         
-        # Fixed: Use the correct reverse relation name
         for subcategory in category.subcategory_set.all():
-            answers = quiz_result.answers.filter(
-                question__theme=subcategory
-            )
-            total = answers.count()
+            # Get all questions in this subcategory
+            questions_in_subcat = Question.objects.filter(theme=subcategory)
+            total_in_subcat = questions_in_subcat.count()
             
-            if total == 0:
-                continue
-                
-            correct = answers.filter(is_correct=True).count()
+            # Get answered questions in this subcategory
+            answered_questions = quiz_result.answers.filter(
+                question__theme=subcategory
+            ).values_list('question', flat=True).distinct()
+            
+            # Count correct answers in this subcategory
+            correct_in_subcat = quiz_result.answers.filter(
+                question__theme=subcategory,
+                is_correct=True
+            ).values('question').distinct().count()
+            
+            incorrect_in_subcat = total_in_subcat - correct_in_subcat
             
             subcategory_stats.append({
                 'subcategory': subcategory.name,
-                'total_questions': total,
-                'correct_questions': correct,
-                'incorrect_questions': total - correct
+                'total_questions': total_in_subcat,
+                'correct_questions': correct_in_subcat,
+                'incorrect_questions': incorrect_in_subcat,
+                'percentage': (correct_in_subcat / total_in_subcat * 100) if total_in_subcat > 0 else 0
             })
+            
+            category_questions_count += total_in_subcat
+            category_correct_count += correct_in_subcat
         
-        if subcategory_stats:
-            category_stats.append({
-                'category': category.name,
-                'subcategories': subcategory_stats
-            })
+        total_questions += category_questions_count
+        total_correct += category_correct_count
+        
+        category_stats.append({
+            'category': category.name,
+            'subcategories': subcategory_stats,
+            'total_questions': category_questions_count,
+            'correct_questions': category_correct_count,
+            'percentage': (category_correct_count / category_questions_count * 100) if category_questions_count > 0 else 0
+        })
     
-    context['category_stats'] = category_stats
+    context.update({
+        'category_stats': category_stats,
+        'total_questions': total_questions,
+        'total_correct': total_correct,
+        'total_percentage': (total_correct / total_questions * 100) if total_questions > 0 else 0,
+        'quiz_name': quiz_result.quiz.category_set.name,
+        'completion_date': quiz_result.created_at.strftime("%B %d, %Y, %I:%M %p")
+    })
+    
     return render(request, 'table_results_pdf.html', context)
+
 
 from django.shortcuts import render
 
 
 def get_admin_statistics_page(request):
-    quiz_result = request.GET.get('quiz_result_id') 
+    quiz_result = request.GET.get('quiz_result_id')
 
     score = request.GET.get('score')
     quiz_categories = request.GET.get('quiz_categories')

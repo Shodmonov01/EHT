@@ -28,7 +28,7 @@ urlpatterns = [
     path('quiz/', include('quiz.urls'), name='quiz'),
     path('nested_admin/', include('nested_admin.urls')),
 
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

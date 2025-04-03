@@ -1,0 +1,153 @@
+# НАЗВАНИЕ ПРОЕКТА.
+# Copyright (C) YEAR ПРАВООБЛАДАТЕЛЬ ПАКЕТА
+# Этот файл распространяется на тех же условиях лицензии, что и пакет.
+# ПЕРВЫЙ АВТОР <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-04-03 13:32+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: Русский <LL@li.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: config/settings.py:178
+msgid "Russian"
+msgstr "Русский"
+
+#: config/settings.py:179
+msgid "Kazak"
+msgstr "Казахский"
+
+#: quiz/models.py:6
+msgid "Exact"
+msgstr "Точные науки"
+
+#: quiz/models.py:7
+msgid "Natural"
+msgstr "Гуманитарные науки"
+
+#: quiz/models.py:12 quiz/models.py:36 quiz/models.py:94
+msgid "Name"
+msgstr "Имя"
+
+#: quiz/models.py:13
+msgid "Type"
+msgstr "Тип"
+
+#: quiz/models.py:16 quiz/models.py:37 quiz/models.py:62
+msgid "Category"
+msgstr "Категория"
+
+#: quiz/models.py:17 quiz/models.py:25
+msgid "Categories"
+msgstr "Категории"
+
+#: quiz/models.py:24
+msgid "Category Set Name"
+msgstr "Название набора категорий"
+
+#: quiz/models.py:28 quiz/models.py:50
+msgid "Category Set"
+msgstr "Набор категорий"
+
+#: quiz/models.py:29
+msgid "Category Sets"
+msgstr "Наборы категорий"
+
+#: quiz/models.py:40
+msgid "Subcategory"
+msgstr "Подкатегория"
+
+#: quiz/models.py:41
+msgid "Subcategories"
+msgstr "Подкатегории"
+
+#: quiz/models.py:48 quiz/models.py:93
+msgid "User Token"
+msgstr "Токен пользователя"
+
+#: quiz/models.py:49 quiz/models.py:96
+msgid "Phone Number"
+msgstr "Номер телефона"
+
+#: quiz/models.py:53 quiz/models.py:97
+msgid "Quiz"
+msgstr "Опрос"
+
+#: quiz/models.py:54
+msgid "Quizzes"
+msgstr "Опросы"
+
+#: quiz/models.py:61
+msgid "Question Text"
+msgstr "Текст вопроса"
+
+#: quiz/models.py:63
+msgid "Theme"
+msgstr "Тема"
+
+#: quiz/models.py:64 quiz/models.py:77
+msgid "Image"
+msgstr "Изображение"
+
+#: quiz/models.py:67 quiz/models.py:76
+msgid "Question"
+msgstr "Вопрос"
+
+#: quiz/models.py:68
+msgid "Questions"
+msgstr "Вопросы"
+
+#: quiz/models.py:75
+msgid "Answer Text"
+msgstr "Текст ответа"
+
+#: quiz/models.py:78
+msgid "Is Correct"
+msgstr "Правильный"
+
+#: quiz/models.py:81
+msgid "Answer"
+msgstr "Ответ"
+
+#: quiz/models.py:82 quiz/models.py:98
+msgid "Answers"
+msgstr "Ответы"
+
+#: quiz/models.py:95
+msgid "Parent Name"
+msgstr "Имя родителя"
+
+#: quiz/models.py:99
+msgid "Unanswered Questions"
+msgstr "Неотвеченные вопросы"
+
+#: quiz/models.py:100
+msgid "Created At"
+msgstr "Создано"
+
+#: quiz/models.py:102
+msgid "Result PDF"
+msgstr "PDF с результатами"
+
+#: quiz/models.py:103
+msgid "Diagnostic PDF"
+msgstr "PDF с диагностикой"
+
+#: quiz/models.py:106
+msgid "Quiz Result"
+msgstr "Результат опроса"
+
+#: quiz/models.py:107
+msgid "Quiz Results"
+msgstr "Результаты опросов"

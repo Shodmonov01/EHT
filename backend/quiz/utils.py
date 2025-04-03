@@ -1,15 +1,11 @@
 import gspread
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oauth2client.service_account import ServiceAccountCredentials
 import os
 from django.conf import settings
-from .models import Category, SubCategory
 from io import BytesIO
 from django.template.loader import get_template
 from xhtml2pdf import pisa
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-from .models import QuizResult, Category, SubCategory, Question 
+from .models import  Question 
 
 
 def get_google_sheet():
@@ -26,16 +22,10 @@ def get_google_sheet():
 
 def save_to_google_sheet(user_token, score, result_url):
     sheet = get_google_sheet()
-    
-    # Check if user_token already exists in the sheet
+
     try:
         cell = sheet.find(str(user_token))
         row_num = cell.row
-   
-             
-        # Update existing row
-        
-       
         sheet.update_cell(row_num, 8, score)
         sheet.update_cell(row_num, 7, result_url)
     except Exception:
