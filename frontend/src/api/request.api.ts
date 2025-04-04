@@ -63,11 +63,17 @@ export const submitQuiz = async (userToken: string, answers: number[], unanswere
   const requestBody = {
     user_token: userToken,
     answer_ids: answers,
-    unanswered_question_ids: unansweredQuestionIds,
+    unanswered_question_ids: unansweredQuestionIds
   };
+  
 
-  const { data } = await axiosInstance.post(`/quiz/api/quiz/submit`, requestBody);
-  return data;
+  try {
+    const { data } = await axiosInstance.post(`/quiz/api/quiz/submit`, requestBody);
+    return data;
+  } catch (error) {
+    console.error("submitQuiz xatolik:", error);
+    throw error;
+  }
 };
 
 export const getQuizResultById = async (id: number) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Navigate, Link } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { fetchQuestions, submitQuiz } from "../../api/request.api";
@@ -9,7 +9,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useTranslation } from "react-i18next";
 import Loader from "../../components/Loader";
-import LoadingButton from "../../components/LoadingButton";
 
 interface Answer {
   id: number;
@@ -30,6 +29,7 @@ export default function Quiz() {
     {}
   );
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {}, [currentLanguage]);
 
@@ -87,26 +87,35 @@ export default function Quiz() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const answerIds = Object.values(selectedAnswers);
-
     const userToken = quizData.token;
     if (!userToken) {
-      console.error("User token is null");
-      alert(t("form.tokenError"));
       return;
     }
+
+    const answerIds = Object.values(selectedAnswers);
+    
     const unansweredQuestionIds = questionsData.flatMap((category) =>
       category.questions
         .filter((question) => !selectedAnswers[question.id])
         .map((q) => q.id)
     );
 
-    submitQuiz(userToken, answerIds, unansweredQuestionIds);
-    // .then((response) => {
-    // })
-    // .catch((error) => {
-    //   alert(t("form.submitError"));
-    // });
+    const requestData = {
+      user_token: userToken,
+      answer_ids: answerIds,
+      unanswered_question_ids: unansweredQuestionIds
+    };
+    console.log("Yuborilayotgan ma'lumotlar:", requestData);
+
+    submitQuiz(userToken, answerIds, unansweredQuestionIds)
+      .then((response) => {
+        console.log('Muvaffaqiyatli yuborildi:', response);
+        navigate(`/quiz-submit`);
+      })
+      .catch((error) => {
+        console.error('Xatolik yuz berdi:', error);
+        console.log('Xatolik tafsilotlari:', error.response?.data);
+      });
   };
 
   return (
@@ -222,14 +231,16 @@ export default function Quiz() {
               </motion.div>
             ))}
           </AnimatePresence>
-          <Link to="/quiz-submit">
-            <LoadingButton
-              type="submit"
-              isLoading={false}
-            >
-              {t("form.quizReadyBtn")}
-            </LoadingButton>
-          </Link>
+          <button 
+            type="submit" 
+            className="submit-button"
+            onClick={(e) => {
+              console.log("Button bosildi");
+              handleSubmit(e);
+            }}
+          >
+            {t("form.quizReadyBtn")}
+          </button>
         </div>
       </form>
     </motion.div>

@@ -77,7 +77,10 @@ export default function Form() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+    if (e) {
+      e.preventDefault();
+    }
+
     if (selectedCategory) {
       const quizData: QuizStartRequest = {
         name: formData.name,
