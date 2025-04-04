@@ -6,35 +6,43 @@ from io import BytesIO
 from django.template.loader import get_template
 from xhtml2pdf import pisa
 from .models import  Question 
+from datetime import datetime, timedelta
+
 
 
 def get_google_sheet():
-            scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-            creds_path = os.path.join(settings.BASE_DIR, 'config', 'keys', 'credentials.json')
-            creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
-            client = gspread.authorize(creds)
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds_path = os.path.join(settings.BASE_DIR, 'config', 'keys', 'credentials.json')
+    creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
+    client = gspread.authorize(creds)
 
-            # Откройте Google Sheet по URL
-            sheet_url = "https://docs.google.com/spreadsheets/d/1FfooaDunqiVekiudUbfXE9AglxAPsOhvnfQuhERr2Lo/"
-            sheet = client.open_by_url(sheet_url).sheet1
-
-            return sheet
+    # Open the Google Sheet by URL
+    sheet_url = "https://docs.google.com/spreadsheets/d/1FfooaDunqiVekiudUbfXE9AglxAPsOhvnfQuhERr2Lo/edit"
+    spreadsheet = client.open_by_url(sheet_url)
+    
+    # Get the specific worksheet by gid (683090842 from your URL)
+    worksheet = spreadsheet.get_worksheet_by_id(683090842)
+    
+    print(f"Opened worksheet: {worksheet.title}")  # Debugging
+    return worksheet
 
 def save_to_google_sheet(user_token, score, result_url):
     sheet = get_google_sheet()
+    current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
 
     try:
         cell = sheet.find(str(user_token))
         row_num = cell.row
         sheet.update_cell(row_num, 8, score)
+        # Fix the hyperlink formula by using single quotes inside the formula string
         sheet.update_cell(row_num, 7, result_url)
+        sheet.update_cell(row_num, 9, current_time)
     except Exception:
         # Add new row
         sheet.append_row([
             str(user_token),
-   
             score,
-            result_url
+            f'=HYPERLINK("{result_url}","View Result")'
         ])
     
     return True

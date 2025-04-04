@@ -110,3 +110,6 @@ class QuizResult(models.Model):
         if self.result_pdf:
             return self.result_pdf.url
         return None
+    
+    def __str__(self):
+        return self.user_token

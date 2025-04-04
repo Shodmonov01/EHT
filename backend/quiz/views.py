@@ -4,6 +4,8 @@ from django.utils import translation
 from django.http import HttpResponse, FileResponse
 from django.shortcuts import render
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -66,6 +68,14 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 print(BASE_URL, 'base url')
+
+_executor = ThreadPoolExecutor(max_workers=4)
+
+def async_task(fn, *args, **kwargs):
+    _executor.submit(fn, *args, **kwargs)
+
+
+
 
 class CategorySetListAPIView(APIView):
     permission_classes = [AllowAny,]
@@ -344,11 +354,11 @@ class QuizResultCreateAPIView(APIView):
         # Update Google Sheet with quiz result data
         try:
             user_token = quiz.user_token  # Get the user_token from the quiz object
-            save_to_google_sheet(
+            async_task(
+                save_to_google_sheet,
                 user_token=user_token,
-                
                 score=round(score_percentage, 2),
-                result_url=admin_statistics_url
+                result_url=request.build_absolute_uri(admin_statistics_url)
             )
         except Exception as e:
             # Log the error but continue with the response
