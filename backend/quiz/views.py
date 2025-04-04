@@ -135,7 +135,7 @@ class StartQuizAPIView(APIView):
         if serializer.is_valid():
             print(serializer.data, 'data ')
             print(serializer.validated_data, 'valid data')
-            google_sheet = get_google_sheet()
+            
             unique_id = str(uuid.uuid4())
             final_data_to_save = serializer.data
             print(final_data_to_save, 'final')
@@ -158,7 +158,20 @@ class StartQuizAPIView(APIView):
                 unique_id, 
             ]
             print(data_to_save, 'data')
-            google_sheet.append_row(data_to_save)
+            
+
+            def start_get_google_sheet():
+                try:
+                    google_sheet = get_google_sheet()
+                    google_sheet.append_row(data_to_save)
+                    print("Google Sheet updated successfully")
+                except Exception as e:
+                    print(f"Error updating Google Sheet: {e}")
+            
+            # Start the Google Sheet update in a separate thread
+            sheet_thread = threading.Thread(target=start_get_google_sheet)
+            sheet_thread.daemon = True  # Thread won't block server shutdown
+            sheet_thread.start()
 
             return Response({"token": f"{unique_id}", "category_set_id":f"{category_set_id}"}, status=201)
         else:
