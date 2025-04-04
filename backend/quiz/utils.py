@@ -42,7 +42,7 @@ def save_to_google_sheet(user_token, score, result_url):
         sheet.append_row([
             str(user_token),
             score,
-            f'=HYPERLINK("{result_url}","View Result")'
+           
         ])
     
     return True
