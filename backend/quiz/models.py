@@ -112,4 +112,4 @@ class QuizResult(models.Model):
         return None
     
     def __str__(self):
-        return self.user_token
+        return f'{self.user_token}'
