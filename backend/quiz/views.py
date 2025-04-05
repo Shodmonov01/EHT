@@ -608,6 +608,4 @@ from django.shortcuts import render
 
 def get_admin_statistics_page(request):
     quiz_result = request.GET.get('quiz_result_id')
-
-
     return render(request, 'admin_statistics_page.html', context = {'quiz_result_id': quiz_result})
