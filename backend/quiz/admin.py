@@ -39,7 +39,7 @@ class CategorySetAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Category)
-admin.site.register(QuizResult)
+# admin.site.register(QuizResult)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Question, QuestionAdmin)
 
