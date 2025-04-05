@@ -517,6 +517,7 @@ def get_quiz_result_context(quiz_result):
 
     context = {
         'quiz_result': quiz_result,
+        'name': quiz_result.quiz.name if quiz_result.quiz else "N/A",
         
         'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz else "Diagnostic Quiz",
         'quiz_grade': "N/A",  # Add grade field to Quiz model if needed
