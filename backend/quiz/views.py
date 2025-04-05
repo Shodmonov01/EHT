@@ -609,14 +609,5 @@ from django.shortcuts import render
 def get_admin_statistics_page(request):
     quiz_result = request.GET.get('quiz_result_id')
 
-    score = request.GET.get('score')
-    quiz_categories = request.GET.get('quiz_categories')
-    percent = request.GET.get('percent')
 
-    print(request.user, 'this user')
-    if not request.user.is_staff:
-        return render(request, "admin_statistics_forbidden_page.html")
-
-    
-    print(quiz_result, 'quiz result')
     return render(request, 'admin_statistics_page.html', context = {'quiz_result_id': quiz_result})
