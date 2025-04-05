@@ -141,7 +141,8 @@ class StartQuizAPIView(APIView):
             print(final_data_to_save, 'final')
             category_set_id = serializer.data['category_set_id_value']
            
-            quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], category_set_id = category_set_id )
+            quiz = Quiz.objects.create(user_token = unique_id, phone_number = final_data_to_save["phone_number"], parent_name = final_data_to_save["parents_fullname"],
+                name = final_data_to_save["name"], category_set_id = category_set_id )
 
 
             current_time = (datetime.utcnow() + timedelta(hours=5)).strftime('%Y-%m-%d %H:%M:%S')
@@ -516,7 +517,7 @@ def get_quiz_result_context(quiz_result):
 
     context = {
         'quiz_result': quiz_result,
-        'name': quiz_result.name,
+        
         'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz else "Diagnostic Quiz",
         'quiz_grade': "N/A",  # Add grade field to Quiz model if needed
         'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
