@@ -196,7 +196,7 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = QuizResult
-        fields = ['id', 'user_token', 'name', 'parent_name', 'phone_number', 
+        fields = ['id', 'user_token', 
                   'score', 'total_questions', 'correct_answers', 'category_stats', 
                   'created_at']
     

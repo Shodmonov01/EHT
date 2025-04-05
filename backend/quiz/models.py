@@ -46,6 +46,8 @@ class SubCategory(models.Model):
 
 class Quiz(models.Model):
     user_token = models.CharField(_("User Token"), max_length=128)
+    name = models.CharField(_("Name"), max_length=255)
+    parent_name = models.CharField(_("Parent Name"), max_length=255, blank=True, null=True)
     phone_number = models.CharField(_("Phone Number"), max_length=20)
     category_set = models.ForeignKey(CategorySet, on_delete=models.CASCADE, verbose_name=_("Category Set"))
 
@@ -54,7 +56,7 @@ class Quiz(models.Model):
         verbose_name_plural = _("Quizzes")
 
     def __str__(self):
-        return self.phone_number
+        return self.name
 
 
 class Question(models.Model):
@@ -91,9 +93,9 @@ def quiz_result_pdf_path(instance, filename):
 
 class QuizResult(models.Model):
     user_token = models.UUIDField(_("User Token"), default=uuid.uuid4, editable=False)
-    name = models.CharField(_("Name"), max_length=255)
-    parent_name = models.CharField(_("Parent Name"), max_length=255, blank=True, null=True)
-    phone_number = models.CharField(_("Phone Number"), max_length=20)
+    # name = models.CharField(_("Name"), max_length=255)
+    # parent_name = models.CharField(_("Parent Name"), max_length=255, blank=True, null=True)
+    # phone_number = models.CharField(_("Phone Number"), max_length=20)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='results', null=True, blank=True, verbose_name=_("Quiz"))
     answers = models.ManyToManyField(Answer, blank=True, verbose_name=_("Answers"))
     unanswered_questions = models.ManyToManyField(Question, blank=True, related_name='unanswered_by', verbose_name=_("Unanswered Questions"))
@@ -112,4 +114,4 @@ class QuizResult(models.Model):
         return None
     
     def __str__(self):
-        return f'{self.user_token}'
+        return f'{self.quiz.name}' 
