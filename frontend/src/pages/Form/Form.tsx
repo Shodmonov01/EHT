@@ -77,18 +77,16 @@ export default function Form() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    if (e) {
-      e.preventDefault();
-    }
-
+    e.preventDefault();
+    const quizData: QuizStartRequest = {
+      name: formData.name,
+      parents_fullname: formData.parents_fullname,
+      phone_number: formData.phone_number,
+      category_set_id: selectedCategory || 0, 
+      is_agreed: isAgreed,
+    };
+    
     if (selectedCategory) {
-      const quizData: QuizStartRequest = {
-        name: formData.name,
-        parents_fullname: formData.parents_fullname,
-        phone_number: formData.phone_number,
-        category_set_id: selectedCategory,
-        is_agreed: isAgreed,
-      };
       startQuizMutation(quizData);
     }
   };

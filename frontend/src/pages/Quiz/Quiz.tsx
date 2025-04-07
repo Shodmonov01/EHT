@@ -23,7 +23,7 @@ export default function Quiz() {
     (state: RootState) => state.language.currentLanguage
   );
   const [selectedAnswers, setSelectedAnswers] = useState<{
-    [key: number]: number;
+    [key: number]: number[];
   }>({});
   const [showRequired, setShowRequired] = useState<{ [key: number]: boolean }>(
     {}
@@ -92,11 +92,11 @@ export default function Quiz() {
       return;
     }
 
-    const answerIds = Object.values(selectedAnswers);
+    const answerIds = Object.values(selectedAnswers).flat();
     
     const unansweredQuestionIds = questionsData.flatMap((category) =>
       category.questions
-        .filter((question) => !selectedAnswers[question.id])
+        .filter((question) => !selectedAnswers[question.id] || selectedAnswers[question.id].length === 0)
         .map((q) => q.id)
     );
 
@@ -126,7 +126,7 @@ export default function Quiz() {
       className="quiz-container"
     >
       <motion.div
-        className="title"
+        className="title quiz_title"
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.2 }}
@@ -187,17 +187,30 @@ export default function Quiz() {
                             whileTap={{ scale: 0.98 }}
                           >
                             <input
-                              type="radio"
+                              type="checkbox"
                               name={`question${question.id}`}
                               value={answer.id}
                               checked={
-                                selectedAnswers[question.id] === answer.id
+                                selectedAnswers[question.id]?.includes(answer.id) || false
                               }
                               onChange={() => {
-                                setSelectedAnswers((prev) => ({
-                                  ...prev,
-                                  [question.id]: answer.id,
-                                }));
+                                setSelectedAnswers((prev) => {
+                                  const currentAnswers = prev[question.id] || [];
+                                  
+                                  if (currentAnswers.includes(answer.id)) {
+                                    return {
+                                      ...prev,
+                                      [question.id]: currentAnswers.filter(a => a !== answer.id)
+                                    };
+                                  } 
+                                  else {
+                                    return {
+                                      ...prev,
+                                      [question.id]: [...currentAnswers, answer.id]
+                                    };
+                                  }
+                                });
+                                
                                 setShowRequired((prev) => ({
                                   ...prev,
                                   [question.id]: false,
@@ -234,10 +247,6 @@ export default function Quiz() {
           <button 
             type="submit" 
             className="submit-button"
-            onClick={(e) => {
-              console.log("Button bosildi");
-              handleSubmit(e);
-            }}
           >
             {t("form.quizReadyBtn")}
           </button>
