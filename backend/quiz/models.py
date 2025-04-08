@@ -86,19 +86,12 @@ class Question(models.Model):
         return self.text
     
     def clean(self):
+        # Remove the validation entirely from the model's clean method
+        # The validation will be handled in the admin
         super().clean()
         
-        # Only validate if the question already exists in the database
-        if self.pk:
-            correct_answers = self.answer_set.filter(is_correct=True).count()
-            
-            if correct_answers != self.correct_answers_count:
-                raise ValidationError(
-                    _('Number of correct answers (%(correct)s) does not match specified count (%(count)s)') % {
-                        'correct': correct_answers,
-                        'count': self.correct_answers_count
-                    }
-                )
+        # No validation here anymore
+
 
 
 class Answer(models.Model):
