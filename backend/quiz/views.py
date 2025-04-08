@@ -21,9 +21,6 @@ from .utils import get_google_sheet, save_to_google_sheet
 
 from datetime import datetime, timedelta
 from django.db.models import Prefetch
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
@@ -231,6 +228,7 @@ class QuestionListAPIView(APIView):
             question_data = {
                 "id": question.id,
                 "text": question.text,
+                'correct_answers_count': question.correct_answers_count,
                 "subcategory": question.theme.name,
                 "image": request.build_absolute_uri(question.image.url) if question.image else None,
                 "answers": [
