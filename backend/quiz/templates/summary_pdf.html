@@ -374,6 +374,7 @@
                         <div class="aad">
                             <span class="aad_res">Результаты тестирования</span>
                             <span class="aad_per">{{ percentage_score }}%</span>
+                            <span style="font-size: 18px;">({{ user_points }}/{{ total_possible }} баллов)</span>
                         </div>
                     </div>
                     <div class="summary">Диагностика</div>
@@ -392,14 +393,16 @@
                                     <div class="sci_sub">
                                         <div class="sci_sub_title">{{ stat.category }}</div>
                                         <hr width="80px">
-                                        <div class="sci_sub_grade">{{ stat.correct_questions }}/{{ stat.total_questions }}</div>
+                                        <div class="sci_sub_grade">{{ stat.user_points }}/{{ stat.total_possible }}</div>
+                                        <div style="font-size: 14px;">({{ stat.percentage|floatformat:1 }}%)</div>
                                     </div>
                                 {% endfor %}
                             </div>
                             <hr width="80%">
                             <div class="exct_sci_ttl">
-                                <div class="sci_ttl_grade">{{ exact_total_stats }}</div>
+                                <div class="sci_ttl_grade">{{ exact_stats.0.user_points }}/{{ exact_stats.0.total_possible }}</div>
                                 <div class="sci_ttl_text">Баллов</div>
+                                <div style="font-size: 18px; margin-top: 8px;">{{ exact_percentage|floatformat:1 }}%</div>
                             </div>
                         </div>
                         <div class="nat_sci">
@@ -409,122 +412,22 @@
                                     <div class="sci_sub">
                                         <div class="sci_sub_title">{{ stat.category }}</div>
                                         <hr width="80px">
-                                        <div class="sci_sub_grade">{{ stat.correct_questions }}/{{ stat.total_questions }}</div>
+                                        <div class="sci_sub_grade">{{ stat.user_points }}/{{ stat.total_possible }}</div>
+                                        <div style="font-size: 14px;">({{ stat.percentage|floatformat:1 }}%)</div>
                                     </div>
                                 {% endfor %}
                             </div>
                             <hr width="80%">
                             <div class="exct_sci_ttl">
-                                <div class="sci_ttl_grade">{{ natural_total_stats }}</div>
+                                <div class="sci_ttl_grade">{{ natural_stats.0.user_points }}/{{ natural_stats.0.total_possible }}</div>
                                 <div class="sci_ttl_text">Баллов</div>
+                                <div style="font-size: 18px; margin-top: 8px;">{{ natural_percentage|floatformat:1 }}%</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="page">
-                <div class="page__container">
-                    <img class="logo" src="{% static './assets/logores.svg' %}">
-                    <img class="bg" src="{% static './assets/bgres.png' %}">
-                    <br>
-                    <h3 class="aaa">
-                        Диагностика успеваемости ученика
-                        <br>
-                        по школьной программе.
-                    </h3>
-                   
-                    <div class="page-2-text">{{ conclusion }}</div>
-                    <div class="page-2-summary-title">Общая характеристика</div>
-                    <br>
-                    <div class="page-2-summary">
-                        <div class="page-2-summary-exc">
-                            <b>Точные науки:</b>
-                            <br>
-                            <br>
-                            {{ exact_characterization | linebreaks }}
-                        </div>
-                        <div class="page-2-summary-nat">
-                            <b>Естественные науки:</b>
-                            <br>
-                            <br>
-                            {{ natural_characterization | linebreaks }}
-                        </div>
-                    </div>
-                    <div class="warning">
-                        <img height="60px" style="margin-right: 5px;" src="{% static './assets/important.svg' %}">
-                        <span>{{ summary_characterization | linebreaks }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="page">
-                <div class="page__container">
-                    <img class="logo" src="{% static './assets/logores.svg' %}">
-                    <img class="bg" src="{% static './assets/bgres.png' %}">
-                    <br>
-                    <h3 class="aaa">
-                        Диагностика успеваемости ученика
-                        <br>
-                        по школьной программе.
-                    </h3>
-                    <div class="recomendation">
-                        <div class="recomendation_title">Рекомендации</div>
-                        <div class="recomendation_text">{{ recomendation | linebreaks }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="page">
-                <div class="page__container">
-                    <img class="logo" src="{% static './assets/logores.svg' %}">
-                    <img class="bg" src="{% static './assets/bgres.png' %}">
-                    <br>
-                    <h3 class="aaa">
-                        Диагностика успеваемости ученика
-                        <br>
-                        по школьной программе.
-                    </h3>
-                    <br>
-                    <h1 class="">
-                        Возможность поступить в
-                        <br>
-                        специализированные школы
-                    </h1>
-                    
-                    <div class="notes">
-                        <b>Примечание:</b>
-                        <br>
-                        Не все дети могут поступить в эти школы, кому-то это вовсе не нужно,
-                        подготовка бывает сложно и не дает результатов. По статистике 0,8% детей
-                        поступают без специализированной подготовки (образовательные центры и
-                        репетиторы), и 99,2% поступают с помощью специальной подготовки и
-                        правильному подходу, что включает в себя - мотивацию, целеполагание,
-                        подготовку, наставничество и поддержку родителей, практику решения задач.
-                    </div>
-                    <div style="display: flex;">
-                        <div style="width: 180px;
-                                    display: flex;
-                                    flex-direction: column;
-                                    align-items: center;
-                                    margin-top: 24px">
-                            <b style="text-align: center;">У вас</b>
-                            <div style="display: flex;">
-                                <div class="month-counter">{{ remaining_month }}</div>
-                            </div>
-                            <b>месяцев</b>
-                        </div>
-                        <div class="end-text"
-                             style="margin-top: 48px;
-                                    margin-left: 16px;
-                                    width: 400px">
-                            На подготовку к поступлению в эти школы.
-                            При подготовке к экзаменам в эти школы
-                            улучшается общий уровень успеваемости по
-                            основным предметам и так, как у ребенка и
-                            родителей появляется цель, результат будет
-                            быстрый и качественный.
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- [Keep the rest of your template pages unchanged] -->
         </div>
         <script>
             let opt = {

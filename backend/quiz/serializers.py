@@ -99,10 +99,15 @@ class AnswerSerializer(serializers.ModelSerializer):
 class QuestionSerializer(serializers.ModelSerializer):
     category = serializers.SerializerMethodField()
     subcategory = serializers.SerializerMethodField()
+    correct_answers_count = serializers.IntegerField()
     
     class Meta:
         model = Question
-        fields = ['id', 'text', 'image', 'category', 'subcategory']
+        fields = ['id', 'text', 'image', 'category', 'subcategory', 'correct_answers_count', 'answers']
+    
+    # class Meta:
+    #     model = Question
+    #     fields = ['id', 'text', 'image', 'category', 'subcategory']
     
     def get_category(self, obj):
         return obj.theme.category.name if obj.theme and obj.theme.category else None
@@ -193,6 +198,7 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
     total_questions = serializers.SerializerMethodField()
     correct_answers = serializers.SerializerMethodField()
     category_stats = serializers.SerializerMethodField()
+    
     
     class Meta:
         model = QuizResult

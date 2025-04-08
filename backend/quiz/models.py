@@ -1,6 +1,8 @@
 from django.db import models
 import uuid
 from django.utils.translation import gettext_lazy as _  # Import translation function
+from django.core.exceptions import ValidationError
+
 
 CATEGORY_TYPE = (
     ('EXC', _('Exact')),
@@ -65,12 +67,38 @@ class Question(models.Model):
     theme = models.ForeignKey(SubCategory, on_delete=models.CASCADE, verbose_name=_("Theme"))
     image = models.ImageField(_("Image"), upload_to='images/questions', null=True, blank=True)
 
+    CORRECT_ANSWERS_CHOICES = (
+        (1, _('1 correct answer')),
+        (2, _('2 correct answers')),
+        (3, _('3 correct answers')),
+    )
+    correct_answers_count = models.PositiveSmallIntegerField(
+        _("Correct Answers Count"),
+        choices=CORRECT_ANSWERS_CHOICES,
+        default=1
+    )
+
     class Meta:
         verbose_name = _("Question")
         verbose_name_plural = _("Questions")
 
     def __str__(self):
         return self.text
+    
+    def clean(self):
+        super().clean()
+        
+        # Only validate if the question already exists in the database
+        if self.pk:
+            correct_answers = self.answer_set.filter(is_correct=True).count()
+            
+            if correct_answers != self.correct_answers_count:
+                raise ValidationError(
+                    _('Number of correct answers (%(correct)s) does not match specified count (%(count)s)') % {
+                        'correct': correct_answers,
+                        'count': self.correct_answers_count
+                    }
+                )
 
 
 class Answer(models.Model):
@@ -103,6 +131,9 @@ class QuizResult(models.Model):
 
     result_pdf = models.FileField(_("Result PDF"), upload_to='quiz_results/', null=True, blank=True)
     diagnostic_pdf = models.FileField(_("Diagnostic PDF"), upload_to='quiz_diagnostics/', null=True, blank=True)
+
+    total_possible_points = models.PositiveIntegerField(_("Total Possible Points"), default=0)
+    user_points = models.PositiveIntegerField(_("User Points"), default=0)
 
     class Meta:
         verbose_name = _("Quiz Result")
