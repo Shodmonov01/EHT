@@ -5,6 +5,7 @@ export interface Question {
   subcategory: string;
   image?: string | null;
   answers: Answer[];
+  correct_answers_count?: number;
 }
 
 export interface Answer {
