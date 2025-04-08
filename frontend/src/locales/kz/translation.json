@@ -1,5 +1,6 @@
 {
   "form": {
+    "multipleAnswers": "{{count}} дұрыс жауапты таңдаңыз",
     "title": "Тест",
     "submit": "Жіберу",
     "cancel": "Бас тарту",

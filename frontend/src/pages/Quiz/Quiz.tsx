@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useTranslation } from "react-i18next";
 import Loader from "../../components/Loader";
+import LoadingButton from "../../components/LoadingButton";
 
 interface Answer {
   id: number;
@@ -30,6 +31,7 @@ export default function Quiz() {
   );
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {}, [currentLanguage]);
 
@@ -47,6 +49,7 @@ export default function Quiz() {
     queryFn: () => fetchQuestions(Number(categorySetId)),
     enabled: !!categorySetId && !!quizData.token,
   });
+  console.log(questionsData);
 
   useEffect(() => {
     if (currentLanguage) {
@@ -92,29 +95,38 @@ export default function Quiz() {
       return;
     }
 
+    setIsSubmitting(true);
+
     const answerIds = Object.values(selectedAnswers).flat();
-    
+
     const unansweredQuestionIds = questionsData.flatMap((category) =>
       category.questions
-        .filter((question) => !selectedAnswers[question.id] || selectedAnswers[question.id].length === 0)
+        .filter(
+          (question) =>
+            !selectedAnswers[question.id] ||
+            selectedAnswers[question.id].length === 0
+        )
         .map((q) => q.id)
     );
 
     const requestData = {
       user_token: userToken,
       answer_ids: answerIds,
-      unanswered_question_ids: unansweredQuestionIds
+      unanswered_question_ids: unansweredQuestionIds,
     };
     console.log("Yuborilayotgan ma'lumotlar:", requestData);
 
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
       .then((response) => {
-        console.log('Muvaffaqiyatli yuborildi:', response);
+        console.log("Muvaffaqiyatli yuborildi:", response);
         navigate(`/quiz-submit`);
       })
       .catch((error) => {
-        console.error('Xatolik yuz berdi:', error);
-        console.log('Xatolik tafsilotlari:', error.response?.data);
+        console.error("Xatolik yuz berdi:", error);
+        console.log("Xatolik tafsilotlari:", error.response?.data);
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
   };
 
@@ -166,7 +178,19 @@ export default function Quiz() {
                       transition={{ delay: 0.1 * questionIndex }}
                     >
                       <li>
-                        <div className="question__title">{question.text}</div>
+                        <div className="question__title">
+                          {question.text}
+                          {question.correct_answers_count &&
+                            question.correct_answers_count > 1 && (
+                              <span className="multiple-answers-hint">
+                                (
+                                {t("form.multipleAnswers", {
+                                  count: question.correct_answers_count,
+                                })}
+                                )
+                              </span>
+                            )}
+                        </div>
                       </li>
                       {question.image && (
                         <motion.div
@@ -191,26 +215,33 @@ export default function Quiz() {
                               name={`question${question.id}`}
                               value={answer.id}
                               checked={
-                                selectedAnswers[question.id]?.includes(answer.id) || false
+                                selectedAnswers[question.id]?.includes(
+                                  answer.id
+                                ) || false
                               }
                               onChange={() => {
                                 setSelectedAnswers((prev) => {
-                                  const currentAnswers = prev[question.id] || [];
-                                  
+                                  const currentAnswers =
+                                    prev[question.id] || [];
+
                                   if (currentAnswers.includes(answer.id)) {
                                     return {
                                       ...prev,
-                                      [question.id]: currentAnswers.filter(a => a !== answer.id)
+                                      [question.id]: currentAnswers.filter(
+                                        (a) => a !== answer.id
+                                      ),
                                     };
-                                  } 
-                                  else {
+                                  } else {
                                     return {
                                       ...prev,
-                                      [question.id]: [...currentAnswers, answer.id]
+                                      [question.id]: [
+                                        ...currentAnswers,
+                                        answer.id,
+                                      ],
                                     };
                                   }
                                 });
-                                
+
                                 setShowRequired((prev) => ({
                                   ...prev,
                                   [question.id]: false,
@@ -244,12 +275,13 @@ export default function Quiz() {
               </motion.div>
             ))}
           </AnimatePresence>
-          <button 
-            type="submit" 
-            className="submit-button"
+          <LoadingButton
+            type="submit"
+            isLoading={isSubmitting}
+            disabled={isSubmitting}
           >
             {t("form.quizReadyBtn")}
-          </button>
+          </LoadingButton>
         </div>
       </form>
     </motion.div>

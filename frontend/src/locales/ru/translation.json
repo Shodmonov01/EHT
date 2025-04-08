@@ -1,5 +1,6 @@
 {
   "form": {
+    "multipleAnswers": "Выберите {{count}} правильных ответа",
     "title": "Форма",
     "submit": "Отправить",
     "cancel": "Отмена",

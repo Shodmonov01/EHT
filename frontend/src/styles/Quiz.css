@@ -209,3 +209,32 @@ ol {
 .quiz_title h1 {
   text-align: left;
 }
+
+.question__image {
+  width: 100%;
+  max-width: 500px;
+  margin: 10px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.question__image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.answer-image {
+  max-width: 120px;
+  height: auto;
+  margin-top: 8px;
+  border-radius: 4px;
+  display: block;
+}
+.multiple-answers-hint {
+  font-size: 0.9em;
+  color: #e67e22;
+  margin-left: 8px;
+  font-weight: bold;
+}
