@@ -241,7 +241,7 @@ class QuestionListAPIView(APIView):
 
         return Response(list(category_questions.values()), status=200)
     
-
+from collections import defaultdict
 class QuizResultCreateAPIView(APIView):
     @extend_schema(
         request=QuizResultCreateSerializer,
@@ -287,12 +287,10 @@ class QuizResultCreateAPIView(APIView):
         unanswered_question_ids = serializer.validated_data.get('unanswered_question_ids', [])
         
         # Get all question IDs for this quiz
-        quiz_question_ids = set(
-            Question.objects.filter(
-                theme__category__category_sets=quiz.category_set
-            ).values_list('id', flat=True)
-        )
-        print(quiz_question_ids, 'question ids')
+        quiz_questions = Question.objects.filter(
+            theme__category__category_sets=quiz.category_set
+        ).prefetch_related('answer_set')
+        quiz_question_ids = set(quiz_questions.values_list('id', flat=True))
         
         # Validate answered questions
         answer_question_ids = set(
@@ -315,78 +313,92 @@ class QuizResultCreateAPIView(APIView):
         # Step 4: Create the quiz result
         quiz_result = serializer.save(quiz=quiz)
         
-        # Step 5: Calculate score with optimized queries
-        quiz_result = QuizResult.objects.filter(pk=quiz_result.pk).annotate(
-            total_questions=Count(
-                'quiz__category_set__categories__questions',
-                distinct=True
-            ),
-            correct_answers=Count(
-                'answers',
-                filter=Q(answers__is_correct=True),
-                distinct=True
-            )
-        ).first()
+        # Step 5: Calculate score with new scoring system
+        selected_answers = quiz_result.answers.all().select_related('question')
+        answers_by_question = defaultdict(list)
+        for answer in selected_answers:
+            answers_by_question[answer.question_id].append(answer)
 
-        # try:
-        #     # You could use Celery for this in production to make it truly async
-        #     pdf_path = generate_and_save_pdf(quiz_result, request)
-        # except Exception as e:
-        #     print(f"Error generating PDF: {e}")
+        total_possible = 0
+        total_user_points = 0
+        question_stats = []
 
-        # try:
-        #     pdf_path = generate_and_save_pdfs(quiz_result, request)
-        # except Exception as e:
-        #      print(f"Error generating PDF: {e}")
-        #     # Handle error if needed
+        for question in quiz_questions:
+            correct_needed = question.correct_answers_count
+            max_possible = 2 if correct_needed in [2, 3] else 1
+            total_possible += max_possible
 
-        # if not pdf_path:
-        #     # PDF generation failed, but we still return the result
-        #     # You might want to log this error
-        #     pass
-        
-        
+            selected = answers_by_question.get(question.id, [])
+            selected_correct = sum(1 for a in selected if a.is_correct)
+            selected_incorrect = len(selected) - selected_correct
 
+            # Calculate points based on question type
+            if correct_needed == 1:
+                points = 1 if (selected_correct == 1 and selected_incorrect == 0) else 0
+            elif correct_needed == 2:
+                if selected_correct == 2 and selected_incorrect == 0:
+                    points = 2
+                elif (selected_correct >= 1) and (selected_incorrect == 0 or selected_correct == 2):
+                    points = 1
+                else:
+                    points = 0
+            elif correct_needed == 3:
+                if selected_correct == 3 and selected_incorrect == 0:
+                    points = 2
+                elif selected_correct >= 2:
+                    points = 1
+                else:
+                    points = 0
+            
+            total_user_points += points
+            question_stats.append({
+                'question_id': question.id,
+                'correct_needed': correct_needed,
+                'selected_correct': selected_correct,
+                'selected_incorrect': selected_incorrect,
+                'points_earned': points
+            })
+
+        # Save scoring metrics
+        quiz_result.total_possible_points = total_possible
+        quiz_result.user_points = total_user_points
+        quiz_result.save()
+
+        # Calculate percentage score
+        percentage_score = (total_user_points / total_possible * 100) if total_possible > 0 else 0
         
-        total_questions = quiz_result.total_questions or 0
-        correct_answers = quiz_result.correct_answers or 0
-        score_percentage = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
-        
-        # Format the score display
-        score_display = f"{correct_answers} из {total_questions}"
-        percentage_display = f"{score_percentage:.1f}%"
-        
-        # Generate admin statistics URL with category set name
+        # Generate admin statistics URL
         category_set_name = quiz.category_set.name if quiz.category_set else ""
         admin_statistics_url = (
             f"{BASE_URL}/admin/statistics/?quiz_result_id={quiz_result.id}"
-            f"&percentage={score_percentage:.1f}"
-            f"&score={score_display}"
+            f"&percentage={percentage_score:.1f}"
+            f"&score={total_user_points}/{total_possible}"
             f"&quiz_name={category_set_name}"
         )
-        print(admin_statistics_url, 'admin url')
+        
         # Update Google Sheet with quiz result data
         try:
-            user_token = quiz.user_token  # Get the user_token from the quiz object
             async_task(
                 save_to_google_sheet,
-                user_token=user_token,
-                score=round(score_percentage, 2),
+                user_token=quiz.user_token,
+                score=round(percentage_score, 2),
                 result_url=request.build_absolute_uri(admin_statistics_url)
             )
         except Exception as e:
-            # Log the error but continue with the response
             print(f"Error updating Google Sheet: {e}")
         
         # Step 6: Prepare response data
         response_data = {
             'result': QuizResultDetailSerializer(
                 quiz_result,
-                context={'request': request}
+                context={
+                    'request': request,
+                    'question_stats': question_stats
+                }
             ).data,
-            'score': round(score_percentage, 2),
-            'total_questions': total_questions,
-            'correct_answers': correct_answers,
+            'score': round(percentage_score, 2),
+            'total_possible_points': total_possible,
+            'user_points': total_user_points,
             'admin_statistics_url': admin_statistics_url,
         }
         
@@ -396,86 +408,99 @@ class QuizResultCreateAPIView(APIView):
 def summary_pdf(request):
     quiz_result_id = request.GET.get('quiz_result')
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
-    
-    # Get base context
     context = get_quiz_result_context(quiz_result)
     
-    # Get all categories in the quiz's category set
     categories = Category.objects.filter(
         category_sets=quiz_result.quiz.category_set
     ).prefetch_related(
         Prefetch('subcategory_set', queryset=SubCategory.objects.all())
     ).order_by('name')
     
-    # Initialize statsint()
-    exact_stats = {'categories': [], 'total_questions': 0, 'total_correct': 0}
-    natural_stats = {'categories': [], 'total_questions': 0, 'total_correct': 0}
+    exact_stats = {'categories': [], 'total_possible': 0, 'user_points': 0}
+    natural_stats = {'categories': [], 'total_possible': 0, 'user_points': 0}
     
     for category in categories:
-        category_questions = 0
-        category_correct = 0
+        category_possible = 0
+        category_points = 0
         
         for subcategory in category.subcategory_set.all():
-            # Get ALL questions in this subcategory
-            questions_in_subcat = Question.objects.filter(
+            questions = Question.objects.filter(
                 theme=subcategory,
                 category=category
             )
             
-            total_in_subcat = questions_in_subcat.count()
+            # Calculate possible points for this subcategory
+            subcat_possible = sum(
+                2 if q.correct_answers_count in [2,3] else 1 
+                for q in questions
+            )
             
-            # Count correct answers in this subcategory
-            correct_in_subcat = quiz_result.answers.filter(
-                question__in=questions_in_subcat,
-                is_correct=True
-            ).values('question').distinct().count()
+            # Calculate earned points for this subcategory
+            subcat_points = 0
+            for q in questions:
+                correct_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=True
+                ).count()
+                incorrect_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=False
+                ).count()
+                
+                if q.correct_answers_count == 1:
+                    subcat_points += 1 if (correct_answers == 1 and incorrect_answers == 0) else 0
+                elif q.correct_answers_count == 2:
+                    if correct_answers == 2 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif (correct_answers >= 1) and (incorrect_answers == 0 or correct_answers == 2):
+                        subcat_points += 1
+                elif q.correct_answers_count == 3:
+                    if correct_answers == 3 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif correct_answers >= 2:
+                        subcat_points += 1
             
-            category_questions += total_in_subcat
-            category_correct += correct_in_subcat
+            category_possible += subcat_possible
+            category_points += subcat_points
         
-        # Add to appropriate category type
         category_data = {
             'category': category.name,
-            'total_questions': category_questions,
-            'correct_questions': category_correct
+            'total_possible': category_possible,
+            'user_points': category_points
         }
         
         if category.type == 'EXC':
             exact_stats['categories'].append(category_data)
-            exact_stats['total_questions'] += category_questions
-            exact_stats['total_correct'] += category_correct
+            exact_stats['total_possible'] += category_possible
+            exact_stats['user_points'] += category_points
         else:
             natural_stats['categories'].append(category_data)
-            natural_stats['total_questions'] += category_questions
-            natural_stats['total_correct'] += category_correct
+            natural_stats['total_possible'] += category_possible
+            natural_stats['user_points'] += category_points
     
     # Calculate percentages
-    exact_percentage = calculate_percentage(exact_stats)
-    natural_percentage = calculate_percentage(natural_stats)
-    total_percentage = context['percentage_score']
- 
-
-    closest_natural_value = min(natural_characterization.keys(), key=lambda x: abs(x - round(natural_percentage)))
-    closest_exact_value = min(exact_characterization.keys(), key=lambda x: abs(x - round(exact_percentage)))
-    summary_characterization[closest_exact_value][closest_natural_value]
-    print(summary_characterization, 'summary')
+    exact_percentage = (exact_stats['user_points'] / exact_stats['total_possible'] * 100) if exact_stats['total_possible'] > 0 else 0
+    natural_percentage = (natural_stats['user_points'] / natural_stats['total_possible'] * 100) if natural_stats['total_possible'] > 0 else 0
+    
+    closest_natural = min(natural_characterization.keys(), key=lambda x: abs(x - round(natural_percentage)))
+    closest_exact = min(exact_characterization.keys(), key=lambda x: abs(x - round(exact_percentage)))
+    
     context.update({
         'exact_stats': exact_stats['categories'],
         'natural_stats': natural_stats['categories'],
-        'exact_total_stats': f"{exact_stats['total_correct']}/{exact_stats['total_questions']}",
-        'natural_total_stats': f"{natural_stats['total_correct']}/{natural_stats['total_questions']}",
-        'recomendation': get_closest_match(recomendation, total_percentage),
-        'conclusion': get_conclusion_with_score(conclusion, total_percentage),
+        'exact_total_stats': f"{exact_stats['user_points']}/{exact_stats['total_possible']}",
+        'natural_total_stats': f"{natural_stats['user_points']}/{natural_stats['total_possible']}",
+        'exact_percentage': round(exact_percentage, 2),
+        'natural_percentage': round(natural_percentage, 2),
+        'recomendation': get_closest_match(recomendation, context['percentage_score']),
+        'conclusion': get_conclusion_with_score(conclusion, context['percentage_score']),
         'natural_characterization': get_closest_match(natural_characterization, natural_percentage),
         'exact_characterization': get_closest_match(exact_characterization, exact_percentage),
-        'summary_characterization': summary_characterization[closest_exact_value][closest_natural_value],
-        
-       
-        # 'remaining_month': remaining_month.get(int(context.get('quiz_grade', 5)), 0)
+        'summary_characterization': summary_characterization[closest_exact][closest_natural],
     })
-    print(context, 'this is context')
     
     return render(request, 'summary_pdf.html', context)
+
 
 
 def calculate_percentage(stats: Dict) -> float:
@@ -496,37 +521,21 @@ def get_conclusion_with_score(conclusion_dict: Dict, score: float) -> str:
 
 def get_quiz_result_context(quiz_result):
     """
-    Prepares common context data for quiz result PDFs
-    Args:
-        quiz_result: QuizResult model instance
-    Returns:
-        Dictionary of common template variables
+    Updated to use points system instead of simple correct counts
     """
-    # Get ALL questions that belong to this quiz's category set
-    total_questions = Question.objects.filter(
-        theme__category__category_sets=quiz_result.quiz.category_set
-    ).count()
-
-    # Calculate correct answers from the user's responses
-    correct_answers = quiz_result.answers.filter(is_correct=True).count()
-    
-    # Calculate percentage score safely
-    percentage_score = 0.0
-    if total_questions > 0:
-        percentage_score = (correct_answers / total_questions) * 100
-
     context = {
         'quiz_result': quiz_result,
         'name': quiz_result.quiz.name if quiz_result.quiz else "N/A",
-        
         'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz else "Diagnostic Quiz",
-        'quiz_grade': "N/A",  # Add grade field to Quiz model if needed
         'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
-        'total_questions': total_questions,
-        'correct_questions': correct_answers,
-        'percentage_score': round(percentage_score, 1),
+        'total_possible': quiz_result.total_possible_points,
+        'user_points': quiz_result.user_points,
+        'percentage_score': round(
+            (quiz_result.user_points / quiz_result.total_possible_points * 100) 
+            if quiz_result.total_possible_points > 0 else 0,
+            2
+        )
     }
-
     return context
 
 def table_pdf(request) -> HttpResponse:
@@ -534,7 +543,6 @@ def table_pdf(request) -> HttpResponse:
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
     context = get_quiz_result_context(quiz_result)
     
-    # Get all categories in the quiz's category set
     categories = Category.objects.filter(
         category_sets=quiz_result.quiz.category_set
     ).prefetch_related(
@@ -543,60 +551,73 @@ def table_pdf(request) -> HttpResponse:
     ).order_by('name')
     
     category_stats = []
-    total_questions = 0
-    total_correct = 0
+    total_possible = 0
+    total_points = 0
     
     for category in categories:
         subcategory_stats = []
-        category_questions_count = 0
-        category_correct_count = 0
+        category_possible = 0
+        category_points = 0
         
         for subcategory in category.subcategory_set.all():
-            # Get all questions in this subcategory
-            questions_in_subcat = Question.objects.filter(theme=subcategory)
-            total_in_subcat = questions_in_subcat.count()
+            questions = Question.objects.filter(theme=subcategory)
+            subcat_possible = 0
+            subcat_points = 0
             
-            # Get answered questions in this subcategory
-            answered_questions = quiz_result.answers.filter(
-                question__theme=subcategory
-            ).values_list('question', flat=True).distinct()
-            
-            # Count correct answers in this subcategory
-            correct_in_subcat = quiz_result.answers.filter(
-                question__theme=subcategory,
-                is_correct=True
-            ).values('question').distinct().count()
-            
-            incorrect_in_subcat = total_in_subcat - correct_in_subcat
+            for q in questions:
+                # Calculate possible points for this question
+                q_possible = 2 if q.correct_answers_count in [2,3] else 1
+                subcat_possible += q_possible
+                
+                # Calculate earned points
+                correct_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=True
+                ).count()
+                incorrect_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=False
+                ).count()
+                
+                if q.correct_answers_count == 1:
+                    subcat_points += 1 if (correct_answers == 1 and incorrect_answers == 0) else 0
+                elif q.correct_answers_count == 2:
+                    if correct_answers == 2 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif (correct_answers >= 1) and (incorrect_answers == 0 or correct_answers == 2):
+                        subcat_points += 1
+                elif q.correct_answers_count == 3:
+                    if correct_answers == 3 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif correct_answers >= 2:
+                        subcat_points += 1
             
             subcategory_stats.append({
                 'subcategory': subcategory.name,
-                'total_questions': total_in_subcat,
-                'correct_questions': correct_in_subcat,
-                'incorrect_questions': incorrect_in_subcat,
-                'percentage': (correct_in_subcat / total_in_subcat * 100) if total_in_subcat > 0 else 0
+                'total_possible': subcat_possible,
+                'user_points': subcat_points,
+                'percentage': (subcat_points / subcat_possible * 100) if subcat_possible > 0 else 0
             })
             
-            category_questions_count += total_in_subcat
-            category_correct_count += correct_in_subcat
+            category_possible += subcat_possible
+            category_points += subcat_points
         
-        total_questions += category_questions_count
-        total_correct += category_correct_count
+        total_possible += category_possible
+        total_points += category_points
         
         category_stats.append({
             'category': category.name,
             'subcategories': subcategory_stats,
-            'total_questions': category_questions_count,
-            'correct_questions': category_correct_count,
-            'percentage': (category_correct_count / category_questions_count * 100) if category_questions_count > 0 else 0
+            'total_possible': category_possible,
+            'user_points': category_points,
+            'percentage': (category_points / category_possible * 100) if category_possible > 0 else 0
         })
     
     context.update({
         'category_stats': category_stats,
-        'total_questions': total_questions,
-        'total_correct': total_correct,
-        'total_percentage': (total_correct / total_questions * 100) if total_questions > 0 else 0,
-        'quiz_name': quiz_result.quiz.category_set.name,
+        'total_possible': total_possible,
+        'total_points': total_points,
+        'total_percentage': (total_points / total_possible * 100) if total_possible > 0 else 0,
         'completion_date': quiz_result.created_at.strftime("%B %d, %Y, %I:%M %p")
     })
     
