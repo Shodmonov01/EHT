@@ -5,11 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { fetchQuestions, submitQuiz } from "../../api/request.api";
 import "../../styles/Quiz.css";
 import yellowBg from "../../assets/images/yellow-bg.png";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useTranslation } from "react-i18next";
 import Loader from "../../components/Loader";
 import LoadingButton from "../../components/LoadingButton";
+import { setQuizData } from "../../redux/features/quizSlice";
 
 interface Answer {
   id: number;
@@ -32,10 +33,35 @@ export default function Quiz() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const savedToken = localStorage.getItem('quiz_token');
+    const savedCategoryId = localStorage.getItem('quiz_category_id');
+    
+    if (savedToken && savedCategoryId && !quizData.token) {
+      dispatch(setQuizData({
+        token: savedToken,
+        category_set_id: savedCategoryId
+      }));
+    }
+  }, [dispatch, quizData.token]);
+
+  useEffect(() => {
+    if (quizData.token && categorySetId) {
+      localStorage.setItem('quiz_token', quizData.token);
+      localStorage.setItem('quiz_category_id', categorySetId);
+    }
+  }, [quizData.token, categorySetId]);
 
   useEffect(() => {}, [currentLanguage]);
 
-  if (!quizData.token) {
+  const clearQuizStorage = () => {
+    localStorage.removeItem('quiz_token');
+    localStorage.removeItem('quiz_category_id');
+  };
+
+  if (!quizData.token && !localStorage.getItem('quiz_token')) {
     return <Navigate to="/" />;
   }
 
@@ -47,9 +73,8 @@ export default function Quiz() {
   } = useQuery({
     queryKey: ["questions", categorySetId, currentLanguage],
     queryFn: () => fetchQuestions(Number(categorySetId)),
-    enabled: !!categorySetId && !!quizData.token,
+    enabled: !!(categorySetId || localStorage.getItem('quiz_category_id')) && !!(quizData.token || localStorage.getItem('quiz_token')),
   });
-  console.log(questionsData);
 
   useEffect(() => {
     if (currentLanguage) {
@@ -90,8 +115,9 @@ export default function Quiz() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const userToken = quizData.token;
+    const userToken = quizData.token || localStorage.getItem('quiz_token');
     if (!userToken) {
+      console.error("Token topilmadi!");
       return;
     }
 
@@ -109,21 +135,26 @@ export default function Quiz() {
         .map((q) => q.id)
     );
 
+    // Backendga yuboriladigan ma'lumotlarni konsolga chiqarish
     const requestData = {
       user_token: userToken,
       answer_ids: answerIds,
-      unanswered_question_ids: unansweredQuestionIds,
+      unanswered_question_ids: unansweredQuestionIds
     };
-    console.log("Yuborilayotgan ma'lumotlar:", requestData);
+    
+    console.log("Token:", userToken);
+    console.log("javoblar:", answerIds);
+    console.log("savollar:", unansweredQuestionIds);
+    console.log("To'liq request:", requestData);
 
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
       .then((response) => {
-        console.log("Muvaffaqiyatli yuborildi:", response);
+        console.log(response);
+        clearQuizStorage();
         navigate(`/quiz-submit`);
       })
       .catch((error) => {
-        console.error("Xatolik yuz berdi:", error);
-        console.log("Xatolik tafsilotlari:", error.response?.data);
+        console.error(error);
       })
       .finally(() => {
         setIsSubmitting(false);

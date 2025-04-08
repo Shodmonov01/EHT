@@ -1,5 +1,4 @@
 body {
-  font-family: "Hind", sans-serif;
   color: #333333;
   background-color: #f4f4f4;
   margin: 0;
@@ -252,7 +251,7 @@ select:focus {
   .agreement {
     padding: 14px 16px;
   }
-  
+
   .custom-select > div:first-of-type {
     min-height: 44px;
   }

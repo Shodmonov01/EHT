@@ -2,12 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface QuizState {
   token: string | null;
-  categorySetId: string | null;
+  category_set_id: number | null;
 }
 
 const initialState: QuizState = {
   token: null,
-  categorySetId: null,
+  category_set_id: null,
 };
 
 const quizSlice = createSlice({
@@ -16,11 +16,11 @@ const quizSlice = createSlice({
   reducers: {
     setQuizData: (state, action: PayloadAction<{ token: string; category_set_id: string }>) => {
       state.token = action.payload.token;
-      state.categorySetId = action.payload.category_set_id;
+      state.category_set_id = Number(action.payload.category_set_id);
     },
     resetQuizData: (state) => {
       state.token = null;
-      state.categorySetId = null;
+      state.category_set_id = null;
     },
   },
 });
