@@ -20,7 +20,6 @@
 
         .logo {
             margin-top: 20px;
-     
             width: 450px;
         }
 
@@ -171,7 +170,7 @@
                     <br>
                     <br>
                     <div class="name">{{ name }}</div>
-                    <div class="grade">Итого: {{ correct_questions }}/{{ total_questions }}</div>
+                    <div class="grade">Итого: {{ total_points }}/{{ total_possible }}</div>
                     <br>
                     <br>
                     <br>
@@ -182,7 +181,7 @@
                         <strong>Дата сдачи:</strong> {{ passed_date }}
                     </p>
                     <p>
-                        <strong>Набранный процент:</strong> {{ percentage_score }}%
+                        <strong>Набранный процент:</strong> {{ total_percentage|floatformat:1 }}%
                     </p>
                     <p>
                         <strong>Quiz Name:</strong> {{ quiz_name }}
@@ -201,21 +200,26 @@
                                 </tr>
                                 <tr>
                                     <th>Тема</th>
-                                    <th>Всего вопросов</th>
-                                    <th>Правильных ответов</th>
-                                    <th>Ошибок</th>
+                                    <th>Макс. баллов</th>
+                                    <th>Набрано баллов</th>
+                                    <th>Процент</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for stats in category.subcategories %}
-                                    
                                     <tr>
                                         <td>{{ stats.subcategory }}</td>
-                                        <td>{{ stats.total_questions }}</td>
-                                        <td>{{ stats.correct_questions }}</td>
-                                        <td>{{ stats.incorrect_questions }}</td>
+                                        <td>{{ stats.total_possible }}</td>
+                                        <td>{{ stats.user_points }}</td>
+                                        <td>{{ stats.percentage|floatformat:1 }}%</td>
                                     </tr>
                                 {% endfor %}
+                                <tr style="font-weight: bold; background-color: #e6e6e6;">
+                                    <td>Всего по категории</td>
+                                    <td>{{ category.total_possible }}</td>
+                                    <td>{{ category.user_points }}</td>
+                                    <td>{{ category.percentage|floatformat:1 }}%</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
