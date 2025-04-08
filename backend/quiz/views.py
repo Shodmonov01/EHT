@@ -201,6 +201,7 @@ class QuestionListAPIView(APIView):
         translation.activate(lang)
         category_set = get_object_or_404(CategorySet, id=category_set_id)
         
+        
         questions = (
             Question.objects.filter(
                 theme__category__in=category_set.categories.all()
@@ -214,6 +215,7 @@ class QuestionListAPIView(APIView):
             )
             .order_by('theme__category__id', 'theme__id')
         )
+        print(questions, 'questions')
 
         category_questions = {}
 
@@ -236,6 +238,7 @@ class QuestionListAPIView(APIView):
                     for a in question.answer_set.all()
                 ]
             }
+            
             
             category_questions[category.id]["questions"].append(question_data)
 
@@ -477,13 +480,14 @@ def summary_pdf(request):
             natural_stats['categories'].append(category_data)
             natural_stats['total_possible'] += category_possible
             natural_stats['user_points'] += category_points
-    
+    print(natural_stats, 'nat')
     # Calculate percentages
     exact_percentage = (exact_stats['user_points'] / exact_stats['total_possible'] * 100) if exact_stats['total_possible'] > 0 else 0
     natural_percentage = (natural_stats['user_points'] / natural_stats['total_possible'] * 100) if natural_stats['total_possible'] > 0 else 0
     
     closest_natural = min(natural_characterization.keys(), key=lambda x: abs(x - round(natural_percentage)))
     closest_exact = min(exact_characterization.keys(), key=lambda x: abs(x - round(exact_percentage)))
+    
     
     context.update({
         'exact_stats': exact_stats['categories'],
@@ -538,6 +542,7 @@ def get_quiz_result_context(quiz_result):
     }
     return context
 
+
 def table_pdf(request) -> HttpResponse:
     quiz_result_id = request.GET.get('quiz_result')
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
@@ -551,6 +556,8 @@ def table_pdf(request) -> HttpResponse:
     ).order_by('name')
     
     category_stats = []
+    total_questions = 0
+    correct_questions = 0
     total_possible = 0
     total_points = 0
     
@@ -558,15 +565,19 @@ def table_pdf(request) -> HttpResponse:
         subcategory_stats = []
         category_possible = 0
         category_points = 0
+        category_total_questions = 0
+        category_correct_questions = 0
         
         for subcategory in category.subcategory_set.all():
             questions = Question.objects.filter(theme=subcategory)
             subcat_possible = 0
             subcat_points = 0
+            total_subcategory_questions = questions.count()
+            correct_subcategory_questions = 0
             
             for q in questions:
                 # Calculate possible points for this question
-                q_possible = 2 if q.correct_answers_count in [2,3] else 1
+                q_possible = 2 if q.correct_answers_count in [2, 3] else 1
                 subcat_possible += q_possible
                 
                 # Calculate earned points
@@ -579,21 +590,31 @@ def table_pdf(request) -> HttpResponse:
                     is_correct=False
                 ).count()
                 
+                points_earned = 0
                 if q.correct_answers_count == 1:
-                    subcat_points += 1 if (correct_answers == 1 and incorrect_answers == 0) else 0
+                    points_earned = 1 if (correct_answers == 1 and incorrect_answers == 0) else 0
                 elif q.correct_answers_count == 2:
                     if correct_answers == 2 and incorrect_answers == 0:
-                        subcat_points += 2
+                        points_earned = 2
                     elif (correct_answers >= 1) and (incorrect_answers == 0 or correct_answers == 2):
-                        subcat_points += 1
+                        points_earned = 1
                 elif q.correct_answers_count == 3:
                     if correct_answers == 3 and incorrect_answers == 0:
-                        subcat_points += 2
+                        points_earned = 2
                     elif correct_answers >= 2:
-                        subcat_points += 1
+                        points_earned = 1
+                
+                subcat_points += points_earned
+                
+                # For backward compatibility - count questions as correct if any points were earned
+                if points_earned > 0:
+                    correct_subcategory_questions += 1
             
             subcategory_stats.append({
                 'subcategory': subcategory.name,
+                'total_questions': total_subcategory_questions,
+                'correct_questions': correct_subcategory_questions,
+                'incorrect_questions': total_subcategory_questions - correct_subcategory_questions,
                 'total_possible': subcat_possible,
                 'user_points': subcat_points,
                 'percentage': (subcat_points / subcat_possible * 100) if subcat_possible > 0 else 0
@@ -601,13 +622,20 @@ def table_pdf(request) -> HttpResponse:
             
             category_possible += subcat_possible
             category_points += subcat_points
+            category_total_questions += total_subcategory_questions
+            category_correct_questions += correct_subcategory_questions
         
         total_possible += category_possible
         total_points += category_points
+        total_questions += category_total_questions
+        correct_questions += category_correct_questions
         
         category_stats.append({
             'category': category.name,
             'subcategories': subcategory_stats,
+            'total_questions': category_total_questions,
+            'correct_questions': category_correct_questions,
+            'incorrect_questions': category_total_questions - category_correct_questions,
             'total_possible': category_possible,
             'user_points': category_points,
             'percentage': (category_points / category_possible * 100) if category_possible > 0 else 0
@@ -615,6 +643,8 @@ def table_pdf(request) -> HttpResponse:
     
     context.update({
         'category_stats': category_stats,
+        'total_questions': total_questions,
+        'correct_questions': correct_questions,
         'total_possible': total_possible,
         'total_points': total_points,
         'total_percentage': (total_points / total_possible * 100) if total_possible > 0 else 0,
@@ -622,6 +652,7 @@ def table_pdf(request) -> HttpResponse:
     })
     
     return render(request, 'table_results_pdf.html', context)
+
 
 
 from django.shortcuts import render
