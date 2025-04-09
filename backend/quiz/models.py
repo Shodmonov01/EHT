@@ -11,7 +11,7 @@ CATEGORY_TYPE = (
 
 
 class Category(models.Model):
-    name = models.CharField(_("Name"), max_length=255)
+    name = models.CharField(_("Category Name"), max_length=255)
     type = models.CharField(_("Type"), max_length=8, choices=CATEGORY_TYPE)
 
     class Meta:
@@ -75,7 +75,8 @@ class Question(models.Model):
     correct_answers_count = models.PositiveSmallIntegerField(
         _("Correct Answers Count"),
         choices=CORRECT_ANSWERS_CHOICES,
-        default=1
+        default=1,
+        
     )
 
     class Meta:
