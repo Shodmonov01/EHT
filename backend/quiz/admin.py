@@ -27,9 +27,14 @@ class QuestionAdmin(nested_admin.NestedModelAdmin):
     ordering = ['theme__category__name', 'theme__name', 'text']
     search_fields = ['text']
     list_per_page = 50
-    list_display = ['text', "category__name"]
+    list_display = ['text', "category__name", "correct_answers_count", 'get_category_sets']
     raw_id_fields = ['theme']
     inlines = [AnswerInline]
+
+    @admin.display(description=_("Category Sets"))
+    def get_category_sets(self, obj):
+        return ", ".join(cs.name for cs in obj.theme.category.category_sets.all())
+    
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
