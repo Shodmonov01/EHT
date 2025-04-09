@@ -15,10 +15,10 @@ urlpatterns = [
     path('api/quiz/submit', QuizResultCreateAPIView.as_view(), name='quiz-result'),
  
     path('files/quiz-results/result.pdf', 
-         summary_pdf, 
+          table_pdf,
          name='download_result_pdf'),
     path('files/quiz-results/diagnostic.pdf', 
-         table_pdf, 
+         summary_pdf, 
          name='download_diagnostic_pdf'),
      path("admin/statistics/", get_admin_statistics_page, name='admin-statistics'),
 
