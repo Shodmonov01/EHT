@@ -63,6 +63,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+
+
 BASE_URL = os.getenv("BASE_URL")
 print(BASE_URL, 'base url')
 
@@ -185,10 +188,9 @@ class QuestionListAPIView(APIView):
                 location=OpenApiParameter.HEADER,
                 description="Select response language (ru, kz)",
                 required=False,
-                enum=["ru", "kz",],
+                enum=["ru", "kz"],
             )
         ],
-         
     )
     def get(self, request, category_set_id):
         lang = request.headers.get("Accept-Language", 'ru')
@@ -198,7 +200,6 @@ class QuestionListAPIView(APIView):
         translation.activate(lang)
         category_set = get_object_or_404(CategorySet, id=category_set_id)
         
-        
         questions = (
             Question.objects.filter(
                 theme__category__in=category_set.categories.all()
@@ -207,12 +208,11 @@ class QuestionListAPIView(APIView):
             .prefetch_related(
                 Prefetch(
                     'answer_set',
-                    queryset=Answer.objects.all().only("id", "text", "image")
+                    queryset=Answer.objects.all().only("id", "text", "image_ru", "image_kz", "is_correct")
                 )
             )
             .order_by('theme__category__id', 'theme__id')
         )
-        print(questions, 'questions')
 
         category_questions = {}
 
@@ -225,22 +225,36 @@ class QuestionListAPIView(APIView):
                     "questions": []
                 }
             
+            # Get appropriate image based on language
+            question_image = question.image_ru if lang == 'ru' else question.image_kz
+            question_image_url = request.build_absolute_uri(question_image.url) if question_image else None
+            
+            answers_data = []
+            for answer in question.answer_set.all():
+                answer_image = answer.image_ru if lang == 'ru' else answer.image_kz
+                answer_image_url = request.build_absolute_uri(answer_image.url) if answer_image else None
+                
+                answers_data.append({
+                    "id": answer.id,
+                    "text": answer.text,
+                    "image": answer_image_url,
+                    "is_correct": answer.is_correct
+                })
+            
             question_data = {
                 "id": question.id,
                 "text": question.text,
                 'correct_answers_count': question.correct_answers_count,
                 "subcategory": question.theme.name,
-                "image": request.build_absolute_uri(question.image.url) if question.image else None,
-                "answers": [
-                    {"id": a.id, "text": a.text, "image": request.build_absolute_uri(a.image.url) if a.image else None}
-                    for a in question.answer_set.all()
-                ]
+                "image": question_image_url,
+                "answers": answers_data
             }
-            
             
             category_questions[category.id]["questions"].append(question_data)
 
         return Response(list(category_questions.values()), status=200)
+    
+
     
 from collections import defaultdict
 class QuizResultCreateAPIView(APIView):

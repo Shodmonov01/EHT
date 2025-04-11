@@ -65,7 +65,8 @@ class Question(models.Model):
     text = models.TextField(_("Question Text"))
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='questions', verbose_name=_("Category"))
     theme = models.ForeignKey(SubCategory, on_delete=models.CASCADE, verbose_name=_("Theme"))
-    image = models.ImageField(_("Image"), upload_to='images/questions', null=True, blank=True)
+    image_ru = models.ImageField(_("Image ru"), upload_to='images/questions/ru', null=True, blank=True)
+    image_kz = models.ImageField(_("Image kz"), upload_to='images/questions/kz', null=True, blank=True)
 
     CORRECT_ANSWERS_CHOICES = (
         (1, _('1 correct answer')),
@@ -98,7 +99,8 @@ class Question(models.Model):
 class Answer(models.Model):
     text = models.TextField(_("Answer Text"))
     question = models.ForeignKey(Question, on_delete=models.CASCADE, verbose_name=_("Question"))
-    image = models.ImageField(_("Image"), upload_to='images/answers', null=True, blank=True)
+    image_ru = models.ImageField(_("Image ru"), upload_to='images/answers/ru', null=True, blank=True)
+    image_kz = models.ImageField(_("Image kz"), upload_to='images/answers/kz', null=True, blank=True)
     is_correct = models.BooleanField(_("Is Correct"), default=False)
 
     class Meta:

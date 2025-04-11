@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-04-09 08:51+0000\n"
+"POT-Creation-Date: 2025-04-11 11:46+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Русский <LL@li.org>\n"
@@ -28,7 +28,11 @@ msgstr "Русский"
 msgid "Kazak"
 msgstr "Казахский"
 
-#: quiz/admin.py:60
+#: quiz/admin.py:34 quiz/models.py:31
+msgid "Category Sets"
+msgstr "Наборы категорий"
+
+#: quiz/admin.py:65
 #, python-format
 msgid ""
 "Number of correct answers (%(correct)s) does not match specified count "
@@ -67,10 +71,6 @@ msgstr "Название набора категорий"
 msgid "Category Set"
 msgstr "Набор категорий"
 
-#: quiz/models.py:31
-msgid "Category Sets"
-msgstr "Наборы категорий"
-
 #: quiz/models.py:38 quiz/models.py:51
 msgid "Name"
 msgstr "Имя"
@@ -83,7 +83,7 @@ msgstr "Подкатегория"
 msgid "Subcategories"
 msgstr "Подкатегории"
 
-#: quiz/models.py:50 quiz/models.py:117
+#: quiz/models.py:50 quiz/models.py:119
 msgid "User Token"
 msgstr "Токен пользователя"
 
@@ -95,7 +95,7 @@ msgstr "Имя родителя"
 msgid "Phone Number"
 msgstr "Номер телефона"
 
-#: quiz/models.py:57 quiz/models.py:121
+#: quiz/models.py:57 quiz/models.py:123
 msgid "Quiz"
 msgstr "Опрос"
 
@@ -111,81 +111,89 @@ msgstr "Текст вопроса"
 msgid "Theme"
 msgstr "Тема"
 
-#: quiz/models.py:68 quiz/models.py:101
-msgid "Image"
-msgstr "Изображение"
+#: quiz/models.py:68 quiz/models.py:102
+#, fuzzy
+#| msgid "Image"
+msgid "Image ru"
+msgstr "Изображение ru"
 
-#: quiz/models.py:71
+#: quiz/models.py:69 quiz/models.py:103
+#, fuzzy
+#| msgid "Image"
+msgid "Image kz"
+msgstr "Изображение kz"
+
+#: quiz/models.py:72
 msgid "1 correct answer"
 msgstr "1 правильный ответ"
 
-#: quiz/models.py:72
+#: quiz/models.py:73
 msgid "2 correct answers"
 msgstr "2 правильных ответа"
 
-#: quiz/models.py:73
+#: quiz/models.py:74
 msgid "3 correct answers"
 msgstr "3 правильных ответа"
 
-#: quiz/models.py:76
+#: quiz/models.py:77
 msgid "Correct Answers Count"
 msgstr "Количество правильных ответов"
 
-#: quiz/models.py:83 quiz/models.py:100
+#: quiz/models.py:84 quiz/models.py:101
 msgid "Question"
 msgstr "Вопрос"
 
-#: quiz/models.py:84
+#: quiz/models.py:85
 msgid "Questions"
 msgstr "Вопросы"
 
-#: quiz/models.py:99
+#: quiz/models.py:100
 msgid "Answer Text"
 msgstr "Текст ответа"
 
-#: quiz/models.py:102
+#: quiz/models.py:104
 msgid "Is Correct"
 msgstr "Правильный"
 
-#: quiz/models.py:105
+#: quiz/models.py:107
 msgid "Answer"
 msgstr "Ответ"
 
-#: quiz/models.py:106 quiz/models.py:122
+#: quiz/models.py:108 quiz/models.py:124
 msgid "Answers"
 msgstr "Ответы"
 
-#: quiz/models.py:123
+#: quiz/models.py:125
 msgid "Unanswered Questions"
 msgstr "Неотвеченные вопросы"
 
-#: quiz/models.py:124
+#: quiz/models.py:126
 msgid "Created At"
 msgstr "Создано"
 
-#: quiz/models.py:126
+#: quiz/models.py:128
 msgid "Result PDF"
 msgstr "PDF с результатами"
 
-#: quiz/models.py:127
+#: quiz/models.py:129
 msgid "Diagnostic PDF"
 msgstr "PDF с диагностикой"
 
-#: quiz/models.py:129
+#: quiz/models.py:131
 msgid "Total Possible Points"
 msgstr ""
 
-#: quiz/models.py:130
+#: quiz/models.py:132
 #, fuzzy
 #| msgid "User Token"
 msgid "User Points"
 msgstr "Токен пользователя"
 
-#: quiz/models.py:133
+#: quiz/models.py:135
 msgid "Quiz Result"
 msgstr "Результат опроса"
 
-#: quiz/models.py:134
+#: quiz/models.py:136
 msgid "Quiz Results"
 msgstr "Результаты опросов"
 
@@ -199,6 +207,9 @@ msgstr "Результаты опросов"
 #~ msgid "Duration"
 #~ msgstr "Вопрос"
 
+#~ msgid "Image"
+#~ msgstr "Изображение"
+
 #, fuzzy
 #~| msgid "Natural"
 #~ msgid "Saturday"
@@ -211,6 +222,17 @@ msgstr "Результаты опросов"
 
 #, fuzzy
 #~| msgid "Phone Number"
+#~ msgid "December"
+#~ msgstr "Номер телефона"
+
+#, fuzzy
+#~| msgid "Phone Number"
 #~ msgctxt "alt. month"
 #~ msgid "November"
+#~ msgstr "Номер телефона"
+
+#, fuzzy
+#~| msgid "Phone Number"
+#~ msgctxt "alt. month"
+#~ msgid "December"
 #~ msgstr "Номер телефона"
