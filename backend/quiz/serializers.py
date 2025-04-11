@@ -2,7 +2,7 @@
 
 from rest_framework import serializers
 from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet
-
+from django.utils.translation import get_language
 
 class UserQuizStarteSerializer(serializers.Serializer):
     name = serializers.CharField(max_length = 64)
@@ -27,21 +27,44 @@ class UserQuizStarteSerializer(serializers.Serializer):
         # Access the related categories through the relationship
         return " + ".join(category_set.categories.values_list("name", flat=True))
     
+
 class AnswerSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Answer
         fields = ['id', 'text', 'image', 'is_correct']
+    
+    def get_image(self, obj):
+        request = self.context.get('request')
+        lang = get_language()
+        
+        if lang == 'kz' and obj.image_kz:
+            return request.build_absolute_uri(obj.image_kz.url) if request else obj.image_kz.url
+        elif lang == 'ru' and obj.image_ru:
+            return request.build_absolute_uri(obj.image_ru.url) if request else obj.image_ru.url
+        return None
 
 
 class QuestionSerializer(serializers.ModelSerializer):
-    # Include related answers; note that in your models, Question has a related_name "questions" on Quiz.
     answers = AnswerSerializer(many=True, read_only=True, source='answer_set')
-    # You can add a field for the category name
     category_name = serializers.CharField(source='theme.category.name', read_only=True)
+    image = serializers.SerializerMethodField()
     
     class Meta:
         model = Question
-        fields = ['id', 'text', 'image', 'quiz', 'theme', 'category_name', 'answers']
+        fields = ['id', 'text', 'image', 'theme', 'category_name', 'answers', 'correct_answers_count']
+    
+    def get_image(self, obj):
+        request = self.context.get('request')
+        lang = get_language()
+        
+        if lang == 'kz' and obj.image_kz:
+            return request.build_absolute_uri(obj.image_kz.url) if request else obj.image_kz.url
+        elif lang == 'ru' and obj.image_ru:
+            return request.build_absolute_uri(obj.image_ru.url) if request else obj.image_ru.url
+        return None
+
 
 # class QuizSerializer(serializers.ModelSerializer):
 #     # Nest questions if needed. (Make sure your Quiz model has a related_name for questions, e.g. 'questions'.)
