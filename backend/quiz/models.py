@@ -43,7 +43,7 @@ class SubCategory(models.Model):
         verbose_name_plural = _("Subcategories")
 
     def __str__(self):
-        return self.name
+        return self.name or "Subcategory"
 
 
 class Quiz(models.Model):
