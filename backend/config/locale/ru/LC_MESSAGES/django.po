@@ -112,14 +112,10 @@ msgid "Theme"
 msgstr "Тема"
 
 #: quiz/models.py:68 quiz/models.py:102
-#, fuzzy
-#| msgid "Image"
 msgid "Image ru"
 msgstr "Изображение ru"
 
 #: quiz/models.py:69 quiz/models.py:103
-#, fuzzy
-#| msgid "Image"
 msgid "Image kz"
 msgstr "Изображение kz"
 
