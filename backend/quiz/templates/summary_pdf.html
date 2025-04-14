@@ -1,0 +1,576 @@
+{% load static %}
+{% load filters %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+        <title>Tesla Education | Diagnostic</title>
+        <link rel="icon" type="image/png" href="{% static './assets/icon.png' %}">
+        <style>
+            body {
+                margin: 0;
+                left: 0;
+                top: 0;
+                font-family: sans-serif;
+                background-color: black;
+            }
+
+            .logo {
+                margin-top: 20px;
+                width: 450px;
+            }
+
+            .page {
+                top: 0;
+                left: 0;
+                position: relative;
+                background-color: white;
+                width: 800px;
+                height: 1122.51px;
+                margin: auto;
+            }
+
+            .page__container {
+                width: 92.5%;
+                margin: auto;
+            }
+
+            .aaa {
+                margin-left: 24px;
+                font-size: 24px;
+                font-weight: 400;
+            }
+            
+            .aab {
+                height: 200px;
+                margin: auto;
+                margin-top: 80px;
+                background-color: #EAEAEA;
+                display: flex;
+            }
+
+            .aac {
+                flex:1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                align-items: center;
+            }
+
+            .aad {
+                display: flex;
+                flex-direction: column;
+                background-color: #3A4BE2;
+                flex: 1;
+                height: 200px;
+                color: white;
+                justify-content: space-around;
+                align-items: center
+            }
+
+            .aad_res {
+                margin-top: 30px;
+                font-size: 20px;
+            }
+
+            .aad_per {
+                font-weight: bolder;
+                font-size: 90px;
+            }
+
+            .points-display {
+                font-size: 18px;
+                margin-top: 5px;
+            }
+
+            .aac_sal {
+                margin-top: -16px;
+                font-size: 78px;
+                font-style: italic;
+                font-weight: bolder;
+                color: #1DCE8E;
+            }
+            
+            .aac_nam {
+                margin-top: -16px;
+                width: 100%;
+                margin-left: 48px;
+            }
+            
+            .aac_des {
+                margin-top: -16px;
+                font-size: 14px;
+            }
+            
+            .summary {
+                margin-top: 50px;
+                text-align: center;
+                font-size: 20px;
+                font-weight: 800;
+            }
+
+            .summary__desc {
+                margin-top: 18px;
+            }
+            
+            .result {
+                margin-top: 36px;
+                width: 100%;
+                border-radius: 16px;
+                display: flex;
+                justify-content: space-around;
+            }
+
+            .exct_sci {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                background-color: #F6F6F6;
+            }
+            
+            .exct_sci_title {
+                font-weight: 700;
+                background-color: #c7d4fe;
+                padding-top:4px;
+                padding-bottom: 4px;
+                text-align: center;
+                border-top-left-radius: 16px;
+                border-bottom-left-radius: 16px;
+            }
+            
+            .sum_sci_sub {
+                font-weight: 700;
+                display: flex;
+                margin:20px 0px;
+                justify-content: space-around;
+            }
+            
+            .exct_sci_ttl {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .sci_ttl_grade {
+                font-size: 64px;
+                font-weight: 700;
+            }
+            
+            .sci_ttl_text {
+                font-size: 24px;
+                margin-bottom: 24px;
+            }
+            
+            .category-percentage {
+                font-size: 20px;
+                font-weight: bold;
+                margin-top: 10px;
+            }
+            
+            .nat_sci {
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                background-color: #FFF4DE;
+            }
+            
+            .nat_sci_title {
+                font-weight: 700;
+                padding-top:4px;
+                padding-bottom: 4px;
+                border-top-right-radius: 16px;
+                border-bottom-right-radius: 16px;
+                background-color: #dbc498;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .nat_sci_sub {
+                font-weight: 700;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .nat_sci_ttl {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .sci_sub {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .percentage-display {
+                font-size: 14px;
+                color: #555;
+                margin-top: 2px;
+            }
+
+            .bg-circle {
+                position: absolute;
+                left: 0;
+            }
+
+            .bg-star1 {
+                position: absolute;
+                transform: scale(2);
+                margin-left: -10px;
+            }
+            
+            .page-2-text {
+                margin-left: 120px;
+                margin-top: 60px;
+            }
+            
+            .page-2-summary-title {
+                margin-top: 100px;
+                font-size: 42px;
+                font-weight: 700;
+            }
+            
+            .page-2-summary {
+                margin-top: 16px;
+                border-radius: 16px;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .page-2-summary-exc {
+                background-color: #F6F6F6;
+                padding: 20px;
+            }
+            
+            .page-2-summary-nat {
+                background-color: #FFF4DE;
+                padding: 20px;
+            }
+            
+            .warning {
+                margin-top: 24px;
+                display: flex;
+                align-items: center;
+            }
+
+            .recomendation_title {
+                text-align: center;
+                font-size: 36px;
+                background-color: #1DCE8E;
+                padding: 20px 15px;
+                font-weight: 700;
+                max-width: 300px;
+                border-top-left-radius: 14px;
+                border-top-right-radius: 14px;
+                margin-top: 48px;
+            }
+
+            .recomendation_text {
+                background-color: #EAEDEC;
+                border-top-right-radius: 14px;
+                border-bottom-left-radius: 14px;
+                border-bottom-right-radius: 14px;
+                padding: 16px;
+            }
+
+            .no_preparation {
+                background-color: #FFDB7E;
+                padding: 15px;
+                border-radius: 12px;
+            }
+            
+            .with_preparation {
+                background-color: #59DB6E;
+                border-radius: 12px;
+                padding: 15px;
+            }
+
+            .preparation_to {
+                font-size: 32px;
+                font-weight: 700;
+                padding: 16px;
+                margin-bottom: 24px;
+            }
+            
+            .no_1 {
+                background-color: #FFE7AB;
+                font-size: 32px;
+                font-weight: 700;
+                text-align: center;
+            }
+            
+            .no_2 {
+                background-color: #FED56C;
+                font-size: 32px;
+                font-weight: 700;
+                text-align: center;
+            }
+            
+            .no_3 {
+                background-color: #EAC054;
+                font-size: 32px;
+                font-weight: 700;
+                text-align: center;
+                padding: 0px 80px;
+            }
+
+            .yes_1 {
+                background-color: #7CE98D;
+                font-size: 32px;
+                font-weight: 700;
+                text-align: center;
+            }
+            
+            .yes_2 {
+                background-color: #59DB6E;
+                font-size: 32px;
+                font-weight: 700;
+                text-align: center;
+            }
+            
+            .yes_3 {
+                background-color: #34C44B;
+                font-size: 32px;
+                font-weight: 700;
+                text-align: center;
+                padding: 0px 80px;
+            }
+            
+            td {
+                border-radius: 14px;
+            }
+            
+            .notes {
+                background-color: #FFF4DE;
+                padding: 16px;
+                margin-top: 36px;
+                border-radius:12px;
+            }
+            
+            .month-counter {
+                background-color: #3A4BE2;
+                padding: 8px 36px;
+                font-size: 64px;
+                font-weight: 800;
+                color:white;
+                border-radius: 8px;
+                margin-top: 8px;
+                margin-bottom: 8px;
+                margin-right: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="safe-screen-qwwq">
+            <!-- Page 1 -->
+            <div class="page">
+                <div class="page__container">
+                    <img class="logo" src="{% static '/assets/logores.svg' %}">
+                    <img class="bg" src="{% static '/assets/bgres.png' %}">
+                    <br>
+                    <h3 class="aaa">
+                        Диагностика успеваемости ученика
+                        <br>
+                        по школьной программе.
+                    </h3>
+                    <div class="aab">
+                        <img class="bg-star1" src="{% static './assets/star.svg' %}">
+                        <div class="aac">
+                            <div class="aac_sal">Салем!</div>
+                            <div style="font-size: 24px;" class="aac_nam">{{ name }}</div>
+                            <div style="display: flex; justify-content: space-around; width: 100%" class="aac_des">
+                                <div>
+                                    
+                                    <br>
+                                    {{ quiz_grade }}
+                                </div>
+                                <div>
+                                    <b>Цель</b>
+                                    <br>
+                                    Диагностика знаний
+                                </div>
+                            </div>
+                        </div>
+                        <div class="aad">
+                            <span class="aad_res">Результаты тестирования</span>
+                            <span class="aad_per">{{ percentage_score }}%</span>
+                            <div class="points-display">{{ user_points }}/{{ total_possible }} баллов</div>
+                        </div>
+                    </div>
+                    <div class="summary">Диагностика</div>
+                    <div class="summary__desc">
+                        Представленная диагностика рассматривает академические способности ребенка в
+                        различных областях знаний. Оценка проведена по балльной системе, где указано количество
+                        набранных баллов по сравнению с максимально возможным. Этот подход позволяет
+                        выявить как сильные, так и слабые стороны в учебном процессе.
+                    </div>
+                    <div class="result">
+                        <div class="exct_sci">
+                            <div class="exct_sci_title">Точные науки</div>
+                            <div class="sum_sci_sub">
+                                {% for stat in exact_stats %}
+                                <div class="sci_sub">
+                                    <div class="sci_sub_title">{{ stat.category }}</div>
+                                    <hr width="80px">
+                                    <div class="sci_sub_grade">{{ stat.user_points }}/{{ stat.total_possible }}</div>
+                                    <!-- <div class="percentage-display">{{ stat.percentage|floatformat:1 }}%</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <hr width="80%">
+                            <div class="exct_sci_ttl">
+                                <div class="sci_ttl_grade">{{ exact_total_stats }}</div>
+                                <div class="sci_ttl_text">Всего баллов</div>
+                                <!-- <div class="category-percentage">{{ exact_percentage|floatformat:1 }}%</div> -->
+                            </div>
+                        </div>
+                        <div class="nat_sci">
+                            <div class="nat_sci_title">Гуманитарные науки</div>
+                            <div class="sum_sci_sub">
+                                {% for stat in natural_stats %}
+                                <div class="sci_sub">
+                                    <div class="sci_sub_title">{{ stat.category }}</div>
+                                    <hr width="80px">
+                                    <div class="sci_sub_grade">{{ stat.user_points }}/{{ stat.total_possible }}</div>
+                                    <!-- <div class="percentage-display">{{ stat.percentage|floatformat:1 }}%</div> -->
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <hr width="80%">
+                           
+                            <div class="exct_sci_ttl">
+                                <div class="sci_ttl_grade">{{ natural_total_stats }}</div>
+                                <div class="sci_ttl_text">Всего баллов</div>
+                                <!-- <div class="category-percentage">{{ natural_percentage|floatformat:1 }}%</div> -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 2 -->
+            <div class="page">
+                <div class="page__container">
+                    <img class="logo" src="{% static './assets/logores.svg' %}">
+                    <img class="bg" src="{% static './assets/bgres.png' %}">
+                    <br>
+                    <h3 class="aaa">
+                        Диагностика успеваемости ученика
+                        <br>
+                        по школьной программе.
+                    </h3>
+                   
+                    <div class="page-2-text">{{ conclusion }}</div>
+                    <div class="page-2-summary-title">Общая характеристика</div>
+                    <br>
+                    <div class="page-2-summary">
+                        <div class="page-2-summary-exc">
+                            <b>Точные науки:</b>
+                            <br>
+                            <br>
+                            {{ exact_characterization | linebreaks }}
+                        </div>
+                        <div class="page-2-summary-nat">
+                            <b>Естественные науки:</b>
+                            <br>
+                            <br>
+                            {{ natural_characterization | linebreaks }}
+                        </div>
+                    </div>
+                    <div class="warning">
+                        <img height="60px" style="margin-right: 5px;" src="{% static './assets/important.svg' %}">
+                        <span>{{ summary_characterization | linebreaks }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 3 -->
+            <div class="page">
+                <div class="page__container">
+                    <img class="logo" src="{% static './assets/logores.svg' %}">
+                    <img class="bg" src="{% static './assets/bgres.png' %}">
+                    <br>
+                    <h3 class="aaa">
+                        Диагностика успеваемости ученика
+                        <br>
+                        по школьной программе.
+                    </h3>
+                    <div class="recomendation">
+                        <div class="recomendation_title">Рекомендации</div>
+                        <div class="recomendation_text">{{ recomendation | linebreaks }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Page 4 -->
+            <div class="page">
+                <div class="page__container">
+                    <img class="logo" src="{% static './assets/logores.svg' %}">
+                    <img class="bg" src="{% static './assets/bgres.png' %}">
+                    <br>
+                    <h3 class="aaa">
+                        Диагностика успеваемости ученика
+                        <br>
+                        по школьной программе.
+                    </h3>
+                    <br>
+                    <h1 class="">
+                        Возможность поступить в
+                        <br>
+                        специализированные школы
+                    </h1>
+                    
+                    <div class="notes">
+                        <b>Примечание:</b>
+                        <br>
+                        Не все дети могут поступить в эти школы, кому-то это вовсе не нужно,
+                        подготовка бывает сложно и не дает результатов. По статистике 0,8% детей
+                        поступают без специализированной подготовки (образовательные центры и
+                        репетиторы), и 99,2% поступают с помощью специальной подготовки и
+                        правильному подходу, что включает в себя - мотивацию, целеполагание,
+                        подготовку, наставничество и поддержку родителей, практику решения задач.
+                    </div>
+                    <div style="display: flex;">
+                        <div style="width: 180px;
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                    margin-top: 24px">
+                            <b style="text-align: center;">У вас</b>
+                            <div style="display: flex;">
+                                <div class="month-counter">{{ remaining_month }}</div>
+                            </div>
+                            <b>месяцев</b>
+                        </div>
+                        <div class="end-text"
+                             style="margin-top: 48px;
+                                    margin-left: 16px;
+                                    width: 400px">
+                            На подготовку к поступлению в эти школы.
+                            При подготовке к экзаменам в эти школы
+                            улучшается общий уровень успеваемости по
+                            основным предметам и так, как у ребенка и
+                            родителей появляется цель, результат будет
+                            быстрый и качественный.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            let opt = {
+                filename:     'tesla_summary.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            window.onload = function() {
+                html2pdf().set(opt).from(document.querySelector('.safe-screen-qwwq')).save();                
+            }
+        </script>
+    </body>
+</html>
