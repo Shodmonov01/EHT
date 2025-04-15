@@ -142,10 +142,10 @@ export default function Quiz() {
       unanswered_question_ids: unansweredQuestionIds
     };
     
-    console.log("Token:", userToken);
-    console.log("javoblar:", answerIds);
-    console.log("savollar:", unansweredQuestionIds);
-    console.log("To'liq request:", requestData);
+    // console.log("Token:", userToken);
+    // console.log("javoblar:", answerIds);
+    // console.log("savollar:", unansweredQuestionIds);
+    // console.log("To'liq request:", requestData);
 
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
       .then((response) => {
