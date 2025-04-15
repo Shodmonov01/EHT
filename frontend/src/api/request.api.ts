@@ -7,9 +7,7 @@ import {
 } from "../types/quizs";
 import { store } from "../redux/store";
 
-// const API_URL = "http://45.66.10.106:8000";
-const API_URL = "http://176.124.210.145:8000"
-// const API_URL = "https://e0e4-95-214-210-70.ngrok-free.app";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

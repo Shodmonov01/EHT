@@ -151,7 +151,7 @@ export default function Quiz() {
       .then((response) => {
         console.log(response);
         clearQuizStorage();
-        navigate(`/quiz-submit`);
+        navigate(`/test-submit`);
       })
       .catch((error) => {
         console.error(error);
