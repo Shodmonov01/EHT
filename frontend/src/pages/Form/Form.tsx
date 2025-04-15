@@ -59,7 +59,7 @@ export default function Form() {
           category_set_id: data.category_set_id,
         })
       );
-      navigate(`/quiz/${data.category_set_id}`);
+      navigate(`/test/${data.category_set_id}`);
     },
     onError: (error) => {
       console.error("Quiz start error:", error);
