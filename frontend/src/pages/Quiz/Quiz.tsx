@@ -145,7 +145,7 @@ export default function Quiz() {
     // console.log("Token:", userToken);
     // console.log("javoblar:", answerIds);
     // console.log("savollar:", unansweredQuestionIds);
-    // console.log("To'liq request:", requestData);
+    console.log( requestData);
 
     submitQuiz(userToken, answerIds, unansweredQuestionIds)
       .then((response) => {
