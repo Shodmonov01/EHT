@@ -63,9 +63,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
-
-
 BASE_URL = os.getenv("BASE_URL")
 print(BASE_URL, 'base url')
 
@@ -73,8 +70,6 @@ _executor = ThreadPoolExecutor(max_workers=4)
 
 def async_task(fn, *args, **kwargs):
     _executor.submit(fn, *args, **kwargs)
-
-
 
 
 class CategorySetListAPIView(APIView):
