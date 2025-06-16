@@ -9,10 +9,17 @@ CATEGORY_TYPE = (
     ('NTR', _('Natural'))
 )
 
+CATEGORY_TYPE_SUBJECT = (
+    ("MAIN", ("Основной")),
+    ("PROFILE", ("Профильный")),
+)
+
 
 class Category(models.Model):
     name = models.CharField(_("Category Name"), max_length=255)
     type = models.CharField(_("Type"), max_length=8, choices=CATEGORY_TYPE)
+    subject_type = models.CharField(_('Subject_type'), choices=CATEGORY_TYPE_SUBJECT)
+
 
     class Meta:
         verbose_name = _("Category")  # Singular name
@@ -20,6 +27,19 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+class Specialization(models.Model):
+    name = models.CharField(
+        _('Name'), max_length=255,
+    )
+    mark = models.IntegerField(
+        _("Mark")
+
+    )
+    categories = models.ManyToManyField(Category, related_name='category_specialization_sets', verbose_name=_("Categories"))
+
+
+
 
 
 class CategorySet(models.Model):

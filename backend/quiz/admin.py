@@ -1,12 +1,15 @@
 from django.contrib import admin
 from .models import (
     Category, Question, Answer, SubCategory,
-    QuizResult, CategorySet, Quiz
+    QuizResult, CategorySet, Quiz, Specialization
 )
 from nested_inline.admin import NestedStackedInline
 import nested_admin
 from django.utils.translation import gettext_lazy as _
 from modeltranslation.translator import translator, TranslationOptions
+
+
+
 
 # --- Inline for Answers ---
 class AnswerInline(nested_admin.NestedStackedInline):
@@ -96,7 +99,7 @@ class CategorySetAdmin(admin.ModelAdmin):
 
 # --- Admin for Category ---
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'type', 'subject_type']
     search_fields = ['name']
 
     def get_form(self, request, obj=None, **kwargs):
@@ -122,5 +125,5 @@ admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Quiz)
-
+admin.site.register(Specialization)
 # admin.site.register(QuizResult)  # Uncomment if needed
