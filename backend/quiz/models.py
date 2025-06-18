@@ -36,9 +36,10 @@ class Specialization(models.Model):
         _("Mark")
 
     )
-    categories = models.ManyToManyField(Category, related_name='category_specialization_sets', verbose_name=_("Categories"))
+    categories = models.ManyToManyField('CategorySet', related_name='category_specialization_sets', verbose_name=_("Categories"))
 
-
+    def __str__(self):
+        return self.name
 
 
 
