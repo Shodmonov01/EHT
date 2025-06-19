@@ -4,6 +4,7 @@ import Quiz from "../pages/Quiz/Quiz";
 import QlientResult from "../pages/Result/QlientResult";
 // import QuizResult from "../pages/Result/QuizResult";
 import SubmitResult from "../pages/Result/SubmitResult";
+import QuizTest from "../pages/QuizTest";
 const AppRoutes = () => {
     return (    
         <Routes>
