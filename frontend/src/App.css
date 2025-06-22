@@ -1,41 +1,40 @@
 :root {
-  font-family: 'Montserrat', sans-serif;
+    font-family: 'Montserrat', sans-serif;
 }
 
-*{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 *,
 *::before,
 *::after {
-  font-family: inherit;
+    font-family: inherit;
 }
 
 body {
-  background-image: url('/background.png') !important;
-  background-size: cover !important;
-  background-position: center !important;
-  background-repeat: no-repeat !important;
-  min-height: 100vh !important;
-  font-family: inherit;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    background-image: url('/background.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    min-height: 100vh !important;
+    font-family: inherit;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 @media (max-width: 768px) {
-  body {
-    background-image: url('/background-mobile.png') !important;
-  }
+    body {
+        background-image: url('/background-mobile.png') !important;
+    }
 }
 
-.container{
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 /* 
 .bg-ent {
