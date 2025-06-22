@@ -380,7 +380,7 @@ class QuizResultCreateAPIView(APIView):
         # Generate admin statistics URL
         category_set_name = quiz.category_set.name if quiz.category_set else ""
         admin_statistics_url = (
-            f"{BASE_URL}/admin/statistics/?quiz_result_id={quiz_result.id}"
+            f"{BASE_URL}/quiz/admin/statistics/?quiz_result_id={quiz_result.id}"
             f"&percentage={percentage_score:.1f}"
             f"&score={total_user_points}/{total_possible}"
             f"&quiz_name={category_set_name}"
