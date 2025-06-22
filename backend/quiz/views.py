@@ -668,3 +668,377 @@ from django.shortcuts import render
 def get_admin_statistics_page(request):
     quiz_result = request.GET.get('quiz_result_id')
     return render(request, 'admin_statistics_page.html', context = {'quiz_result_id': quiz_result})
+
+##############################33
+
+
+
+
+SUBJECT_EVALUATIONS = {
+    'reading_literacy': {
+        'low': "По грамотности чтения показан низкий результат. Необходимо уделить больше внимания развитию навыков понимания текста, анализу информации и критическому мышлению. Рекомендуется регулярное чтение различных типов текстов и выполнение упражнений на понимание прочитанного.",
+        'medium': "По грамотности чтения показан средний результат. У вас есть базовые навыки работы с текстом, но есть потенциал для улучшения. Рекомендуется практиковать анализ сложных текстов и работу с различными типами информации.",
+        'high': "Отличный результат по грамотности чтения! Вы демонстрируете высокий уровень понимания текста и способность к анализу информации. Продолжайте развивать эти навыки для поддержания высокого уровня."
+    },
+    'math_literacy': {
+        'low': "Математическая грамотность требует серьезного внимания. Необходимо укрепить базовые математические концепции и развить навыки решения практических задач. Рекомендуется систематическое изучение основных тем и регулярная практика.",
+        'medium': "Средний уровень математической грамотности. Базовые навыки присутствуют, но требуется дополнительная работа над сложными задачами. Сосредоточьтесь на развитии логического мышления и практическом применении математических знаний.",
+        'high': "Превосходный результат по математической грамотности! Вы показываете отличное понимание математических концепций и умение применять их на практике. Продолжайте развивать аналитические способности."
+    },
+    'history_kazakhstan': {
+        'low': "Знания по истории Казахстана нуждаются в значительном улучшении. Рекомендуется систематическое изучение ключевых исторических периодов, важных событий и личностей. Уделите особое внимание современной истории Казахстана.",
+        'medium': "Удовлетворительные знания по истории Казахстана. Основные факты известны, но требуется более глубокое понимание исторических процессов. Рекомендуется изучение дополнительных источников и анализ причинно-следственных связей.",
+        'high': "Отличные знания по истории Казахстана! Вы демонстрируете глубокое понимание исторических процессов и их влияния на современность. Продолжайте изучать детали и различные интерпретации исторических событий."
+    },
+    'profile_subject': {
+        'low': "Результат по профильному предмету {subject_name} требует серьезной работы. Это критически важный предмет для вашей будущей специальности. Рекомендуется интенсивная подготовка с репетитором и дополнительное изучение материала.",
+        'medium': "Средний результат по профильному предмету {subject_name}. Есть базовые знания, но для успешного поступления требуется значительное улучшение. Сосредоточьтесь на изучении сложных тем и решении практических задач.",
+        'high': "Превосходный результат по профильному предмету {subject_name}! Это дает вам значительное преимущество при поступлении. Продолжайте углублять знания и поддерживать высокий уровень подготовки."
+    }
+}
+
+GROUP_EVALUATIONS = {
+    'general_subjects': {
+        'low': "Общие предметы (грамотность чтения, математическая грамотность, история Казахстана) требуют комплексной подготовки. Эти предметы формируют основу академических знаний. Рекомендуется составить детальный план подготовки и уделять равное внимание всем трем направлениям.",
+        'medium': "По общим предметам показаны удовлетворительные результаты. Есть хорошая база, но необходимо усилить подготовку для достижения более высоких результатов. Особое внимание уделите предметам с наиболее низкими показателями.",
+        'high': "Отличные результаты по общим предметам! Вы демонстрируете высокий уровень общей академической подготовки. Это создает прочную основу для дальнейшего обучения. Поддерживайте достигнутый уровень."
+    },
+    'profile_subjects': {
+        'low': "Профильные предметы показывают низкий результат, что критично для поступления по выбранной специальности. Необходима интенсивная подготовка с акцентом на эти дисциплины. Рассмотрите возможность занятий с репетитором и дополнительных курсов.",
+        'medium': "Средние результаты по профильным предметам. Есть потенциал для значительного улучшения. Профильные предметы имеют особое значение для поступления, поэтому рекомендуется усилить подготовку именно по этим дисциплинам.",
+        'high': "Превосходные результаты по профильным предметам! Это дает вам отличные шансы на поступление по выбранной специальности. Продолжайте углублять знания в профильных областях."
+    }
+}
+
+ADMISSION_PROBABILITY_COMMENTS = {
+    'low': "Низкий шанс поступления. Требуется серьезная подготовка для повышения конкурентоспособности.",
+    'medium': "Средний шанс поступления. При должной подготовке есть хорошие перспективы для успешного поступления.",
+    'high': "Высокий шанс поступления. Отличные результаты дают вам значительные преимущества."
+}
+
+def get_subject_evaluation_level(percentage):
+    """Determine evaluation level based on percentage"""
+    if percentage < 50:
+        return 'low'
+    elif percentage <= 70:
+        return 'medium'
+    else:
+        return 'high'
+
+def get_subject_detailed_analysis(quiz_result):
+    """Generate detailed analysis for each subject"""
+    categories = Category.objects.filter(
+        category_sets=quiz_result.quiz.category_set
+    ).prefetch_related(
+        Prefetch('subcategory_set', queryset=SubCategory.objects.all())
+    ).order_by('name')
+    
+    subject_analysis = {}
+    general_subjects = []
+    profile_subjects = []
+    
+    for category in categories:
+        category_possible = 0
+        category_points = 0
+        
+        # Calculate points for this category (same logic as your original)
+        for subcategory in category.subcategory_set.all():
+            questions = Question.objects.filter(
+                theme=subcategory,
+                category=category
+            )
+            
+            subcat_possible = sum(
+                2 if q.correct_answers_count in [2,3] else 1 
+                for q in questions
+            )
+            
+            subcat_points = 0
+            for q in questions:
+                correct_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=True
+                ).count()
+                incorrect_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=False
+                ).count()
+                
+                if q.correct_answers_count == 1:
+                    subcat_points += 1 if (correct_answers == 1 and incorrect_answers == 0) else 0
+                elif q.correct_answers_count == 2:
+                    if correct_answers == 2 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif (correct_answers >= 1) and (incorrect_answers == 0 or correct_answers == 2):
+                        subcat_points += 1
+                elif q.correct_answers_count == 3:
+                    if correct_answers == 3 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif correct_answers >= 2:
+                        subcat_points += 1
+            
+            category_possible += subcat_possible
+            category_points += subcat_points
+        
+        # Calculate percentage for this category
+        category_percentage = (category_points / category_possible * 100) if category_possible > 0 else 0
+        evaluation_level = get_subject_evaluation_level(category_percentage)
+        
+        # Determine subject type and get appropriate evaluation text
+        if category.subject_type == 'MAIN':
+            # Map category names to evaluation keys
+            if 'чтение' in category.name.lower() or 'грамотность чтения' in category.name.lower():
+                evaluation_text = SUBJECT_EVALUATIONS['reading_literacy'][evaluation_level]
+                subject_key = 'reading_literacy'
+            elif 'математ' in category.name.lower():
+                evaluation_text = SUBJECT_EVALUATIONS['math_literacy'][evaluation_level]
+                subject_key = 'math_literacy'
+            elif 'история' in category.name.lower():
+                evaluation_text = SUBJECT_EVALUATIONS['history_kazakhstan'][evaluation_level]
+                subject_key = 'history_kazakhstan'
+            else:
+                evaluation_text = SUBJECT_EVALUATIONS['profile_subject'][evaluation_level].format(
+                    subject_name=category.name
+                )
+                subject_key = 'general_other'
+            
+            general_subjects.append({
+                'name': category.name,
+                'points': category_points,
+                'possible': category_possible,
+                'percentage': round(category_percentage, 2),
+                'evaluation_level': evaluation_level,
+                'evaluation_text': evaluation_text
+            })
+        else:  # PROFILE
+            evaluation_text = SUBJECT_EVALUATIONS['profile_subject'][evaluation_level].format(
+                subject_name=category.name
+            )
+            
+            profile_subjects.append({
+                'name': category.name,
+                'points': category_points,
+                'possible': category_possible,
+                'percentage': round(category_percentage, 2),
+                'evaluation_level': evaluation_level,
+                'evaluation_text': evaluation_text
+            })
+    
+    return {
+        'general_subjects': general_subjects,
+        'profile_subjects': profile_subjects
+    }
+
+def get_group_analysis(subjects_data):
+    """Generate group analysis for general and profile subjects"""
+    if not subjects_data:
+        return {
+            'average_percentage': 0,
+            'evaluation_level': 'low',
+            'evaluation_text': "Нет данных для анализа"
+        }
+    
+    # Calculate average percentage
+    total_points = sum(s['points'] for s in subjects_data)
+    total_possible = sum(s['possible'] for s in subjects_data)
+    average_percentage = (total_points / total_possible * 100) if total_possible > 0 else 0
+    
+    evaluation_level = get_subject_evaluation_level(average_percentage)
+    
+    return {
+        'average_percentage': round(average_percentage, 2),
+        'evaluation_level': evaluation_level,
+        'total_points': total_points,
+        'total_possible': total_possible
+    }
+
+def calculate_admission_probability(total_percentage):
+    """Calculate admission probability with and without preparation"""
+    import random
+    
+    # Base probability without preparation
+    if total_percentage >= 80:
+        base_prob = random.randint(75, 90)
+    elif total_percentage >= 60:
+        base_prob = random.randint(45, 70)
+    elif total_percentage >= 40:
+        base_prob = random.randint(20, 50)
+    else:
+        base_prob = random.randint(5, 25)
+    
+    # Probability with preparation (30-40% improvement, but capped)
+    improvement = random.randint(30, 40)
+    with_prep_prob = min(base_prob + improvement, 94)  # Cap at 94% to avoid 95%+
+    
+    # Ensure we don't show 0%
+    base_prob = max(base_prob, 1)
+    with_prep_prob = max(with_prep_prob, 1)
+    
+    # Get evaluation comments
+    base_comment = ADMISSION_PROBABILITY_COMMENTS[
+        'high' if base_prob >= 70 else 'medium' if base_prob >= 40 else 'low'
+    ]
+    prep_comment = ADMISSION_PROBABILITY_COMMENTS[
+        'high' if with_prep_prob >= 70 else 'medium' if with_prep_prob >= 40 else 'low'
+    ]
+    
+    return {
+        'without_preparation': {
+            'percentage': base_prob,
+            'comment': base_comment
+        },
+        'with_preparation': {
+            'percentage': with_prep_prob,
+            'comment': prep_comment
+        },
+        'improvement_potential': with_prep_prob - base_prob
+    }
+
+def get_quiz_result_context_v2(quiz_result):
+    """
+    Enhanced version with detailed subject analysis and admission probability
+    """
+    # Get subject analysis
+    subject_analysis = get_subject_detailed_analysis(quiz_result)
+    
+    # Get group analysis
+    general_analysis = get_group_analysis(subject_analysis['general_subjects'])
+    profile_analysis = get_group_analysis(subject_analysis['profile_subjects'])
+    
+    # Add group evaluation texts
+    general_analysis['evaluation_text'] = GROUP_EVALUATIONS['general_subjects'][general_analysis['evaluation_level']]
+    profile_analysis['evaluation_text'] = GROUP_EVALUATIONS['profile_subjects'][profile_analysis['evaluation_level']]
+    
+    # Calculate overall percentage
+    overall_percentage = round(
+        (quiz_result.user_points / quiz_result.total_possible_points * 100) 
+        if quiz_result.total_possible_points > 0 else 0,
+        2
+    )
+    
+    # Calculate admission probability
+    admission_probability = calculate_admission_probability(overall_percentage)
+    
+    context = {
+        'quiz_result': quiz_result,
+        'name': quiz_result.quiz.name if quiz_result.quiz else "N/A",
+        'quiz_name': quiz_result.quiz.category_set.name if quiz_result.quiz else "Diagnostic Quiz",
+        'passed_date': quiz_result.created_at.strftime('%d.%m.%Y'),
+        'total_possible': quiz_result.total_possible_points,
+        'user_points': quiz_result.user_points,
+        'percentage_score': overall_percentage,
+        
+        # New detailed analysis
+        'subject_analysis': subject_analysis,
+        'general_subjects_analysis': general_analysis,
+        'profile_subjects_analysis': profile_analysis,
+        'admission_probability': admission_probability,
+        
+        # Summary statistics
+        'total_subjects': len(subject_analysis['general_subjects']) + len(subject_analysis['profile_subjects']),
+        'subjects_passed': len([s for s in subject_analysis['general_subjects'] + subject_analysis['profile_subjects'] if s['percentage'] >= 50]),
+    }
+    
+    return context
+
+def summary_pdf_v2(request):
+    """Updated summary_pdf function with enhanced context"""
+    quiz_result_id = request.GET.get('quiz_result')
+    print(quiz_result_id, 'quiz result id ')
+    quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
+    
+    # Get enhanced context
+    context = get_quiz_result_context_v2(quiz_result)
+    
+    # Keep your existing exact/natural stats logic if needed
+    categories = Category.objects.filter(
+        category_sets=quiz_result.quiz.category_set
+    ).prefetch_related(
+        Prefetch('subcategory_set', queryset=SubCategory.objects.all())
+    ).order_by('name')
+    
+    exact_stats = {'categories': [], 'total_possible': 0, 'user_points': 0}
+    natural_stats = {'categories': [], 'total_possible': 0, 'user_points': 0}
+    
+    for category in categories:
+        category_possible = 0
+        category_points = 0
+        
+        for subcategory in category.subcategory_set.all():
+            questions = Question.objects.filter(
+                theme=subcategory,
+                category=category
+            )
+            
+            subcat_possible = sum(
+                2 if q.correct_answers_count in [2,3] else 1 
+                for q in questions
+            )
+            
+            subcat_points = 0
+            for q in questions:
+                correct_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=True
+                ).count()
+                incorrect_answers = quiz_result.answers.filter(
+                    question=q,
+                    is_correct=False
+                ).count()
+                
+                if q.correct_answers_count == 1:
+                    subcat_points += 1 if (correct_answers == 1 and incorrect_answers == 0) else 0
+                elif q.correct_answers_count == 2:
+                    if correct_answers == 2 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif (correct_answers >= 1) and (incorrect_answers == 0 or correct_answers == 2):
+                        subcat_points += 1
+                elif q.correct_answers_count == 3:
+                    if correct_answers == 3 and incorrect_answers == 0:
+                        subcat_points += 2
+                    elif correct_answers >= 2:
+                        subcat_points += 1
+            
+            category_possible += subcat_possible
+            category_points += subcat_points
+        
+        category_data = {
+            'category': category.name,
+            'total_possible': category_possible,
+            'user_points': category_points,
+            'percentage': round((category_points / category_possible * 100) if category_possible > 0 else 0, 2)
+        }
+        
+        if category.type == 'EXC':
+            exact_stats['categories'].append(category_data)
+            exact_stats['total_possible'] += category_possible
+            exact_stats['user_points'] += category_points
+        else:
+            natural_stats['categories'].append(category_data)
+            natural_stats['total_possible'] += category_possible
+            natural_stats['user_points'] += category_points
+    
+    # Calculate percentages
+    exact_percentage = (exact_stats['user_points'] / exact_stats['total_possible'] * 100) if exact_stats['total_possible'] > 0 else 0
+    natural_percentage = (natural_stats['user_points'] / natural_stats['total_possible'] * 100) if natural_stats['total_possible'] > 0 else 0
+    
+    # Add existing characterizations if you have them
+    # closest_natural = min(natural_characterization.keys(), key=lambda x: abs(x - round(natural_percentage)))
+    # closest_exact = min(exact_characterization.keys(), key=lambda x: abs(x - round(exact_percentage)))
+    
+    context.update({
+        'exact_stats': exact_stats['categories'],
+        'natural_stats': natural_stats['categories'],
+        'exact_total_stats': f"{exact_stats['user_points']}/{exact_stats['total_possible']}",
+        'natural_total_stats': f"{natural_stats['user_points']}/{natural_stats['total_possible']}",
+        'exact_percentage': round(exact_percentage, 2),
+        'natural_percentage': round(natural_percentage, 2),
+        # Add your existing characterizations here if available
+        # 'recomendation': get_closest_match(recomendation, context['percentage_score']),
+        # 'conclusion': get_conclusion_with_score(conclusion, context['percentage_score']),
+        # 'natural_characterization': get_closest_match(natural_characterization, natural_percentage),
+        # 'exact_characterization': get_closest_match(exact_characterization, exact_percentage),
+        # 'summary_characterization': summary_characterization[closest_exact][closest_natural],
+    })
+    
+    return render(request, 'summary.html', context)

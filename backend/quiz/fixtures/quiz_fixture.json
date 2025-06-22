@@ -1,894 +1,105 @@
 [
-    {
-      "model": "quiz.category",
-      "pk": 1,
-      "fields": {
-        "name": "Mathematics",
-        "type": "EXC"
-      }
-    },
-    {
-      "model": "quiz.category",
-      "pk": 2,
-      "fields": {
-        "name": "Science",
-        "type": "NTR"
-      }
-    },
-    {
-      "model": "quiz.category",
-      "pk": 3,
-      "fields": {
-        "name": "History",
-        "type": "EXC"
-      }
-    },
-    {
-      "model": "quiz.category",
-      "pk": 4,
-      "fields": {
-        "name": "Geography",
-        "type": "NTR"
-      }
-    },
-    {
-      "model": "quiz.category",
-      "pk": 5,
-      "fields": {
-        "name": "Literature",
-        "type": "EXC"
-      }
-    },
-    
-    {
-      "model": "quiz.categoryset",
-      "pk": 1,
-      "fields": {
-        "name": "Elementary School Set",
-        "categories": [1, 2, 4]
-      }
-    },
-    {
-      "model": "quiz.categoryset",
-      "pk": 2,
-      "fields": {
-        "name": "Middle School Set",
-        "categories": [1, 2, 3, 4, 5]
-      }
-    },
-    {
-      "model": "quiz.categoryset",
-      "pk": 3,
-      "fields": {
-        "name": "High School Set",
-        "categories": [1, 2, 3, 4, 5]
-      }
-    },
-    
-    {
-      "model": "quiz.subcategory",
-      "pk": 1,
-      "fields": {
-        "name": "Algebra",
-        "category": 1
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 2,
-      "fields": {
-        "name": "Geometry",
-        "category": 1
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 3,
-      "fields": {
-        "name": "Physics",
-        "category": 2
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 4,
-      "fields": {
-        "name": "Biology",
-        "category": 2
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 5,
-      "fields": {
-        "name": "Chemistry",
-        "category": 2
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 6,
-      "fields": {
-        "name": "Ancient History",
-        "category": 3
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 7,
-      "fields": {
-        "name": "World Wars",
-        "category": 3
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 8,
-      "fields": {
-        "name": "Continents",
-        "category": 4
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 9,
-      "fields": {
-        "name": "Countries",
-        "category": 4
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 10,
-      "fields": {
-        "name": "Classical Literature",
-        "category": 5
-      }
-    },
-    {
-      "model": "quiz.subcategory",
-      "pk": 11,
-      "fields": {
-        "name": "Modern Literature",
-        "category": 5
-      }
-    },
-    
-    {
-      "model": "quiz.question",
-      "pk": 1,
-      "fields": {
-        "text": "What is 2 + 2?",
-        "category": 1,
-        "theme": 1,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 2,
-      "fields": {
-        "text": "Solve for x: 3x + 5 = 14",
-        "category": 1,
-        "theme": 1,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 3,
-      "fields": {
-        "text": "What is the formula for the area of a circle?",
-        "category": 1,
-        "theme": 2,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 4,
-      "fields": {
-        "text": "What is the Pythagorean theorem?",
-        "category": 1,
-        "theme": 2,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 5,
-      "fields": {
-        "text": "What is Newton's first law of motion?",
-        "category": 2,
-        "theme": 3,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 6,
-      "fields": {
-        "text": "What is the formula for force?",
-        "category": 2,
-        "theme": 3,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 7,
-      "fields": {
-        "text": "What is photosynthesis?",
-        "category": 2,
-        "theme": 4,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 8,
-      "fields": {
-        "text": "What are the parts of a cell?",
-        "category": 2,
-        "theme": 4,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 9,
-      "fields": {
-        "text": "What is the periodic table?",
-        "category": 2,
-        "theme": 5,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 10,
-      "fields": {
-        "text": "What is the chemical formula for water?",
-        "category": 2,
-        "theme": 5,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 11,
-      "fields": {
-        "text": "Who was Julius Caesar?",
-        "category": 3,
-        "theme": 6,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 12,
-      "fields": {
-        "text": "What was the Roman Empire?",
-        "category": 3,
-        "theme": 6,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 13,
-      "fields": {
-        "text": "When did World War I begin?",
-        "category": 3,
-        "theme": 7,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 14,
-      "fields": {
-        "text": "What countries were part of the Allies in World War II?",
-        "category": 3,
-        "theme": 7,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 15,
-      "fields": {
-        "text": "What are the seven continents?",
-        "category": 4,
-        "theme": 8,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 16,
-      "fields": {
-        "text": "Which is the largest continent?",
-        "category": 4,
-        "theme": 8,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 17,
-      "fields": {
-        "text": "What is the capital of France?",
-        "category": 4,
-        "theme": 9,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 18,
-      "fields": {
-        "text": "Which country has the largest population?",
-        "category": 4,
-        "theme": 9,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 19,
-      "fields": {
-        "text": "Who wrote 'Romeo and Juliet'?",
-        "category": 5,
-        "theme": 10,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 20,
-      "fields": {
-        "text": "What is the main theme of 'The Odyssey'?",
-        "category": 5,
-        "theme": 10,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 21,
-      "fields": {
-        "text": "Who wrote '1984'?",
-        "category": 5,
-        "theme": 11,
-        "image": null
-      }
-    },
-    {
-      "model": "quiz.question",
-      "pk": 22,
-      "fields": {
-        "text": "What is the setting of 'To Kill a Mockingbird'?",
-        "category": 5,
-        "theme": 11,
-        "image": null
-      }
-    },
-    
-    {
-      "model": "quiz.answer",
-      "pk": 1,
-      "fields": {
-        "text": "4",
-        "question": 1,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 2,
-      "fields": {
-        "text": "5",
-        "question": 1,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 3,
-      "fields": {
-        "text": "3",
-        "question": 1,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 4,
-      "fields": {
-        "text": "22",
-        "question": 1,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 5,
-      "fields": {
-        "text": "x = 3",
-        "question": 2,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 6,
-      "fields": {
-        "text": "x = 4",
-        "question": 2,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 7,
-      "fields": {
-        "text": "x = 5",
-        "question": 2,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 8,
-      "fields": {
-        "text": "x = 6",
-        "question": 2,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 9,
-      "fields": {
-        "text": "A = πr²",
-        "question": 3,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 10,
-      "fields": {
-        "text": "A = 2πr",
-        "question": 3,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 11,
-      "fields": {
-        "text": "A = πd",
-        "question": 3,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 12,
-      "fields": {
-        "text": "A = 2πr²",
-        "question": 3,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 13,
-      "fields": {
-        "text": "a² + b² = c²",
-        "question": 4,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 14,
-      "fields": {
-        "text": "a + b = c",
-        "question": 4,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 15,
-      "fields": {
-        "text": "a² - b² = c²",
-        "question": 4,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 16,
-      "fields": {
-        "text": "(a + b)² = c²",
-        "question": 4,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 17,
-      "fields": {
-        "text": "An object at rest stays at rest, and an object in motion stays in motion unless acted upon by an external force.",
-        "question": 5,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 18,
-      "fields": {
-        "text": "Force equals mass times acceleration.",
-        "question": 5,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 19,
-      "fields": {
-        "text": "For every action, there is an equal and opposite reaction.",
-        "question": 5,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 20,
-      "fields": {
-        "text": "Energy cannot be created or destroyed, only transformed.",
-        "question": 5,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 21,
-      "fields": {
-        "text": "F = ma",
-        "question": 6,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 22,
-      "fields": {
-        "text": "F = mv",
-        "question": 6,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 23,
-      "fields": {
-        "text": "F = mg",
-        "question": 6,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 24,
-      "fields": {
-        "text": "F = mc²",
-        "question": 6,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 25,
-      "fields": {
-        "text": "The process by which plants use sunlight to convert carbon dioxide and water into oxygen and glucose.",
-        "question": 7,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 26,
-      "fields": {
-        "text": "The process by which plants break down glucose for energy.",
-        "question": 7,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 27,
-      "fields": {
-        "text": "The process by which plants absorb water from the soil.",
-        "question": 7,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 28,
-      "fields": {
-        "text": "The process by which plants release excess water through their leaves.",
-        "question": 7,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 29,
-      "fields": {
-        "text": "Nucleus, cell membrane, cytoplasm, mitochondria, ribosomes, endoplasmic reticulum, Golgi apparatus",
-        "question": 8,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 30,
-      "fields": {
-        "text": "Nucleus, cell wall, chloroplasts, vacuole",
-        "question": 8,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 31,
-      "fields": {
-        "text": "Heart, lungs, brain, liver",
-        "question": 8,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 32,
-      "fields": {
-        "text": "DNA, RNA, proteins, lipids",
-        "question": 8,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 33,
-      "fields": {
-        "text": "A table of all known chemical elements arranged by atomic number.",
-        "question": 9,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 34,
-      "fields": {
-        "text": "A list of common chemical reactions.",
-        "question": 9,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 35,
-      "fields": {
-        "text": "A chart showing the phases of matter.",
-        "question": 9,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 36,
-      "fields": {
-        "text": "A diagram of atomic structure.",
-        "question": 9,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 37,
-      "fields": {
-        "text": "H₂O",
-        "question": 10,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 38,
-      "fields": {
-        "text": "CO₂",
-        "question": 10,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 39,
-      "fields": {
-        "text": "O₂",
-        "question": 10,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 40,
-      "fields": {
-        "text": "H₂O₂",
-        "question": 10,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 41,
-      "fields": {
-        "text": "A Roman general and statesman who played a critical role in the events that led to the demise of the Roman Republic.",
-        "question": 11,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 42,
-      "fields": {
-        "text": "A Greek philosopher and mathematician.",
-        "question": 11,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 43,
-      "fields": {
-        "text": "The first emperor of the Roman Empire.",
-        "question": 11,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 44,
-      "fields": {
-        "text": "A famous Roman poet and author.",
-        "question": 11,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 45,
-      "fields": {
-        "text": "A vast empire that originated in Rome and expanded to control large parts of Europe, North Africa, and Western Asia.",
-        "question": 12,
-        "image": null,
-        "is_correct": true
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 46,
-      "fields": {
-        "text": "A democratic government system established in ancient Rome.",
-        "question": 12,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 47,
-      "fields": {
-        "text": "A military alliance between European nations.",
-        "question": 12,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.answer",
-      "pk": 48,
-      "fields": {
-        "text": "A trading coalition among Mediterranean cities.",
-        "question": 12,
-        "image": null,
-        "is_correct": false
-      }
-    },
-    {
-      "model": "quiz.quizresult",
-      "pk": 1,
-      "fields": {
-        "phone_number": "555-123-4567",
-        "name": "John Smith",
-        "parent_name": "Mary Smith",
-        "answers": [1, 5, 9, 13, 17],
-        "unanswered_questions": [],
-        "created_at": "2024-12-15T14:30:00Z"
-      }
-    },
-    {
-      "model": "quiz.quizresult",
-      "pk": 2,
-      "fields": {
-        "phone_number": "555-987-6543",
-        "name": "Emma Johnson",
-        "parent_name": "David Johnson",
-        "answers": [2, 6, 10, 14, 18],
-        "unanswered_questions": [3, 7],
-        "created_at": "2024-12-16T09:45:00Z"
-      }
-    },
-    {
-      "model": "quiz.quizresult",
-      "pk": 3,
-      "fields": {
-        "phone_number": "555-555-5555",
-        "name": "Alex Brown",
-        "parent_name": "Sarah Brown",
-        "answers": [3, 7, 11, 15, 19],
-        "unanswered_questions": [],
-        "created_at": "2024-12-17T16:20:00Z"
-      }
+  {
+    "model": "quiz.category",
+    "pk": 1,
+    "fields": {
+      "name": "Mathematics",
+      "type": "EXC",
+      "subject_type": "MAIN"
     }
-  ]
+  },
+  {
+    "model": "quiz.category",
+    "pk": 2,
+    "fields": {
+      "name": "Biology",
+      "type": "NTR",
+      "subject_type": "PROFILE"
+    }
+  },
+  {
+    "model": "quiz.categoryset",
+    "pk": 1,
+    "fields": {
+      "name": "Science Set",
+      "categories": [1, 2]
+    }
+  },
+  {
+    "model": "quiz.specialization",
+    "pk": 1,
+    "fields": {
+      "name": "Medical",
+      "mark": 85,
+      "categories": [1]
+    }
+  },
+  {
+    "model": "quiz.subcategory",
+    "pk": 1,
+    "fields": {
+      "name": "Algebra",
+      "category": 1
+    }
+  },
+  {
+    "model": "quiz.quiz",
+    "pk": 1,
+    "fields": {
+      "user_token": "abc123token",
+      "name": "John Doe",
+      "parent_name": "Jane Doe",
+      "phone_number": "+998901234567",
+      "category_set": 1
+    }
+  },
+  {
+    "model": "quiz.question",
+    "pk": 1,
+    "fields": {
+      "text": "What is 2 + 2?",
+      "category": 1,
+      "theme": 1,
+      "image_ru": null,
+      "image_kz": null,
+      "correct_answers_count": 1
+    }
+  },
+  {
+    "model": "quiz.answer",
+    "pk": 1,
+    "fields": {
+      "text": "4",
+      "question": 1,
+      "image_ru": null,
+      "image_kz": null,
+      "is_correct": true
+    }
+  },
+  {
+    "model": "quiz.answer",
+    "pk": 2,
+    "fields": {
+      "text": "5",
+      "question": 1,
+      "image_ru": null,
+      "image_kz": null,
+      "is_correct": false
+    }
+  },
+  {
+    "model": "quiz.quizresult",
+    "pk": 1,
+    "fields": {
+      "user_token": "c56a4180-65aa-42ec-a945-5fd21dec0538",
+      "quiz": 1,
+      "answers": [1],
+      "unanswered_questions": [],
+      "created_at": "2025-06-22T12:00:00Z",
+      "result_pdf": null,
+      "diagnostic_pdf": null,
+      "total_possible_points": 10,
+      "user_points": 10
+    }
+  }
+]
