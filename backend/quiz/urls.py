@@ -2,7 +2,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
      CategorySetListAPIView, StartQuizAPIView, QuestionListAPIView, QuizResultCreateAPIView, \
-        table_pdf, summary_pdf, get_admin_statistics_page, summary_pdf_v2
+        table_pdf, summary_pdf, get_admin_statistics_page, summary_pdf_v2, CategoryListView
 )
 
 router = DefaultRouter()
@@ -22,6 +22,7 @@ urlpatterns = [
          name='download_diagnostic_pdf'),
     path("summary", summary_pdf_v2, name='s2'),
     path("admin/statistics/", get_admin_statistics_page, name='admin-statistics'),
+    path('subjects', CategoryListView.as_view(), name='subject-list'),
    
 
     # path('quizzes/', QuizListView.as_view(), name='quiz-list'),

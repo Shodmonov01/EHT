@@ -1043,3 +1043,11 @@ def summary_pdf_v2(request):
     })
     
     return render(request, 'summary.html', context)
+
+from rest_framework import generics
+
+class CategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
