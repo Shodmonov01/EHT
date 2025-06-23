@@ -4,7 +4,7 @@ import LanguageSwitcher from '../../components/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
 // import yellowBg from '../../assets/images/yellow-bg.png'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { fetchCategories, startQuiz } from '../../api/request.api'
+import { startQuiz } from '../../api/request.api'
 import { useState, useEffect } from 'react'
 import { QuizStartRequest, QuizResult, Category } from '../../types/quizs'
 import { useNavigate } from 'react-router-dom'
@@ -16,7 +16,7 @@ import Loader from '../../components/Loader'
 import LoadingButton from '../../components/LoadingButton'
 // import { div } from 'framer-motion/client'
 
-export default function Form() {
+export default function FormSt() {
     const { t } = useTranslation()
     const dispatch = useDispatch()
     const currentLanguage = useSelector((state: RootState) => state.language.currentLanguage)
@@ -27,21 +27,26 @@ export default function Form() {
         phone_number: ''
     })
     const [isAgreed, setIsAgreed] = useState(false)
+    // const [point, setPoint] = useState()
+
     const navigate = useNavigate()
 
     const {
-        data: categories,
+        data: subject,
         isError,
         isLoading,
         refetch
     } = useQuery({
-        queryKey: ['categories', currentLanguage],
+        queryKey: ['subjects', currentLanguage],
         queryFn: async () => {
-            const data = await fetchCategories()
+            const response = await fetch(`http://185.191.141.172:8001/quiz/subjects`)
+            if (!response.ok) {
+                throw new Error('Network response was not ok')
+            }
+            const data = await response.json()
             return data
         }
     })
-    console.log('categories', categories)
 
     useEffect(() => {
         refetch()
@@ -121,9 +126,8 @@ export default function Form() {
                 <div className='quiz__description'>{t('form.description')}</div>
 
                 <div className='form-content'>
-                    <div className=' text-cont'>
-                        <h2 className='form-subtitle'>{t('form.aboutYou')}</h2>
-                        <div className='bg-text' />
+                    <div style={{ marginBottom: '10px' }} className=' text-cont'>
+                        <h2 className='form-subtitle'>{t('form.yourDetails')}</h2>
                     </div>
 
                     <form id='' onSubmit={handleSubmit}>
@@ -131,7 +135,7 @@ export default function Form() {
                             <input
                                 type='text'
                                 name='parents_fullname'
-                                placeholder={t('form.parentName')}
+                                placeholder={t('form.name')}
                                 required
                                 value={formData.parents_fullname}
                                 onChange={handleChange}
@@ -141,42 +145,51 @@ export default function Form() {
                             <input
                                 type='text'
                                 name='name'
-                                placeholder={t('form.fullName')}
-                                required
-                                value={formData.name}
-                                onChange={handleChange}
-                                disabled={isStarting}
-                            />
-
-                            <input
-                                type='text'
-                                name='phone_number'
                                 placeholder={t('form.phone')}
                                 required
-                                value={formData.phone_number}
+                                value={formData.name}
                                 onChange={handleChange}
                                 disabled={isStarting}
                             />
                         </div>
 
                         <div className=''>
-                            <div className=' text-cont'>
+                            <div style={{ marginBottom: '10px' }} className=' text-cont'>
                                 <label htmlFor='category' className='form-subtitle'>
-                                    {t('form.selectClass')}:
+                                    {t('form.pointsFor')}:
                                 </label>
-                                <div className='bg-text2' />
                             </div>
                             <Select
                                 id='category'
-                                options={categories?.map((category: Category) => ({
+                                options={subject?.map((category: Category) => ({
                                     value: category.id,
                                     label: category.name
                                 }))}
-                                onChange={selectedOption => setSelectedCategory(selectedOption?.value || null)}
+                                onChange={(selectedOption: any) => setSelectedCategory(selectedOption?.value || null)}
                                 required
                                 isDisabled={isStarting}
                                 className='custom-select'
-                                placeholder={t('form.selectSubject')}
+                                placeholder={t('form.pointsFor')}
+                            />
+                        </div>
+
+                        <div className=''>
+                            <div style={{ marginBottom: '10px' }} className=' text-cont'>
+                                <label htmlFor='point' className='form-subtitle'>
+                                    {t('form.pointsFor')}:
+                                </label>
+                            </div>
+                            <Select
+                                id='point'
+                                options={subject?.map((category: Category) => ({
+                                    value: category.id,
+                                    label: category.name
+                                }))}
+                                onChange={(selectedOption: any) => setSelectedCategory(selectedOption?.value || null)}
+                                required
+                                isDisabled={isStarting}
+                                className='custom-select'
+                                placeholder={t('form.pointsFor')}
                             />
                         </div>
 
@@ -193,27 +206,9 @@ export default function Form() {
                         </div>
 
                         <LoadingButton type='submit' isLoading={isStarting} disabled={!selectedCategory}>
-                            {t('form.startForm')}
+                            {t('form.sendData')}
                         </LoadingButton>
                     </form>
-                    <div style={{ display: 'flex', justifyContent: 'end' }}>
-                        <button
-                            style={{
-                                marginTop: '20px',
-                                fontSize: '18px',
-                                paddingBlock: '10px',
-                                paddingInline: '45px',
-                                backgroundColor: '#1c559e',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '5px',
-                                cursor: 'pointer'
-                            }}
-                            onClick={() => navigate('/form')}
-                        >
-                            кнопка
-                        </button>
-                    </div>
                 </div>
             </motion.div>
         </div>
