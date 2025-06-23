@@ -83,7 +83,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'type']
+        fields = ['id', 'name', 'type', 'subject_type']
 
 
 class CategorySetHomeSerializer(serializers.ModelSerializer):
