@@ -12,7 +12,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import  Question, Answer, Category, QuizResult, SubCategory, CategorySet, Quiz
 from .serializers import  QuestionSerializer, AnswerSerializer,\
-                            CategorySetHomeSerializer, UserQuizStarteSerializer
+                            CategorySetHomeSerializer, UserQuizStarteSerializer,\
+                                  DiagnosticInputSerializer, DiagnosticResultSerializer
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from oauth2client.service_account import ServiceAccountCredentials
 from rest_framework.permissions import AllowAny
@@ -1050,4 +1051,328 @@ class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+
+##################################
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils.translation import gettext_lazy as _
+from django.db import transaction
+import uuid
+from datetime import datetime
+
+
+class DiagnosticService:
+    """Service class for diagnostic calculations and evaluations"""
+    
+    TOTAL_MAX_POINTS = 140
+    
+    @staticmethod
+    def get_max_points_for_category(category):
+        """Get max points based on category subject type"""
+        return 40 if category.subject_type == 'PROFILE' else 20
+    
+    @staticmethod
+    def calculate_percentage(points, max_points):
+        """Calculate percentage"""
+        return (points / max_points) * 100 if max_points > 0 else 0
+    
+    @staticmethod
+    def get_level(percentage):
+        """Determine level based on percentage"""
+        if percentage >= 70:
+            return "высокий"
+        elif percentage >= 50:
+            return "средний"
+        else:
+            return "низкий"
+    
+    @staticmethod
+    def evaluate_subject(category, points):
+        """Evaluate individual subject"""
+        max_points = DiagnosticService.get_max_points_for_category(category)
+        percentage = DiagnosticService.calculate_percentage(points, max_points)
+        level = DiagnosticService.get_level(percentage)
+        
+        return {
+            'category_id': category.id,
+            'category_name': category.name,
+            'category_type': category.type,
+            'subject_type': category.subject_type,
+            'points': points,
+            'max_points': max_points,
+            'percentage': round(percentage, 2),
+            'level': level
+        }
+    
+    @staticmethod
+    def evaluate_groups(subject_evaluations):
+        """Evaluate groups of subjects by subject_type"""
+        groups = {}
+        
+        # Group subjects by subject_type
+        for subject in subject_evaluations:
+            group_type = subject['subject_type']
+            if group_type not in groups:
+                groups[group_type] = {
+                    'subjects': [],
+                    'total_points': 0,
+                    'max_points': 0
+                }
+            
+            groups[group_type]['subjects'].append(subject)
+            groups[group_type]['total_points'] += subject['points']
+            groups[group_type]['max_points'] += subject['max_points']
+        
+        # Calculate group evaluations
+        group_evaluations = []
+        for group_type, group_data in groups.items():
+            percentage = DiagnosticService.calculate_percentage(
+                group_data['total_points'], 
+                group_data['max_points']
+            )
+            level = DiagnosticService.get_level(percentage)
+            
+            group_name = "Основные предметы" if group_type == 'MAIN' else "Профильные предметы"
+            
+            group_evaluations.append({
+                'group_name': group_name,
+                'group_type': group_type,
+                'total_points': group_data['total_points'],
+                'max_points': group_data['max_points'],
+                'percentage': round(percentage, 2),
+                'level': level,
+                'subjects_count': len(group_data['subjects'])
+            })
+        
+        return group_evaluations
+    
+    @staticmethod
+    def generate_recommendations(subject_evaluations, group_evaluations, total_percentage):
+        """Generate detailed recommendations"""
+        recommendations = []
+        
+        # Overall assessment
+        if total_percentage < 50:
+            recommendations.append(
+                "Общий уровень подготовки требует значительного улучшения. "
+                "Рекомендуется комплексная подготовка по всем предметам."
+            )
+        elif total_percentage < 70:
+            recommendations.append(
+                "Уровень подготовки средний. Есть потенциал для улучшения результатов "
+                "с целенаправленной подготовкой."
+            )
+        else:
+            recommendations.append(
+                "Хороший уровень подготовки. Рекомендуется поддерживать текущий уровень "
+                "и работать над слабыми местами."
+            )
+        
+        # Group-specific recommendations
+        for group in group_evaluations:
+            if group['level'] == 'низкий':
+                if group['group_type'] == 'MAIN':
+                    recommendations.append(
+                        f"Основные предметы ({group['percentage']:.1f}%): "
+                        "Необходимо усилить подготовку по базовым дисциплинам. "
+                        "Рекомендуются дополнительные занятия и повторение основных тем."
+                    )
+                else:
+                    recommendations.append(
+                        f"Профильные предметы ({group['percentage']:.1f}%): "
+                        "Требуется интенсивная подготовка по специализированным дисциплинам. "
+                        "Рекомендуется работа с преподавателем и решение практических задач."
+                    )
+        
+        # Subject-specific recommendations
+        weak_subjects = [s for s in subject_evaluations if s['level'] == 'низкий']
+        if weak_subjects:
+            subject_names = [s['category_name'] for s in weak_subjects]
+            recommendations.append(
+                f"Слабые предметы: {', '.join(subject_names)}. "
+                "Рекомендуется уделить этим предметам особое внимание."
+            )
+        
+        return " ".join(recommendations)
+    
+    @staticmethod
+    def calculate_admission_probability(total_percentage, subject_evaluations):
+        """Calculate admission probability"""
+        # Basic probability calculation based on total percentage
+        base_probability = min(total_percentage / 100, 0.95)
+        
+        # Adjust based on profile subjects performance
+        profile_subjects = [s for s in subject_evaluations if s['subject_type'] == 'PROFILE']
+        if profile_subjects:
+            profile_avg = sum(s['percentage'] for s in profile_subjects) / len(profile_subjects)
+            profile_factor = profile_avg / 100
+            base_probability = (base_probability + profile_factor) / 2
+        
+        without_prep = max(0.05, min(0.95, base_probability))
+        with_prep = max(0.1, min(0.98, base_probability + 0.3))
+        
+        return {
+            'without_preparation': round(without_prep * 100, 1),
+            'with_preparation': round(with_prep * 100, 1)
+        }
+
+
+class DiagnosticCreateView(APIView):
+    """API endpoint for creating diagnostic results"""
+    @extend_schema(
+        request=DiagnosticInputSerializer,  # Specifies the request body schema
+
+        description="Create a new quiz",
+        parameters=[
+            OpenApiParameter(
+                name="Accept-Language",
+                type=str,
+                location=OpenApiParameter.HEADER,
+                description="Select response language (ru, kz)",
+                required=False,
+                enum=["ru", "kz",],
+            )
+        ]
+    )
+
+    
+    def post(self, request):
+        serializer = DiagnosticInputSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {'errors': serializer.errors}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        validated_data = serializer.validated_data
+        
+        try:
+            with transaction.atomic():
+                # Get categories for the provided scores
+                category_ids = [score['category_id'] for score in validated_data['subject_scores']]
+                categories = Category.objects.filter(id__in=category_ids)
+                
+                if len(categories) != len(category_ids):
+                    return Response(
+                        {'error': 'Some categories not found'}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                
+                # Create category lookup
+                category_lookup = {cat.id: cat for cat in categories}
+                
+                # Evaluate subjects
+                subject_evaluations = []
+                total_points = 0
+                
+                for score_data in validated_data['subject_scores']:
+                    category = category_lookup[score_data['category_id']]
+                    points = score_data['points']
+                    total_points += points
+                    
+                    evaluation = DiagnosticService.evaluate_subject(category, points)
+                    subject_evaluations.append(evaluation)
+                
+                # Evaluate groups
+                group_evaluations = DiagnosticService.evaluate_groups(subject_evaluations)
+                
+                # Calculate total percentage
+                total_percentage = DiagnosticService.calculate_percentage(
+                    total_points, 
+                    DiagnosticService.TOTAL_MAX_POINTS
+                )
+                
+                # Generate recommendations
+                recommendations = DiagnosticService.generate_recommendations(
+                    subject_evaluations, 
+                    group_evaluations, 
+                    total_percentage
+                )
+                
+                # Calculate admission probability
+                admission_probability = DiagnosticService.calculate_admission_probability(
+                    total_percentage, 
+                    subject_evaluations
+                )
+                
+                # Create QuizResult record
+                user_token = uuid.uuid4()
+                quiz_result = QuizResult.objects.create(
+                    user_token=user_token,
+                    total_possible_points=DiagnosticService.TOTAL_MAX_POINTS,
+                    user_points=total_points
+                )
+                
+                # Prepare response data
+                result_data = {
+                    'user_token': user_token,
+                    'name': validated_data['name'],
+                    'phone_number': validated_data['phone_number'],
+                    'total_points': total_points,
+                    'total_possible_points': DiagnosticService.TOTAL_MAX_POINTS,
+                    'total_percentage': round(total_percentage, 2),
+                    'subject_evaluations': subject_evaluations,
+                    'group_evaluations': group_evaluations,
+                    'recommendations': recommendations,
+                    'admission_probability': admission_probability,
+                    'created_at': quiz_result.created_at
+                }
+                
+                response_serializer = DiagnosticResultSerializer(result_data)
+                return Response(
+                    response_serializer.data, 
+                    status=status.HTTP_201_CREATED
+                )
+                
+        except Exception as e:
+            return Response(
+                {'error': f'An error occurred: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class CategoriesListView(APIView):
+    """API endpoint to get available categories for diagnostic"""
+    
+    def get(self, request):
+        categories = Category.objects.all().values(
+            'id', 'name', 'type', 'subject_type'
+        )
+        
+        # Add max_points to each category
+        categories_with_points = []
+        for category in categories:
+            cat_obj = Category.objects.get(id=category['id'])
+            category['max_points'] = DiagnosticService.get_max_points_for_category(cat_obj)
+            categories_with_points.append(category)
+        
+        return Response({
+            'categories': categories_with_points,
+            'total_max_points': DiagnosticService.TOTAL_MAX_POINTS
+        })
+
+
+class DiagnosticResultView(APIView):
+    """API endpoint to retrieve diagnostic result by token"""
+    
+    def get(self, request, token):
+        try:
+            quiz_result = QuizResult.objects.get(user_token=token)
+            
+            # For this endpoint, you might want to reconstruct the evaluation
+            # or store it in the database. For now, return basic info
+            return Response({
+                'user_token': quiz_result.user_token,
+                'total_points': quiz_result.user_points,
+                'total_possible_points': quiz_result.total_possible_points,
+                'created_at': quiz_result.created_at,
+                'pdf_url': quiz_result.get_pdf_url()
+            })
+            
+        except QuizResult.DoesNotExist:
+            return Response(
+                {'error': 'Diagnostic result not found'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
 
