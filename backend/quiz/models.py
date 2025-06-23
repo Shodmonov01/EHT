@@ -24,7 +24,10 @@ class Category(models.Model):
     class Meta:
         verbose_name = _("Category")  # Singular name
         verbose_name_plural = _("Categories")  # Plural name
-
+    
+    def total_possible_mark(self,):
+        pass
+    
     def __str__(self):
         return self.name
 
@@ -167,4 +170,4 @@ class QuizResult(models.Model):
         return None
     
     def __str__(self):
-        return f'{self.quiz.name}' 
+        return f'{self.user_token}' 

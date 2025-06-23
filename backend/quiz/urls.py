@@ -33,3 +33,11 @@ urlpatterns = [
     # path('api/summary/<int:quiz_result_id>/', SummaryAPIView.as_view(), name='api_summary'),
     # path('api/table/<int:quiz_result_id>/', TableAPIView.as_view(), name='api_table'),
 ]
+
+from django.urls import path
+from .views import DiagnosticCreateView, CategoriesListView, DiagnosticResultView
+
+urlpatterns += [
+    path('subjects-create/', DiagnosticCreateView.as_view(), name='diagnostic-create'),
+    path('subjects/result/<uuid:token>/', DiagnosticResultView.as_view(), name='diagnostic-result'),
+]
