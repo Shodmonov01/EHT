@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { fetchQuestions, submitQuiz } from '../../api/request.api'
 import '../../styles/Quiz.css'
-import yellowBg from '../../assets/images/yellow-bg.png'
+// import yellowBg from '../../assets/images/yellow-bg.png'
 import { useSelector, useDispatch } from 'react-redux'
 import { RootState } from '../../redux/store'
 import { useTranslation } from 'react-i18next'
@@ -162,8 +162,6 @@ export default function Quiz() {
                     exit={{ opacity: 0 }}
                     className='quiz-container'
                 >
-                 
-
                     <motion.div
                         className='quiz__description'
                         initial={{ opacity: 0, y: 20 }}
