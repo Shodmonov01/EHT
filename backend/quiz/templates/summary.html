@@ -486,24 +486,24 @@
                     <div class="section-content">{{ general_subjects_analysis.evaluation_text }}</div>
                 </div>
 
-                {% for subject in subject_analysis.general_subjects %}
+                {% comment %} {% for subject in subject_analysis.general_subjects %}
                 <div class="subject-evaluation">
                     <h4>{{ subject.name }} - {{ subject.percentage }}%</h4>
                     <p>{{ subject.evaluation_text }}</p>
                 </div>
-                {% endfor %}
+                {% endfor %} {% endcomment %}
 
                 <div class="title">АНАЛИЗ ПРОФИЛЬНЫХ ПРЕДМЕТОВ</div>
                 <div class="section natural-sciences">
                     <div class="section-content">{{ profile_subjects_analysis.evaluation_text }}</div>
                 </div>
 
-                {% for subject in subject_analysis.profile_subjects %}
+                {% comment %} {% for subject in subject_analysis.profile_subjects %}
                 <div class="subject-evaluation">
                     <h4>{{ subject.name }} - {{ subject.percentage }}%</h4>
                     <p>{{ subject.evaluation_text }}</p>
                 </div>
-                {% endfor %}
+                {% endfor %} {% endcomment %}
             </div>
 
             <!-- Admission Probability Section -->
@@ -521,7 +521,7 @@
 
                 <div class="comparison-section">
                     <div class="preparation-card without-prep">
-                        <div class="prep-header">Без подготовки</div>
+                        <div class="prep-header"  style="background-color: #50bcee" >Без подготовки</div>
                         <div style="background-color: #50bcee; color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
                             {{ admission_probability.without_preparation.percentage }}%
                         </div>
@@ -556,7 +556,7 @@
 
 
                     <div class="preparation-card with-prep">
-                        <div class="prep-header">С подготовкой</div>
+                        <div class="prep-header" style="background-color: #54ab9b">С подготовкой</div>
                         <div      style="
                                 background-color: #54ab9b;
                                 color: white;
