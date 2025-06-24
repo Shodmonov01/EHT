@@ -943,14 +943,28 @@ def get_quiz_result_context_v2(quiz_result):
     
     return context
 
+from .models import Specialization
+
 def summary_pdf_v2(request):
     """Updated summary_pdf function with enhanced context"""
     quiz_result_id = request.GET.get('quiz_result')
     print(quiz_result_id, 'quiz result id ')
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
+    related_specializations = Specialization.objects.filter(
+    categories=quiz_result.quiz.category_set
+        ).distinct()
+
+     
+   
+
     
     # Get enhanced context
     context = get_quiz_result_context_v2(quiz_result)
+    context.update({
+        'specializations': related_specializations
+    })
+
+    print(context['specializations'], 'speciallll')
     
     # Keep your existing exact/natural stats logic if needed
     categories = Category.objects.filter(
