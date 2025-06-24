@@ -435,39 +435,38 @@
                     <div class="subjects-basic">
                         <div class="subjects-title">Основные предметы</div>
                         <div style="border-radius: 15px; padding: 20px; background-color: #d2ddec; min-height: 170px">
+                        <div style="display: flex; justify-content: space-around">
                             <div class="subject-row">
                                 {% for subject in subject_analysis.general_subjects %}
                                 <div class="subject-name">{{ subject.name }}</div>
-                                {% endfor %}
-                            </div>
-                            <div class="subject-row">
-                                {% for subject in subject_analysis.general_subjects %}
                                 <div class="subject-score">{{ subject.points }}/{{ subject.possible }}</div>
                                 {% endfor %}
                             </div>
-                            <div style="display: flex; justify-content: center; font-size: 24px; font-weight: bold; margin-top: 20px;">
-                                {{ general_subjects_analysis.total_points }}/{{ general_subjects_analysis.total_possible }} 
-                                ({{ general_subjects_analysis.average_percentage }}%)
+                        </div>
+                            <div style="padding-inline: 55px" class="subject-row"></div>
+                                <div style="display: flex; justify-content: end" class="total-number">
+                                {{ general_subjects_analysis.total_points }} 
+                                {% comment %} ({{ general_subjects_analysis.average_percentage }}%) {% endcomment %}
                             </div>
                         </div>
                     </div>
                     <div class="subjects-profile">
                         <div class="subjects-title">Профильные предметы</div>
                         <div style="border-radius: 15px; padding: 20px; background-color: #ececd2; min-height: 170px">
+                          <div style="display: flex; justify-content: space-around">
                             <div class="subject-row">
                                 {% for subject in subject_analysis.profile_subjects %}
                                 <div class="subject-name">{{ subject.name }}</div>
-                                {% endfor %}
-                            </div>
-                            <div class="subject-row">
-                                {% for subject in subject_analysis.profile_subjects %}
+            
                                 <div class="subject-score">{{ subject.points }}/{{ subject.possible }}</div>
                                 {% endfor %}
                             </div>
-                            <div style="display: flex; justify-content: center; font-size: 24px; font-weight: bold; margin-top: 20px;">
-                                {{ profile_subjects_analysis.total_points }}/{{ profile_subjects_analysis.total_possible }} 
-                                ({{ profile_subjects_analysis.average_percentage }}%)
+                           
                             </div>
+                                <div class="total-number">{{ profile_subjects_analysis.total_points }}</div>
+                            
+                              <div class="total-label">баллов</div>
+
                         </div>
                     </div>
                 </div>
