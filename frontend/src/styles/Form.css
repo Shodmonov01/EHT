@@ -77,13 +77,14 @@
 }
 
 .form-subtitle {
-    display: block;
+    display: flex;
     font-size: 24px;
     color: #333;
     font-weight: 500;
+    align-items: center;
     /* background-image: url('/bg-text.svg'); */
-    position: relative;
-    z-index: 10;
+    /* position: relative;
+    z-index: 10; */
     /* height: 17px !important; */
 }
 
@@ -91,7 +92,7 @@
     position: relative;
     margin-bottom: 25px;
     height: 12px !important;
-    bottom: 25% !important;
+    bottom: 27% !important;
     background-image: url('/bg-text.svg');
     /* width: 270px; */
 }
@@ -100,7 +101,7 @@
     position: relative;
     margin-bottom: 25px;
     height: 12px !important;
-    bottom: 25% !important;
+    bottom: 30% !important;
     background-image: url('/bg-text.svg');
     /* width: 270px; */
 }
@@ -129,6 +130,26 @@ select {
 }
 
 input[type='text']:focus,
+select:focus {
+    border-color: #0cae74;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(12, 174, 116, 0.1);
+}
+
+input[type='number'],
+select {
+    max-width: 570px;
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 16px;
+    color: #333;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+input[type='number']:focus,
 select:focus {
     border-color: #0cae74;
     outline: none;
