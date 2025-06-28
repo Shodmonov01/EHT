@@ -5,15 +5,16 @@ import { useTranslation } from 'react-i18next'
 // import yellowBg from '../../assets/images/yellow-bg.png'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { startQuiz } from '../../api/request.api'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { QuizStartRequest, QuizResult, Category } from '../../types/quizs'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setQuizData } from '../../redux/features/quizSlice'
 import Select from 'react-select'
 import { RootState } from '../../redux/store'
-import Loader from '../../components/Loader'
 import LoadingButton from '../../components/LoadingButton'
+import Loader from '../../components/Loader'
+import axios from 'axios'
 // import { div } from 'framer-motion/client'
 
 export default function FormSt() {
@@ -23,34 +24,46 @@ export default function FormSt() {
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
     const [formData, setFormData] = useState({
         name: '',
-        parents_fullname: '',
-        phone_number: ''
+        phone: '',
+        history_kazakhstan: '',
+        math_literacy: '',
+        reading_literacy: '',
+        profile_subject_1: {
+            name: '',
+            score: ''
+        },
+        profile_subject_2: {
+            name: '',
+            score: ''
+        }
     })
+
     const [isAgreed, setIsAgreed] = useState(false)
     const token = localStorage.getItem('token')
+    console.log('formData', formData)
 
     const navigate = useNavigate()
     console.log('selectedCategory', selectedCategory)
     console.log('currentLanguage', currentLanguage)
 
-    // const {
-    //     data: subject,
-    //     isError,
-    //     isLoading,
-    //     refetch
-    // } = useQuery({
-    //     queryKey: ['subjects', currentLanguage],
-    //     queryFn: async () => {
-    //         const response = await fetch(`http://185.191.141.172:8001/quiz/subjects`)
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok')
-    //         }
-    //         const data = await response.json()
-    //         return data
-    //     }
-    // })
+    const {
+        data: subject,
+        isError,
+        isLoading,
+        refetch
+    } = useQuery({
+        queryKey: ['subjects', currentLanguage],
+        queryFn: async () => {
+            const response = await fetch(`http://185.191.141.172:8001/quiz/subjects`)
+            if (!response.ok) {
+                throw new Error('Network response was not ok')
+            }
+            const data = await response.json()
+            return data
+        }
+    })
 
-    // console.log('subject', subject)
+    console.log('subject', subject)
 
     const { data: point } = useQuery({
         queryKey: ['points', currentLanguage, selectedCategory],
@@ -69,9 +82,9 @@ export default function FormSt() {
 
     console.log('point', point)
 
-    // useEffect(() => {
-    //     refetch()
-    // }, [currentLanguage, refetch])
+    useEffect(() => {
+        refetch()
+    }, [currentLanguage, refetch])
 
     const { mutate: startQuizMutation, isPending: isStarting } = useMutation<QuizResult, Error, QuizStartRequest>({
         mutationFn: startQuiz,
@@ -99,32 +112,51 @@ export default function FormSt() {
         setIsAgreed(e.target.checked)
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        const quizData: QuizStartRequest = {
-            name: formData.name,
-            parents_fullname: formData.parents_fullname,
-            phone_number: formData.phone_number,
-            category_set_id: selectedCategory || 0,
-            is_agreed: isAgreed
-        }
 
-        if (selectedCategory) {
-            startQuizMutation(quizData)
+        try {
+            await axios.post(
+                'http://185.191.141.172:8001/quiz/ent-diagnosis/',
+                { ...formData },
+                {
+                    headers: {
+                        'Accept-Language': currentLanguage
+                    }
+                }
+            )
+            alert('Данные успешно отправлены!')
+            setFormData({
+                name: '',
+                phone: '',
+                history_kazakhstan: '',
+                math_literacy: '',
+                reading_literacy: '',
+                profile_subject_1: {
+                    name: '',
+                    score: ''
+                },
+                profile_subject_2: {
+                    name: '',
+                    score: ''
+                }
+            })
+        } catch (error) {
+            console.error('Error sending data:', error)
         }
     }
 
-    // if (isLoading) {
-    //     return <Loader />
-    // }
+    if (isLoading) {
+        return <Loader />
+    }
 
-    // if (isError) {
-    //     return (
-    //         <div className='error-container'>
-    //             <div className='error'>{t('form.error')}</div>
-    //         </div>
-    //     )
-    // }
+    if (isError) {
+        return (
+            <div className='error-container'>
+                <div className='error'>{t('form.error')}</div>
+            </div>
+        )
+    }
 
     return (
         <div className='main-container'>
@@ -155,20 +187,20 @@ export default function FormSt() {
                         <div className='input-group'>
                             <input
                                 type='text'
-                                name='parents_fullname'
+                                name='name'
                                 placeholder={t('form.name')}
                                 required
-                                value={formData.parents_fullname}
+                                value={formData.name}
                                 onChange={handleChange}
                                 disabled={isStarting}
                             />
 
                             <input
                                 type='text'
-                                name='name'
+                                name='phone'
                                 placeholder={t('form.phone')}
                                 required
-                                value={formData.name}
+                                value={formData.phone}
                                 onChange={handleChange}
                                 disabled={isStarting}
                             />
@@ -177,53 +209,89 @@ export default function FormSt() {
                         <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <input
+                                    name=''
                                     type='text'
-                                    value='История Казахстана'
+                                    value={t('form.his')}
                                     readOnly
                                     className='form-subtitle'
                                     style={{ whiteSpace: 'nowrap', marginRight: '30px' }}
                                 />
-                                <input type='number' />
+                                <input
+                                    type='number'
+                                    required
+                                    name='history_kazakhstan'
+                                    placeholder={t('form.point')}
+                                    value={formData.history_kazakhstan}
+                                    onChange={handleChange}
+                                    disabled={isStarting}
+                                />
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <input
                                     type='text'
-                                    value='Математическая грамотность'
+                                    value={t('form.math')}
                                     readOnly
                                     className='form-subtitle'
                                     style={{ whiteSpace: 'nowrap', marginRight: '30px' }}
                                 />
-                                <input type='number' />
+                                <input
+                                    type='number'
+                                    required
+                                    name='math_literacy'
+                                    placeholder={t('form.point')}
+                                    value={formData.math_literacy}
+                                    onChange={handleChange}
+                                    disabled={isStarting}
+                                />
                             </div>
 
                             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <input
                                     type='text'
-                                    value='Грамотность чтения'
+                                    value={t('form.read')}
                                     readOnly
                                     className='form-subtitle'
                                     style={{ whiteSpace: 'nowrap', marginRight: '30px' }}
                                 />
-                                <input type='number' />
+                                <input
+                                    type='number'
+                                    required
+                                    name='reading_literacy'
+                                    placeholder={t('form.point')}
+                                    value={formData.reading_literacy}
+                                    onChange={handleChange}
+                                    disabled={isStarting}
+                                />
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '20px' }} className=''>
                             <div style={{ width: '100%' }}>
                                 <div className=' text-cont'>
-                                    <label style={{ marginBlock: '20px' }} htmlFor='category' className='form-subtitle'>
-                                        {/* {t('form.selectClass')}: */}
-                                        Профильный предмет №1
+                                    <label
+                                        style={{ marginBlock: '20px' }}
+                                        htmlFor='category1'
+                                        className='form-subtitle'
+                                    >
+                                        {t('form.prof1')}
                                     </label>
                                 </div>
                                 <Select
-                                    id='category'
-                                    // options={categories?.map((category: Category) => ({
-                                    //     value: category.id,
-                                    //     label: category.name
-                                    // }))}
-                                    // onChange={selectedOption => setSelectedCategory(selectedOption?.value || null)}
+                                    id='category1'
+                                    options={subject?.map((category: Category) => ({
+                                        value: category.id,
+                                        label: category.name
+                                    }))}
+                                    onChange={(selectedOption: any) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            profile_subject_1: {
+                                                ...prev.profile_subject_1,
+                                                name: selectedOption?.label || ''
+                                            }
+                                        }))
+                                    }}
                                     required
                                     isDisabled={isStarting}
                                     className='custom-select'
@@ -231,25 +299,51 @@ export default function FormSt() {
                                 />
                             </div>
                             <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
-                                <input type='number' />
+                                <input
+                                    type='number'
+                                    required
+                                    value={formData.profile_subject_1.score}
+                                    onChange={e =>
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            profile_subject_1: {
+                                                ...prev.profile_subject_1,
+                                                score: e.target.value
+                                            }
+                                        }))
+                                    }
+                                    placeholder={t('form.point')}
+                                    disabled={isStarting}
+                                />
                             </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '20px' }} className=''>
                             <div style={{ width: '100%' }}>
                                 <div className=' text-cont'>
-                                    <label style={{ marginBlock: '20px' }} htmlFor='category' className='form-subtitle'>
-                                        {/* {t('form.selectClass')}: */}
-                                        Профильный предмет №2
+                                    <label
+                                        style={{ marginBlock: '20px' }}
+                                        htmlFor='category2'
+                                        className='form-subtitle'
+                                    >
+                                        {t('form.prof2')}
                                     </label>
                                 </div>
                                 <Select
-                                    id='category'
-                                    // options={categories?.map((category: Category) => ({
-                                    //     value: category.id,
-                                    //     label: category.name
-                                    // }))}
-                                    // onChange={selectedOption => setSelectedCategory(selectedOption?.value || null)}
+                                    id='category2'
+                                    options={subject?.map((category: Category) => ({
+                                        value: category.id,
+                                        label: category.name
+                                    }))}
+                                    onChange={(selectedOption: any) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            profile_subject_2: {
+                                                ...prev.profile_subject_2,
+                                                name: selectedOption?.label || ''
+                                            }
+                                        }))
+                                    }}
                                     required
                                     isDisabled={isStarting}
                                     className='custom-select'
@@ -257,12 +351,27 @@ export default function FormSt() {
                                 />
                             </div>
                             <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
-                                <input type='number' />
+                                <input
+                                    type='number'
+                                    required
+                                    value={formData.profile_subject_2.score}
+                                    onChange={e =>
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            profile_subject_2: {
+                                                ...prev.profile_subject_2,
+                                                score: e.target.value
+                                            }
+                                        }))
+                                    }
+                                    placeholder={t('form.point')}
+                                    disabled={isStarting}
+                                />
                             </div>
                         </div>
 
                         <p style={{ marginTop: '50px' }}>
-                            <strong>Суммарное количество возможных баллов: 140</strong>
+                            <strong>{t('form.ball')} </strong>
                         </p>
 
                         <div className='agreement'>
@@ -277,7 +386,7 @@ export default function FormSt() {
                             <label htmlFor='dataAgreement'>{t('form.dataAgreement')}</label>
                         </div>
 
-                        <LoadingButton type='submit' isLoading={isStarting} disabled={!selectedCategory}>
+                        <LoadingButton type='submit' isLoading={isStarting}>
                             {t('form.sendData')}
                         </LoadingButton>
                     </form>
