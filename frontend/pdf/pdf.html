@@ -13,20 +13,21 @@
                 background-image: url('../public/background.png') !important;
                 background-size: cover !important;
                 background-position: center !important;
-                background-repeat: no-repeat !important;
+                /* background-repeat: no-repeat !important; */
                 min-height: 100vh !important;
                 font-family: inherit;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
+                margin: 0px !important;
             }
 
             .container {
                 background-image: url('../public/background.png') !important;
                 background-size: cover !important;
                 background-position: center !important;
-                background-repeat: no-repeat !important;
+                /* background-repeat: no-repeat !important; */
                 /* width: 210mm; */
-                height: 297mm;
+                /* height: 297mm; */
                 page-break-after: always;
                 padding-inline: 200px;
             }
@@ -60,6 +61,9 @@
                 border-radius: 15px;
                 padding: 20px;
                 color: white;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
             .greeting {
@@ -107,7 +111,7 @@
                 color: white;
                 font-size: 36px;
                 font-weight: bold;
-                margin: 40px 0 30px 0;
+                margin: 40px 0 40px 0;
                 letter-spacing: 2px;
             }
 
@@ -155,6 +159,7 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                flex-direction: column;
                 margin-bottom: 15px;
                 color: black;
                 font-size: 14px;
@@ -167,6 +172,12 @@
             .subject-name {
                 flex: 1;
                 text-align: center;
+                font-weight: bold;
+                font-size: 18px;
+                border-bottom: 2px solid black;
+                padding-bottom: 8px;
+                margin-inline: 5px;
+                margin-bottom: 10px;
             }
 
             .subject-score {
@@ -198,6 +209,7 @@
                 text-align: justify;
                 font-size: 24px;
                 margin-bottom: 20px;
+                line-height: 1.3;
             }
 
             .title {
@@ -260,9 +272,9 @@
 
             .main-title {
                 text-align: center;
-                font-size: 28px;
+                font-size: 32px;
                 font-weight: bold;
-                margin-bottom: 40px;
+                margin: 80px 0px 40px 0px;
                 line-height: 1.3;
             }
 
@@ -274,7 +286,7 @@
             }
 
             .preparation-card {
-                flex: 1;
+                width: 33%;
                 color: white;
             }
 
@@ -299,7 +311,7 @@
                 text-align: center;
                 font-weight: bold;
                 margin-bottom: 15px;
-                font-size: 14px;
+                font-size: 16px;
             }
 
             .percentage {
@@ -391,12 +403,26 @@
                 font-size: 22px;
                 margin-bottom: 10px;
             }
+
+            .card-gradient {
+                color: black;
+                padding-inline: 15px;
+                padding-block: 25px;
+                margin-bottom: 5px;
+                border-top-right-radius: 10px;
+                border-top-left-radius: 10px;
+                text-align: center;
+                font-weight: bold;
+                border: 2px solid black;
+                overflow-y: auto;
+                overflow-wrap: break-word;
+            }
         </style>
     </head>
     <body>
         <div style="width: 100%">
             <!-- page 1 -->
-            <div class="container">
+            <div style="background-image: url('../public/background.png')" class="container">
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
@@ -413,7 +439,9 @@
                 </p>
                 <div class="top-cards">
                     <div class="card-left">
-                        <div class="greeting">Салем!</div>
+                        <div style="display: flex; justify-content: center; align-items: center" class="greeting">
+                            Салем!
+                        </div>
                         <div class="name-box">Торгулова<br />Назгуль</div>
                         <div class="class-info">
                             <span style="font-size: 20px"><strong>Класс</strong><br />5</span>
@@ -421,8 +449,10 @@
                         </div>
                     </div>
                     <div class="card-right">
-                        <div class="results-title">Результаты тестирования</div>
-                        <div style="border-radius: 15px; font-size: 30px" class="percentage">50.0%</div>
+                        <div style="display: flex; justify-content: center; align-items: center" class="results-title">
+                            Результаты тестирования
+                        </div>
+                        <div style="border-radius: 10px; font-size: 30px" class="percentage">50.0%</div>
                     </div>
                 </div>
 
@@ -439,29 +469,37 @@
                     <div class="subjects-basic">
                         <div class="subjects-title">Основные предметы</div>
                         <div style="border-radius: 15px; padding: 20px; background-color: #d2ddec; height: 170px">
-                            <div class="subject-row">
-                                <div class="subject-name">Математическая грамотность</div>
-                                <div class="subject-name">История Казахстана</div>
-                                <div class="subject-name">Грамотность чтения</div>
+                            <div style="display: flex; justify-content: space-around">
+                                <div class="subject-row">
+                                    <div class="subject-name">Математическая грамотность</div>
+
+                                    <div class="subject-score">12/15</div>
+                                </div>
+                                <div class="subject-row">
+                                    <div class="subject-name">История Казахстана</div>
+                                    <div class="subject-score">13/15</div>
+                                </div>
+                                <div class="subject-row">
+                                    <div class="subject-name">Грамотность чтения</div>
+                                    <div class="subject-score">15/20</div>
+                                </div>
                             </div>
-                            <div class="subject-row">
-                                <div class="subject-score">12/15</div>
-                                <div class="subject-score">13/15</div>
-                                <div class="subject-score">15/20</div>
-                            </div>
+                            <div style="padding-inline: 55px" class="subject-row"></div>
                             <div style="display: flex; justify-content: end" class="total-number">70/</div>
                         </div>
                     </div>
                     <div class="subjects-profile">
                         <div class="subjects-title">Профильные предметы</div>
                         <div style="border-radius: 15px; padding: 20px; background-color: #ececd2; height: 170px">
-                            <div class="subject-row">
-                                <div class="subject-name">Математика</div>
-                                <div class="subject-name">Физика</div>
-                            </div>
-                            <div class="subject-row">
-                                <div class="subject-score">20/45</div>
-                                <div class="subject-score">15/45</div>
+                            <div style="display: flex; justify-content: space-around">
+                                <div class="subject-row">
+                                    <div class="subject-name">Математика</div>
+                                    <div class="subject-score">20/45</div>
+                                </div>
+                                <div class="subject-row">
+                                    <div class="subject-name">Физика</div>
+                                    <div class="subject-score">15/45</div>
+                                </div>
                             </div>
                             <div class="total-number">140</div>
                             <div class="total-label">баллов</div>
@@ -471,7 +509,7 @@
             </div>
 
             <!-- page 2 -->
-            <div class="container">
+            <div style="background-image: url('../public/background.png')" class="container">
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
@@ -493,7 +531,7 @@
                     что поднимает вопросы к его готовности к экзамену ЕНТ.
                 </div>
 
-                <div class="title">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
+                <div style="font-size: 30px" class="title">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
 
                 <div class="section exact-sciences">
                     <div class="section-title">Точные науки:</div>
@@ -521,8 +559,19 @@
                     style="display: flex; justify-content: center; align-items: center; padding-block: 50px; gap: 20px"
                     class="info-icon"
                 >
-                    <div class="info-circle">i</div>
-                    <p style="color: white; font-size: 16px">
+                    <div
+                        style="
+                            color: white;
+                            background-color: transparent;
+                            border-radius: 50%;
+                            border: 5px solid white;
+                            font-size: 24px;
+                        "
+                        class="info-circle"
+                    >
+                        !
+                    </div>
+                    <p style="line-height: 1.4; font-size: 18px; color: white">
                         Учащийся сталкивается с трудностями как в точных, так и в гуманитарных дисциплинах, что требует
                         комплексного подхода к обучению и поиска специальных методик для преодоления образовательных
                         препятствий.
@@ -531,7 +580,7 @@
             </div>
 
             <!-- page 3 -->
-            <div class="container">
+            <div style="background-image: url('../public/background.png')" class="container">
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
@@ -554,14 +603,17 @@
                         width: 200px;
                         padding: 1px;
                         color: white;
+                        position: relative;
                         bottom: -10px;
+                        z-index: 1;
                     "
                 >
                     <p style="font-size: 24px; text-align: center">Рекомендации</p>
                 </div>
-                <div class="section exact-sciences">
-                    <!-- <div class="section-title">Точные науки:</div> -->
-
+                <div
+                    style="position: relative; z-index: 10; font-size: 20px; line-height: 1.6"
+                    class="section exact-sciences"
+                >
                     <div class="section-content">
                         Интенсивные занятия с репетиторами: Ребенку требуется индивидуальный подход, предоставляемый
                         опытными репетиторами по каждому из предметов. Это позволит выявить конкретные слабости и
@@ -584,7 +636,7 @@
             </div>
 
             <!-- page 4 -->
-            <div style="padding-bottom: 60px" class="container">
+            <div style="padding-bottom: 60px; background-image: url('../public/background.png')" class="container">
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
@@ -599,7 +651,7 @@
                 >
                     Диагностика успеваемости ученика по тесту ЕНТ
                 </p>
-                <h1 class="main-title">
+                <h1 style="font-size: 36px; font-weight: 700" class="main-title">
                     Возможность поступить<br />
                     в выбранные специальности
                 </h1>
@@ -607,127 +659,174 @@
                 <div class="comparison-section">
                     <div class="preparation-card without-prep">
                         <div
-                            style="background-color: #50bcee; font-size: 26px; border-radius: 10px"
+                            style="background-color: #50bced; font-size: 26px; border-radius: 10px"
                             class="prep-header"
                         >
                             Без подготовки
                         </div>
                         <div
+                            class=""
                             style="
-                                background-color: #50bcee;
+                                background-color: #50bced;
                                 color: white;
-                                padding: 15px;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-top-right-radius: 15px;
+                                border-top-left-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                font-size: 20px;
                             "
                         >
                             10%
                         </div>
                         <div
                             style="
-                                background-color: #7bc5e7;
-                                color: white;
-                                padding: 15px;
+                                background-color: #a8def8;
+                                color: black;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-top-right-radius: 15px;
+                                border-top-left-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                position: relative;
+                                top: -6%;
+                                font-size: 20px;
                             "
                         >
                             5%
                         </div>
                         <div
                             style="
-                                background-color: #8ccdec;
-                                color: white;
-                                padding: 15px;
+                                background-color: #d4eefb;
+                                color: black;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-top-right-radius: 15px;
+                                border-top-left-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                position: relative;
+                                top: -11%;
+                                font-size: 20px;
                             "
                         >
                             15%
                         </div>
                         <div
                             style="
-                                background-color: #add8eb;
-                                color: white;
-                                padding: 15px;
+                                background-color: #eaf7fd;
+                                color: black;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                position: relative;
+                                top: -16%;
+                                font-size: 20px;
                             "
                         >
                             15%
                         </div>
                     </div>
 
-                    <div class="middle-section">
-                        <div class="middle-item">Электротехника и энергетика</div>
-                        <div class="middle-item">Стандартизация, сертификация и метрология (по отраслям)</div>
-                        <div class="middle-item">Механика</div>
-                        <div class="middle-item">Коммуникации и коммуникационные технологии</div>
+                    <div style="display: flex; flex-direction: column; width: 33%; margin-top: 60px">
+                        <div class="card-gradient" style="background-color: #f1c2a4">
+                            Электротехника и
+                            энерxxxxxxxxxxxxxxxxxddddddddddddddddddddddddddddddddddddddddxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxг
+                            mnnnnnnnnn
+                        </div>
+                        <div class="card-gradient" style="background-color: #f9a871; position: relative; top: -6%">
+                            Стандартизация, сертификация
+                            bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbи
+                            метрология (по отраслям)
+                        </div>
+                        <div class="card-gradient" style="background-color: #f1c2a4; position: relative; top: -11%">
+                            Механика
+                        </div>
+                        <div class="card-gradient" style="background-color: #f9a871; position: relative; top: -16%">
+                            Коммуникации и коммуникационные технологии
+                        </div>
                     </div>
 
                     <div class="preparation-card with-prep">
                         <div
-                            style="background-color: #4caf50; font-size: 26px; border-radius: 10px"
+                            style="background-color: #54ab9b; font-size: 26px; border-radius: 10px"
                             class="prep-header"
                         >
                             С подготовкой
                         </div>
                         <div
                             style="
-                                background-color: #4caf50;
+                                background-color: #54ab9b;
                                 color: white;
-                                padding: 15px;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-top-right-radius: 15px;
+                                border-top-left-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                font-size: 20px;
                             "
                         >
                             96%
                         </div>
                         <div
                             style="
-                                background-color: #66bb6a;
-                                color: white;
-                                padding: 15px;
+                                background-color: #aad5cc;
+                                color: black;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-top-right-radius: 15px;
+                                border-top-left-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                position: relative;
+                                top: -6%;
+                                font-size: 20px;
                             "
                         >
                             91%
                         </div>
                         <div
                             style="
-                                background-color: #81c784;
-                                color: white;
-                                padding: 15px;
+                                background-color: #d5e9e7;
+                                color: black;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-top-right-radius: 15px;
+                                border-top-left-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                position: relative;
+                                top: -11%;
+                                font-size: 20px;
                             "
                         >
                             94%
                         </div>
                         <div
                             style="
-                                background-color: #a5d6a7;
+                                background-color: #eaf4f3;
                                 color: black;
-                                padding: 15px;
+                                padding-inline: 15px;
+                                padding-block: 25px;
                                 margin-bottom: 5px;
-                                border-radius: 8px;
+                                border-radius: 15px;
                                 text-align: center;
                                 font-weight: bold;
+                                position: relative;
+                                top: -16%;
+                                font-size: 20px;
                             "
                         >
                             94%
