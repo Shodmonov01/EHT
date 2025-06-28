@@ -1390,3 +1390,184 @@ class DiagnosticResultView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
+class ListProfileSubjectsView(generics.ListAPIView):
+    serializer_class = CategorySerializer
+
+    def get_queryset(self):
+        qs = Category.objects.filter(subject_type="PROFILE")[:2]
+        return qs
+    
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import EntDiagnosisInputSerializer
+
+# --- Utility functions (copied from previous step) ---
+def calculate_subject_level(score, max_score):
+    p = (score / max_score) * 100
+    return "низкий" if p < 50 else "средний" if p <= 70 else "высокий"
+
+def calculate_group_level(scores, max_scores):
+    total = sum(scores)
+    total_max = sum(max_scores)
+    p = (total / total_max) * 100
+    return "низкий" if p < 50 else "средний" if p <= 70 else "высокий"
+
+def get_subject_recommendation(subject, level):
+    rec = {
+        "reading_literacy": {
+            "низкий": "Трудности с пониманием текстов.",
+            "средний": "Базовое понимание есть.",
+            "высокий": "Хорошие навыки."
+        },
+        "math_literacy": {
+            "низкий": "Сложно применять математику.",
+            "средний": "Понимание есть, но есть пробелы.",
+            "высокий": "Уверенные знания."
+        },
+        "history_kazakhstan": {
+            "низкий": "Фрагментарные знания истории.",
+            "средний": "База есть, ошибки в деталях.",
+            "высокий": "Системные знания."
+        },
+        "profile": {
+            "низкий": "Серьёзные пробелы в знаниях.",
+            "средний": "Нужно уверенность в сложных задачах.",
+            "высокий": "Хорошие знания."
+        }
+    }
+    return rec.get(subject, rec["profile"])[level]
+
+def get_group_recommendation(group, level):
+    rec = {
+        "general": {
+            "низкий": "Нужна комплексная работа.",
+            "средний": "Надо улучшать слабые места.",
+            "высокий": "Хороший уровень подготовки."
+        },
+        "profile": {
+            "низкий": "Нужен индивидуальный план.",
+            "средний": "Нужна систематизация знаний.",
+            "высокий": "Готов к поступлению."
+        }
+    }
+    return rec[group][level]
+
+def calculate_admission_probability(percentage):
+    if percentage >= 85:
+        return {"без подготовки": "Высокая (85–95%)", "с подготовкой": "Очень высокая (95–98%)"}
+    elif percentage >= 70:
+        return {"без подготовки": "Средняя (60–75%)", "с подготовкой": "Высокая (80–90%)"}
+    elif percentage >= 50:
+        return {"без подготовки": "Низкая (25–40%)", "с подготовкой": "Средняя (50–65%)"}
+    else:
+        return {"без подготовки": "Очень низкая (5–15%)", "с подготовкой": "Низкая (20–35%)"}
+
+from drf_spectacular.utils import extend_schema, OpenApiExample
+
+@extend_schema(
+    request=EntDiagnosisInputSerializer,
+    
+    examples=[
+        OpenApiExample(
+            name="Пример запроса",
+            value={
+                "name": "Али",
+                "phone": "+998901234567",
+                "history_kazakhstan": 33,
+                "math_literacy": 30,
+                "reading_literacy": 38,
+                "profile_subject_1": {
+                    "name": "Физика",
+                    "score": 45
+                },
+                "profile_subject_2": {
+                    "name": "Математика",
+                    "score": 47
+                }
+            },
+            request_only=True
+        )
+    ],
+    description="Рассчитывает результаты диагностики по ЕНТ и возвращает анализ"
+)
+@api_view(['POST'])
+def ent_diagnosis_analysis(request):
+    serializer = EntDiagnosisInputSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    data = serializer.validated_data
+    total_score = (
+        data['history_kazakhstan'] +
+        data['math_literacy'] +
+        data['reading_literacy'] +
+        data['profile_subject_1']['score'] +
+        data['profile_subject_2']['score']
+    )
+    max_score = 140
+    percentage = (total_score / max_score) * 100
+
+    # Levels
+    reading_level = calculate_subject_level(data['reading_literacy'], 40)
+    math_level = calculate_subject_level(data['math_literacy'], 40)
+    history_level = calculate_subject_level(data['history_kazakhstan'], 40)
+    profile1_level = calculate_subject_level(data['profile_subject_1']['score'], 50)
+    profile2_level = calculate_subject_level(data['profile_subject_2']['score'], 50)
+
+    general_level = calculate_group_level(
+        [data['history_kazakhstan'], data['math_literacy'], data['reading_literacy']], [40, 40, 40]
+    )
+    profile_level = calculate_group_level(
+        [data['profile_subject_1']['score'], data['profile_subject_2']['score']], [50, 50]
+    )
+
+    response_data = {
+        "name": data['name'],
+        "phone": data['phone'],
+        "total_score": total_score,
+        "percentage": round(percentage, 2),
+        "subject_analysis": {
+            "reading_literacy": {
+                "score": data['reading_literacy'],
+                "level": reading_level,
+                "recommendation": get_subject_recommendation("reading_literacy", reading_level)
+            },
+            "math_literacy": {
+                "score": data['math_literacy'],
+                "level": math_level,
+                "recommendation": get_subject_recommendation("math_literacy", math_level)
+            },
+            "history_kazakhstan": {
+                "score": data['history_kazakhstan'],
+                "level": history_level,
+                "recommendation": get_subject_recommendation("history_kazakhstan", history_level)
+            },
+            "profile_subject_1": {
+                "name": data['profile_subject_1']['name'],
+                "score": data['profile_subject_1']['score'],
+                "level": profile1_level,
+                "recommendation": get_subject_recommendation("profile", profile1_level)
+            },
+            "profile_subject_2": {
+                "name": data['profile_subject_2']['name'],
+                "score": data['profile_subject_2']['score'],
+                "level": profile2_level,
+                "recommendation": get_subject_recommendation("profile", profile2_level)
+            }
+        },
+        "group_analysis": {
+            "general_subjects": {
+                "level": general_level,
+                "recommendation": get_group_recommendation("general", general_level)
+            },
+            "profile_subjects": {
+                "level": profile_level,
+                "recommendation": get_group_recommendation("profile", profile_level)
+            }
+        },
+        "admission_probability": calculate_admission_probability(percentage)
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)

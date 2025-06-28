@@ -391,3 +391,18 @@ class DiagnosticResultSerializer(serializers.Serializer):
     
     created_at = serializers.DateTimeField()
 
+class ProfileSubjectSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    score = serializers.IntegerField(min_value=0, max_value=50)
+
+class EntDiagnosisInputSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    phone = serializers.CharField()
+    
+    history_kazakhstan = serializers.IntegerField(min_value=0, max_value=40)
+    math_literacy = serializers.IntegerField(min_value=0, max_value=40)
+    reading_literacy = serializers.IntegerField(min_value=0, max_value=40)
+
+    profile_subject_1 = ProfileSubjectSerializer()
+    profile_subject_2 = ProfileSubjectSerializer()
+    
