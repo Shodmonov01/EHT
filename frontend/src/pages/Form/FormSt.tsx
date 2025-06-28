@@ -27,30 +27,51 @@ export default function FormSt() {
         phone_number: ''
     })
     const [isAgreed, setIsAgreed] = useState(false)
-    // const [point, setPoint] = useState()
+    const token = localStorage.getItem('token')
 
     const navigate = useNavigate()
+    console.log('selectedCategory', selectedCategory)
+    console.log('currentLanguage', currentLanguage)
 
-    const {
-        data: subject,
-        isError,
-        isLoading,
-        refetch
-    } = useQuery({
-        queryKey: ['subjects', currentLanguage],
+    // const {
+    //     data: subject,
+    //     isError,
+    //     isLoading,
+    //     refetch
+    // } = useQuery({
+    //     queryKey: ['subjects', currentLanguage],
+    //     queryFn: async () => {
+    //         const response = await fetch(`http://185.191.141.172:8001/quiz/subjects`)
+    //         if (!response.ok) {
+    //             throw new Error('Network response was not ok')
+    //         }
+    //         const data = await response.json()
+    //         return data
+    //     }
+    // })
+
+    // console.log('subject', subject)
+
+    const { data: point } = useQuery({
+        queryKey: ['points', currentLanguage, selectedCategory],
         queryFn: async () => {
-            const response = await fetch(`http://185.191.141.172:8001/quiz/subjects`)
+            const response = await fetch(`http://185.191.141.172:8001/quiz/subjects/result/${token}/`)
+
             if (!response.ok) {
                 throw new Error('Network response was not ok')
             }
+
             const data = await response.json()
             return data
-        }
+        },
+        enabled: !!selectedCategory
     })
 
-    useEffect(() => {
-        refetch()
-    }, [currentLanguage, refetch])
+    console.log('point', point)
+
+    // useEffect(() => {
+    //     refetch()
+    // }, [currentLanguage, refetch])
 
     const { mutate: startQuizMutation, isPending: isStarting } = useMutation<QuizResult, Error, QuizStartRequest>({
         mutationFn: startQuiz,
@@ -93,17 +114,17 @@ export default function FormSt() {
         }
     }
 
-    if (isLoading) {
-        return <Loader />
-    }
+    // if (isLoading) {
+    //     return <Loader />
+    // }
 
-    if (isError) {
-        return (
-            <div className='error-container'>
-                <div className='error'>{t('form.error')}</div>
-            </div>
-        )
-    }
+    // if (isError) {
+    //     return (
+    //         <div className='error-container'>
+    //             <div className='error'>{t('form.error')}</div>
+    //         </div>
+    //     )
+    // }
 
     return (
         <div className='main-container'>
@@ -153,45 +174,96 @@ export default function FormSt() {
                             />
                         </div>
 
-                        <div className=''>
-                            <div style={{ marginBottom: '10px' }} className=' text-cont'>
-                                <label htmlFor='category' className='form-subtitle'>
-                                    {t('form.pointsFor')}:
-                                </label>
+                        <div style={{ display: 'flex', gap: '20px', flexDirection: 'column' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <input
+                                    type='text'
+                                    value='История Казахстана'
+                                    readOnly
+                                    className='form-subtitle'
+                                    style={{ whiteSpace: 'nowrap', marginRight: '30px' }}
+                                />
+                                <input type='number' />
                             </div>
-                            <Select
-                                id='category'
-                                options={subject?.map((category: Category) => ({
-                                    value: category.id,
-                                    label: category.name
-                                }))}
-                                onChange={(selectedOption: any) => setSelectedCategory(selectedOption?.value || null)}
-                                required
-                                isDisabled={isStarting}
-                                className='custom-select'
-                                placeholder={t('form.pointsFor')}
-                            />
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <input
+                                    type='text'
+                                    value='Математическая грамотность'
+                                    readOnly
+                                    className='form-subtitle'
+                                    style={{ whiteSpace: 'nowrap', marginRight: '30px' }}
+                                />
+                                <input type='number' />
+                            </div>
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                <input
+                                    type='text'
+                                    value='Грамотность чтения'
+                                    readOnly
+                                    className='form-subtitle'
+                                    style={{ whiteSpace: 'nowrap', marginRight: '30px' }}
+                                />
+                                <input type='number' />
+                            </div>
                         </div>
 
-                        <div className=''>
-                            <div style={{ marginBottom: '10px' }} className=' text-cont'>
-                                <label htmlFor='point' className='form-subtitle'>
-                                    {t('form.pointsFor')}:
-                                </label>
+                        <div style={{ display: 'flex', gap: '20px' }} className=''>
+                            <div style={{ width: '100%' }}>
+                                <div className=' text-cont'>
+                                    <label style={{ marginBlock: '20px' }} htmlFor='category' className='form-subtitle'>
+                                        {/* {t('form.selectClass')}: */}
+                                        Профильный предмет №1
+                                    </label>
+                                </div>
+                                <Select
+                                    id='category'
+                                    // options={categories?.map((category: Category) => ({
+                                    //     value: category.id,
+                                    //     label: category.name
+                                    // }))}
+                                    // onChange={selectedOption => setSelectedCategory(selectedOption?.value || null)}
+                                    required
+                                    isDisabled={isStarting}
+                                    className='custom-select'
+                                    placeholder={t('form.selectSubject')}
+                                />
                             </div>
-                            <Select
-                                id='point'
-                                options={subject?.map((category: Category) => ({
-                                    value: category.id,
-                                    label: category.name
-                                }))}
-                                onChange={(selectedOption: any) => setSelectedCategory(selectedOption?.value || null)}
-                                required
-                                isDisabled={isStarting}
-                                className='custom-select'
-                                placeholder={t('form.pointsFor')}
-                            />
+                            <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
+                                <input type='number' />
+                            </div>
                         </div>
+
+                        <div style={{ display: 'flex', gap: '20px' }} className=''>
+                            <div style={{ width: '100%' }}>
+                                <div className=' text-cont'>
+                                    <label style={{ marginBlock: '20px' }} htmlFor='category' className='form-subtitle'>
+                                        {/* {t('form.selectClass')}: */}
+                                        Профильный предмет №2
+                                    </label>
+                                </div>
+                                <Select
+                                    id='category'
+                                    // options={categories?.map((category: Category) => ({
+                                    //     value: category.id,
+                                    //     label: category.name
+                                    // }))}
+                                    // onChange={selectedOption => setSelectedCategory(selectedOption?.value || null)}
+                                    required
+                                    isDisabled={isStarting}
+                                    className='custom-select'
+                                    placeholder={t('form.selectSubject')}
+                                />
+                            </div>
+                            <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
+                                <input type='number' />
+                            </div>
+                        </div>
+
+                        <p style={{ marginTop: '50px' }}>
+                            <strong>Суммарное количество возможных баллов: 140</strong>
+                        </p>
 
                         <div className='agreement'>
                             <input
