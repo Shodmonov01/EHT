@@ -196,6 +196,27 @@ export default function Form() {
                             {t('form.startForm')}
                         </LoadingButton>
                     </form>
+<<<<<<< HEAD
+=======
+                    <div style={{ display: 'flex', justifyContent: 'end' }}>
+                        <button
+                            style={{
+                                marginTop: '20px',
+                                fontSize: '18px',
+                                paddingBlock: '10px',
+                                paddingInline: '45px',
+                                backgroundColor: '#1c559e',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '5px',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => navigate('/form')}
+                        >
+                            кнопка
+                        </button>
+                    </div>
+>>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
                 </div>
             </motion.div>
         </div>
