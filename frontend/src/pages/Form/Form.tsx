@@ -196,8 +196,6 @@ export default function Form() {
                             {t('form.startForm')}
                         </LoadingButton>
                     </form>
-<<<<<<< HEAD
-=======
                     <div style={{ display: 'flex', justifyContent: 'end' }}>
                         <button
                             style={{
@@ -216,7 +214,6 @@ export default function Form() {
                             кнопка
                         </button>
                     </div>
->>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
                 </div>
             </motion.div>
         </div>
