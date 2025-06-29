@@ -77,15 +77,6 @@
 }
 
 .form-subtitle {
-<<<<<<< HEAD
-    display: block;
-    font-size: 24px;
-    color: #333;
-    font-weight: 500;
-    /* background-image: url('/bg-text.svg'); */
-    position: relative;
-    z-index: 10;
-=======
     display: flex;
     font-size: 24px;
     color: #333;
@@ -94,7 +85,6 @@
     /* background-image: url('/bg-text.svg'); */
     /* position: relative;
     z-index: 10; */
->>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
     /* height: 17px !important; */
 }
 
@@ -102,11 +92,7 @@
     position: relative;
     margin-bottom: 25px;
     height: 12px !important;
-<<<<<<< HEAD
-    bottom: 25% !important;
-=======
     bottom: 27% !important;
->>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
     background-image: url('/bg-text.svg');
     /* width: 270px; */
 }
@@ -115,11 +101,7 @@
     position: relative;
     margin-bottom: 25px;
     height: 12px !important;
-<<<<<<< HEAD
-    bottom: 25% !important;
-=======
     bottom: 30% !important;
->>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
     background-image: url('/bg-text.svg');
     /* width: 270px; */
 }
@@ -152,8 +134,6 @@ select:focus {
     border-color: #0cae74;
     outline: none;
     box-shadow: 0 0 0 2px rgba(12, 174, 116, 0.1);
-<<<<<<< HEAD
-=======
 }
 
 input[type='number'],
@@ -174,7 +154,6 @@ select:focus {
     border-color: #0cae74;
     outline: none;
     box-shadow: 0 0 0 2px rgba(12, 174, 116, 0.1);
->>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
 }
 
 .category-select {
