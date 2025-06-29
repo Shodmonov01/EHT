@@ -1049,6 +1049,7 @@ def summary_pdf_v2(request):
         'natural_total_stats': f"{natural_stats['user_points']}/{natural_stats['total_possible']}",
         'exact_percentage': round(exact_percentage, 2),
         'natural_percentage': round(natural_percentage, 2),
+        'current_year' : datetime.now().year,
         # Add your existing characterizations here if available
         # 'recomendation': get_closest_match(recomendation, context['percentage_score']),
         # 'conclusion': get_conclusion_with_score(conclusion, context['percentage_score']),
@@ -1056,6 +1057,8 @@ def summary_pdf_v2(request):
         # 'exact_characterization': get_closest_match(exact_characterization, exact_percentage),
         # 'summary_characterization': summary_characterization[closest_exact][closest_natural],
     })
+
+    print(context, 'this is context----')
     
     return render(request, 'summary.html', context)
 
@@ -1456,13 +1459,13 @@ def get_group_recommendation(group, level):
 
 def calculate_admission_probability(percentage):
     if percentage >= 85:
-        return {"без подготовки": "Высокая (85–95%)", "с подготовкой": "Очень высокая (95–98%)"}
+        return {"without_preparation": "85", "with_preparation": "95"}
     elif percentage >= 70:
-        return {"без подготовки": "Средняя (60–75%)", "с подготовкой": "Высокая (80–90%)"}
+        return {"without_preparation": "60", "with_preparation": "80"}
     elif percentage >= 50:
-        return {"без подготовки": "Низкая (25–40%)", "с подготовкой": "Средняя (50–65%)"}
+        return {"without_preparation": "25", "with_preparation": "65"}
     else:
-        return {"без подготовки": "Очень низкая (5–15%)", "с подготовкой": "Низкая (20–35%)"}
+        return {"without_preparation": "15", "with_preparation": "35%"}
 
 from drf_spectacular.utils import extend_schema, OpenApiExample
 

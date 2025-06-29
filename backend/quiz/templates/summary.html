@@ -437,6 +437,7 @@
                         <div style="border-radius: 15px; padding: 20px; background-color: #d2ddec; min-height: 170px">
                         <div style="display: flex; justify-content: space-around">
                             <div class="subject-row">
+
                                 {% for subject in subject_analysis.general_subjects %}
                                 <div class="subject-name">{{ subject.name }}</div>
                                 <div class="subject-score">{{ subject.points }}/{{ subject.possible }}</div>
@@ -445,8 +446,8 @@
                         </div>
                             <div style="padding-inline: 55px" class="subject-row"></div>
                                 <div style="display: flex; justify-content: end" class="total-number">
-                                {{ general_subjects_analysis.total_points }} 
-                                {% comment %} ({{ general_subjects_analysis.average_percentage }}%) {% endcomment %}
+                                {{ general_subjects_analysis.total_points }} /
+                               
                             </div>
                         </div>
                     </div>
@@ -470,7 +471,9 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
+            
 
             <!-- Subject Evaluations Section -->
             <div style="margin-inline: auto; max-width: 800px">
@@ -504,7 +507,11 @@
                     <p>{{ subject.evaluation_text }}</p>
                 </div>
                 {% endfor %} {% endcomment %}
+
+                
             </div>
+
+            
 
             <!-- Admission Probability Section -->
             <div style="margin-inline: auto; max-width: 800px; padding-bottom: 60px" class="container">
@@ -523,7 +530,7 @@
                     <div class="preparation-card without-prep">
                         <div class="prep-header"  style="background-color: #50bcee" >Без подготовки</div>
                         <div style="background-color: #50bcee; color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
-                            {{ admission_probability.without_preparation.percentage }}%
+                            {{ admission_probability.without_preparation }}%
                         </div>
                         {% comment %} <div style="padding: 10px; font-size: 12px; text-align: center; color: white;">
                             {{ admission_probability.without_preparation.comment }}
@@ -560,17 +567,9 @@
                         <div class="prep-header" style="background-color: #54ab9b">С подготовкой</div>
                         <div      style="
                                 background-color: #54ab9b;
-                                color: white;
-                                padding-inline: 15px;
-                                padding-block: 25px;
-                                margin-bottom: 5px;
-                                border-top-right-radius: 15px;
-                                border-top-left-radius: 15px;
-                                text-align: center;
-                                font-weight: bold;
-                                font-size: 20px;
+                                color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;
                             ">
-                            {{ admission_probability.with_preparation.percentage }}%
+                            {{ admission_probability.with_preparation }}%
                         </div>
                         {% comment %} <div  style="
                                 background-color: #aad5cc;
@@ -604,6 +603,7 @@
                     <div style="display: flex; flex-direction: column; align-items: center">
                         <div style="color: white" class="bottom-title">ВРЕМЕНИ</div>
                         <div style="color: white" class="months-number months-badge">
+                        {{current_year}} 
                             {% now "Y" as current_year %}
                             {% if current_year|add:"1" %}
                                 {{ current_year|add:"1"|date:"Y" }}
