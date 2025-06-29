@@ -81,9 +81,10 @@ class SubCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'category']
 
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'type']
+        fields = ['id', 'name', 'type', 'subject_type']
 
 
 class CategorySetHomeSerializer(serializers.ModelSerializer):
@@ -284,3 +285,124 @@ class QuizResultDetailSerializer(serializers.ModelSerializer):
             result.append(cat_data)
         
         return result
+    
+
+#############################################
+from rest_framework import serializers
+from .models import QuizResult, Quiz, Category, Specialization
+
+
+class SubjectScoreSerializer(serializers.Serializer):
+    """Serializer for individual subject score input"""
+    category_id = serializers.IntegerField()
+    points = serializers.IntegerField(min_value=0)
+    
+    def validate_category_id(self, value):
+        """Validate that category exists"""
+        if not Category.objects.filter(id=value).exists():
+            raise serializers.ValidationError("Category does not exist")
+        return value
+    
+    def validate(self, data):
+        """Validate points based on category type"""
+        try:
+            category = Category.objects.get(id=data['category_id'])
+            max_points = 40 if category.subject_type == 'PROFILE' else 20
+            
+            if data['points'] > max_points:
+                raise serializers.ValidationError(
+                    f"Points for {category.name} cannot exceed {max_points}"
+                )
+        except Category.DoesNotExist:
+            raise serializers.ValidationError("Category does not exist")
+        
+        return data
+
+
+class DiagnosticInputSerializer(serializers.Serializer):
+    """Serializer for manual diagnostic input"""
+    name = serializers.CharField(max_length=255)
+    phone_number = serializers.CharField(max_length=20)
+    subject_scores = SubjectScoreSerializer(many=True)
+    
+    def validate_subject_scores(self, value):
+        """Validate subject scores structure"""
+        if len(value) == 0:
+            raise serializers.ValidationError("At least one subject score is required")
+        
+        # Check for duplicate categories
+        category_ids = [score['category_id'] for score in value]
+        if len(category_ids) != len(set(category_ids)):
+            raise serializers.ValidationError("Duplicate categories are not allowed")
+        
+        # Validate total points don't exceed 140
+        total_points = sum(score['points'] for score in value)
+        if total_points > 140:
+            raise serializers.ValidationError("Total points cannot exceed 140")
+        
+        return value
+
+
+class SubjectEvaluationSerializer(serializers.Serializer):
+    """Serializer for individual subject evaluation"""
+    category_id = serializers.IntegerField()
+    category_name = serializers.CharField()
+    category_type = serializers.CharField()
+    subject_type = serializers.CharField()
+    points = serializers.IntegerField()
+    max_points = serializers.IntegerField()
+    percentage = serializers.FloatField()
+    level = serializers.CharField()
+
+
+class GroupEvaluationSerializer(serializers.Serializer):
+    """Serializer for subject group evaluation"""
+    group_name = serializers.CharField()
+    group_type = serializers.CharField()  # MAIN or PROFILE
+    total_points = serializers.IntegerField()
+    max_points = serializers.IntegerField()
+    percentage = serializers.FloatField()
+    level = serializers.CharField()
+    subjects_count = serializers.IntegerField()
+
+
+class AdmissionProbabilitySerializer(serializers.Serializer):
+    """Serializer for admission probability"""
+    without_preparation = serializers.FloatField()
+    with_preparation = serializers.FloatField()
+    specializations = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class DiagnosticResultSerializer(serializers.Serializer):
+    """Serializer for diagnostic results"""
+    user_token = serializers.UUIDField()
+    name = serializers.CharField()
+    phone_number = serializers.CharField()
+    
+    total_points = serializers.IntegerField()
+    total_possible_points = serializers.IntegerField()
+    total_percentage = serializers.FloatField()
+    
+    subject_evaluations = SubjectEvaluationSerializer(many=True)
+    group_evaluations = GroupEvaluationSerializer(many=True)
+    
+    recommendations = serializers.CharField()
+    admission_probability = AdmissionProbabilitySerializer()
+    
+    created_at = serializers.DateTimeField()
+
+class ProfileSubjectSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    score = serializers.IntegerField(min_value=0, max_value=50)
+
+class EntDiagnosisInputSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    phone = serializers.CharField()
+    
+    history_kazakhstan = serializers.IntegerField(min_value=0, max_value=40)
+    math_literacy = serializers.IntegerField(min_value=0, max_value=40)
+    reading_literacy = serializers.IntegerField(min_value=0, max_value=40)
+
+    profile_subject_1 = ProfileSubjectSerializer()
+    profile_subject_2 = ProfileSubjectSerializer()
+    

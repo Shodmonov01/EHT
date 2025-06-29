@@ -148,7 +148,7 @@
         // Update button links with the actual quiz_result_id
         document.addEventListener('DOMContentLoaded', function() {
             if (quizResultId) {
-                document.getElementById('diagnostic-btn').href = `/quiz/files/quiz-results/diagnostic.pdf?quiz_result=${quizResultId}`;
+                document.getElementById('diagnostic-btn').href = `/quiz/summary?quiz_result=${quizResultId}`;
                 document.getElementById('results-btn').href = `/quiz/files/quiz-results/result.pdf?quiz_result=${quizResultId}`;
             }
             

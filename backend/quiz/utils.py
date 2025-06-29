@@ -13,12 +13,16 @@ from datetime import datetime, timedelta
 def get_google_sheet():
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds_path = os.path.join(settings.BASE_DIR, 'config', 'keys', 'credentials.json')
+    print(creds_path, 'creads path')
     creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
+    print(creds, 'creds--')
     client = gspread.authorize(creds)
+    print(client, 'client')
 
     # Open the Google Sheet by URL
     sheet_url = "https://docs.google.com/spreadsheets/d/1FfooaDunqiVekiudUbfXE9AglxAPsOhvnfQuhERr2Lo/edit"
     spreadsheet = client.open_by_url(sheet_url)
+    print(spreadsheet, 'sp---')
     
     # Get the specific worksheet by gid (683090842 from your URL)
     worksheet = spreadsheet.get_worksheet_by_id(683090842)

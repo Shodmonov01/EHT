@@ -120,10 +120,15 @@ class AnswerAdmin(admin.ModelAdmin):
             form.base_fields.pop(field, None)
         return form
     
+@admin.register(QuizResult)
+class QuizResultAdmin(admin.ModelAdmin):
+    list_display = ['id', 'quiz', 'user_points']
+
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(SubCategory, SubCategoryAdmin)
 admin.site.register(Question, QuestionAdmin)
 admin.site.register(Answer, AnswerAdmin)
 admin.site.register(Quiz)
 admin.site.register(Specialization)
+
 # admin.site.register(QuizResult)  # Uncomment if needed
