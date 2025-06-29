@@ -21,7 +21,7 @@ export default function FormSt() {
     const { t } = useTranslation()
     const dispatch = useDispatch()
     const currentLanguage = useSelector((state: RootState) => state.language.currentLanguage)
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+    const [selectedCategory] = useState<number | null>(null)
     const [formData, setFormData] = useState({
         name: '',
         phone: '',
@@ -86,7 +86,7 @@ export default function FormSt() {
         refetch()
     }, [currentLanguage, refetch])
 
-    const { mutate: startQuizMutation, isPending: isStarting } = useMutation<QuizResult, Error, QuizStartRequest>({
+    const { isPending: isStarting } = useMutation<QuizResult, Error, QuizStartRequest>({
         mutationFn: startQuiz,
         onSuccess: data => {
             dispatch(

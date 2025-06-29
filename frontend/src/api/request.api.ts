@@ -34,14 +34,11 @@ export const fetchCategories = async () => {
     const { data } = await axiosInstance.get<Category[]>(`/quiz/api/category-set/`)
     return data
 }
-<<<<<<< HEAD
-=======
 
 // export const fetchSubject = async () => {
 //     const { data } = await axiosInstance.get<Category[]>(`/quiz/subjects`)
 //     return data
 // }
->>>>>>> b8c1fd2cd49ec5426cd490587bbc5ad805c664ba
 
 export const startQuiz = async (quizData: QuizStartRequest) => {
     const { data } = await axiosInstance.post<QuizResult>(`/quiz/api/quizzes/start`, quizData)
