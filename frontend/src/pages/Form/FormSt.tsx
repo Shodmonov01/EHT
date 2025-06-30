@@ -240,6 +240,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={20}
                                     name='history_kazakhstan'
                                     placeholder={t('form.point')}
                                     value={formData.history_kazakhstan}
@@ -259,6 +260,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={10}
                                     name='math_literacy'
                                     placeholder={t('form.point')}
                                     value={formData.math_literacy}
@@ -278,6 +280,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={10}
                                     name='reading_literacy'
                                     placeholder={t('form.point')}
                                     value={formData.reading_literacy}
@@ -323,6 +326,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={50}
                                     value={formData.profile_subject_1.score}
                                     onChange={e =>
                                         setFormData(prev => ({
@@ -375,6 +379,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={50}
                                     value={formData.profile_subject_2.score}
                                     onChange={e =>
                                         setFormData(prev => ({
