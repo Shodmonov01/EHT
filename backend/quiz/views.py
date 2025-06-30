@@ -950,12 +950,49 @@ def summary_pdf_v2(request):
     quiz_result_id = request.GET.get('quiz_result')
     print(quiz_result_id, 'quiz result id ')
     quiz_result = get_object_or_404(QuizResult, pk=quiz_result_id)
+
     related_specializations = Specialization.objects.filter(
+   
     categories=quiz_result.quiz.category_set
         ).distinct()
+    
+    print(related_specializations, 'related specialities')
+    context = get_quiz_result_context_v2(quiz_result)
+    
+    subject_analysis = context['subject_analysis']
+    print(subject_analysis, 'subject analysiz')
 
-     
-   
+    specialization_probabilities = []
+
+    for specialization in related_specializations:
+        print(specialization, 'specialization  ----')
+        # Find categories in this specialization
+        spec_categories = specialization.categories.all()
+        print(spec_categories, 'spec categorieis')
+        new_data = []
+        for d in spec_categories:
+            print(d, 'nameeee')
+            new_data.append(Category.objects.filter())
+
+        
+        # Filter subject_analysis to only include subjects in this specialization
+        total_points = 0
+        total_possible = 0
+        
+        for subject in subject_analysis['general_subjects'] + subject_analysis['profile_subjects']:
+            if any(c.name == subject['name'] for c in spec_categories):
+                total_points += subject['points']
+                total_possible += subject['possible']
+    
+    # Calculate percentage
+    percentage = (total_points / total_possible * 100) if total_possible > 0 else 0
+    admission = calculate_admission_probability(percentage)
+
+    specialization_probabilities.append({
+        'name': specialization.name,
+        'percentage': round(percentage, 2),
+        'admission': admission
+    })
 
     
     # Get enhanced context
@@ -1050,6 +1087,7 @@ def summary_pdf_v2(request):
         'exact_percentage': round(exact_percentage, 2),
         'natural_percentage': round(natural_percentage, 2),
         'current_year' : datetime.now().year,
+            'specialization_probabilities': specialization_probabilities,
         # Add your existing characterizations here if available
         # 'recomendation': get_closest_match(recomendation, context['percentage_score']),
         # 'conclusion': get_conclusion_with_score(conclusion, context['percentage_score']),
@@ -1059,7 +1097,9 @@ def summary_pdf_v2(request):
     })
 
     print(context, 'this is context----')
-    
+    print(
+        'this iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii'
+    )
     return render(request, 'summary.html', context)
 
 from rest_framework import generics
