@@ -603,15 +603,25 @@
                 <div class="subjects-container">
                     <div class="subjects-basic">
                         <div class="subjects-title">Основные предметы</div>
-                        <div style="border-radius: 15px; padding: 20px; background-color: #d2ddec; min-height: 170px">
+                        <div style="
+                                border-radius: 15px;
+                                padding: 20px;
+                                background-color: #d2ddec;
+                                height: 170px;
+                                position: relative !important;
+                                bottom: 0;
+                            ">
+                             {% for subject in subject_analysis.general_subjects %}
                         <div style="display: flex; justify-content: space-around">
+                       
                             <div class="subject-row">
 
-                                {% for subject in subject_analysis.general_subjects %}
+                                
                                 <div class="subject-name">{{ subject.name }}</div>
                                 <div class="subject-score">{{ subject.points }}/{{ subject.possible }}</div>
-                                {% endfor %}
+                                
                             </div>
+                            {% endfor %}
                         </div>
                             <div style="padding-inline: 55px" class="subject-row"></div>
                                 <div style="display: flex; justify-content: end" class="total-number">
@@ -622,15 +632,27 @@
                     </div>
                     <div class="subjects-profile">
                         <div class="subjects-title">Профильные предметы</div>
-                        <div style="border-radius: 15px; padding: 20px; background-color: #ececd2; min-height: 170px">
-                          <div style="display: flex; justify-content: space-around">
+                        <div style="
+                                border-radius: 15px;
+                                padding: 20px;
+                                background-color: #ececd2;
+                                height: 170px;
+                                position: relative !important;
+                                bottom: 0;
+                            ">
+                               
+                           <div style="display: flex; justify-content: space-around">
+                           {% for subject in subject_analysis.profile_subjects %}
+
                             <div class="subject-row">
-                                {% for subject in subject_analysis.profile_subjects %}
+                             
                                 <div class="subject-name">{{ subject.name }}</div>
             
                                 <div class="subject-score">{{ subject.points }}/{{ subject.possible }}</div>
-                                {% endfor %}
+                              
                             </div>
+
+                              {% endfor %}
                            
                             </div>
                                 <div class="total-number">{{ profile_subjects_analysis.total_points }}</div>
