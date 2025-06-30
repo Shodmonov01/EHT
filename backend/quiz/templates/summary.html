@@ -570,6 +570,7 @@
     </head>
     <body>
         <div style="width: 100%">
+            <div style="background-image: url('static/public/background.png')" class="container">
             <div style="margin-inline: auto; max-width: 800px">
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
@@ -584,8 +585,8 @@
                         </div>
                         <div class="name-box">{{ name|default:"Студент" }}</div>
                         <div class="class-info">
-                            <span><strong>Тест</strong><br />{{ quiz_name }}</span>
-                            <span><strong>Дата</strong><br />{{ passed_date }}</span>
+                            <span  style="font-size: 20px"><strong>Тест</strong><br />{{ quiz_name }}</span>
+                            <span  style="font-size: 20px"><strong>Дата</strong><br />{{ passed_date }}</span>
                         </div>
                     </div>
                     <div class="card-right">
@@ -665,11 +666,14 @@
                 </div>
                 
             </div>
+            </div>
 
           
 
             <!-- Subject Evaluations Section -->
+            <div style="background-image: url('static/public/background.png')" class="container">
             <div style="margin-inline: auto; max-width: 800px">
+             
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
@@ -747,12 +751,14 @@
                     </p>
                 </div>
             </div>
+            </div>
             
 
             
 
             <!-- Admission Probability Section -->
-            <div style="margin-inline: auto; max-width: 800px; padding-bottom: 60px" class="container">
+        <div style="background-image: url('static/public/background.png')" class="container">
+            <div style="margin-inline: auto; max-width: 800px; padding-bottom: 60px" >
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
@@ -776,7 +782,7 @@
 
                     <div style="display: flex; flex-direction: column; width: 33%; margin-top: 60px">
                     {% for specialization in specialization_probabilities %}
-                        <div
+                    <div
                             style="
                                 background-color: #f1c2a4;
                                 color: black;
@@ -790,8 +796,13 @@
                                 border: 2px solid black;
                                
                             "
-                        >
+                        > 
+                        <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 60px">
+                                             <div class="card-gradient" style="background-color: #f9a871">
                                   {{ specialization.name }}
+
+                                  </div>
+                                  </div>
                         </div>
                         {% endfor %}
 
@@ -840,6 +851,7 @@
                         На подготовку к поступлению в ВУЗы. При подготовке к экзаменам ЕНТ улучшается общий уровень успеваемости по основным и профильным предметам. Когда у ребенка и родителей появляется четкая цель, результат достигается быстрее и качественнее.
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </body>
