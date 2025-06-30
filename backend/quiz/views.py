@@ -1097,7 +1097,9 @@ def summary_pdf_v2(request):
     })
 
     print(context, 'this is context----')
-    
+    print(
+        'this iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii'
+    )
     return render(request, 'summary.html', context)
 
 from rest_framework import generics
