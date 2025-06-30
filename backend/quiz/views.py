@@ -985,14 +985,14 @@ def summary_pdf_v2(request):
                 total_possible += subject['possible']
     
     # Calculate percentage
-    percentage = (total_points / total_possible * 100) if total_possible > 0 else 0
-    admission = calculate_admission_probability(percentage)
+        percentage = (total_points / total_possible * 100) if total_possible > 0 else 0
+        admission = calculate_admission_probability(percentage)
 
-    specialization_probabilities.append({
-        'name': specialization.name,
-        'percentage': round(percentage, 2),
-        'admission': admission
-    })
+        specialization_probabilities.append({
+            'name': specialization.name,
+            'percentage': round(percentage, 2),
+            'admission': admission
+        })
 
     
     # Get enhanced context

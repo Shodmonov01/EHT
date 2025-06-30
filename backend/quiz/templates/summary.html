@@ -8,6 +8,22 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
                <style>
+
+              .spec-1 { background: #4bbcf3; } /* Dark blue */
+                .spec-2 { background: #a3dbf7; } /* Medium blue */
+                .spec-3 { background: #c8e8fb; } /* Light blue */
+                .spec-4 { background: #90caf9; } /* Lighter blue */
+                .spec-5 { background: #bbdefb; } /* Very light blue */
+                .spec-6 { background: #e3f2fd; } 
+
+                .aspec-1 { background: #54ab9b; } /* Dark blue */
+                .aspec-2 { background: #aad5cc; } /* Medium blue */
+                .aspec-3 { background: #d5e9e7; } /* Light blue */
+                .aspec-4 { background: #eaf4f3; } /* Lighter blue */
+                .aspec-5 { background: #bbdefb; } /* Very light blue */
+                .aspec-6 { background: #e3f2fd; } 
+
+
             body {
                 background-image: url('/static/public/background.png') !important;
                 background-size: cover !important;
@@ -312,7 +328,7 @@
 
             .prep-header {
                 background: rgba(255, 255, 255, 0.3);
-                border-radius: 20px;
+                border-radius: 10px;
                 padding: 8px 16px;
                 text-align: center;
                 font-weight: bold;
@@ -774,29 +790,37 @@
                 </h1>
 
                <div class="comparison-section" style="display: flex; justify-content: space-between;">
-            {% for specialization in specialization_probabilities %}
+          
                 <div class="preparation-card without-prep">
                     <div class="prep-header" style="background-color: #50bced">Без подготовки</div>
-                    <div style="background-color: #50bced; color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
-                        {{ specialization.admission.without_preparation }}%
-                    </div>
+                  {% for specialization in specialization_probabilities %}
+                <div class="spec-item spec-{{ forloop.counter0|add:1 }} "  style='color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;'>
+                    {{ specialization.admission.without_preparation }}%
                 </div>
+                {% endfor %}
+                </div>
+                     
+                       
                  <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 60px">
-             
+                {% for specialization in specialization_probabilities %}
                         <div class="card-gradient" style="background-color: #f9a871">
                                {{ specialization.name }}
                         </div>
+                          {% endfor %}
                        
                     </div>
-
+                      
 
                 <div class="preparation-card with-prep">
                     <div class="prep-header" style="background-color: #54ab9b">С подготовкой</div>
-                    <div style="background-color: #54ab9b; color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
+
+ {% for specialization in specialization_probabilities %}
+                    <div class="spec-item aspec-{{ forloop.counter0|add:1 }}" style=" color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
                         {{ specialization.admission.with_preparation }}%
                     </div>
+                      {% endfor %}
                 </div>
-            {% endfor %}
+          
         </div>
 
                 <div class="notes-section">
@@ -812,15 +836,9 @@
                     <div style="display: flex; flex-direction: column; align-items: center">
                         <div style="color: white" class="bottom-title">ВРЕМЕНИ</div>
                         <div style="color: white" class="months-number months-badge">
-                        {{current_year}} 
-                            {% now "Y" as current_year %}
-                            {% if current_year|add:"1" %}
-                                {{ current_year|add:"1"|date:"Y" }}
-                            {% else %}
-                                2025
-                            {% endif %}
+                        36
                         </div>
-                        <div style="color: white" class="months-text">ГОД ЕНТ</div>
+                        <div style="color: white" class="months-text">МЕСЯЦЕВ</div>
                     </div>
                     <div class="bottom-text">
                         На подготовку к поступлению в ВУЗы. При подготовке к экзаменам ЕНТ улучшается общий уровень успеваемости по основным и профильным предметам. Когда у ребенка и родителей появляется четкая цель, результат достигается быстрее и качественнее.
