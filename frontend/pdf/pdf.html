@@ -63,7 +63,6 @@
                 color: white;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
             }
 
             .greeting {
@@ -92,7 +91,7 @@
 
             .results-title {
                 font-size: 30px;
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
 
             .percentage {
@@ -290,26 +289,14 @@
                 display: flex;
                 gap: 20px;
                 margin-bottom: 30px;
+                align-items: flex-start;
             }
 
             .preparation-card {
                 width: 33%;
                 color: white;
+                min-height: 100% !important;
             }
-
-            /* .page {
-                width: 210mm;
-                height: 297mm;
-                page-break-after: always;
-            } */
-
-            /* .without-prep {
-                background: linear-gradient(135deg, #87ceeb 0%, #4fc3f7 100%);
-            }
-
-            .with-prep {
-                background: linear-gradient(135deg, #81c784 0%, #4caf50 100%);
-            } */
 
             .prep-header {
                 background: rgba(255, 255, 255, 0.3);
@@ -322,7 +309,6 @@
             }
 
             .percentage {
-                font-size: 24px;
                 font-weight: bold;
                 text-align: center;
             }
@@ -435,6 +421,8 @@
                 max-width: 400px;
                 margin: auto;
                 position: relative;
+                height: 100%;
+                align-items: stretch;
             }
 
             .card {
@@ -448,6 +436,7 @@
                 margin-top: -30px; /* overlap effect */
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
                 z-index: 1;
+                height: max-content;
             }
 
             /* First card should not be overlapped */
@@ -567,6 +556,13 @@
                     flex-direction: column;
                 }
             }
+
+            .three-column-layout {
+                display: flex;
+                justify-content: center;
+                gap: 50px;
+                align-items: flex-start;
+            }
         </style>
     </head>
     <body>
@@ -578,7 +574,7 @@
                 </div>
                 <p
                     style="
-                        color: white;+
+                        color: white;
                         font-size: 20px;
                         text-align: center;
                         text-transform: uppercase;
@@ -602,7 +598,7 @@
                         <div style="display: flex; justify-content: center; align-items: center" class="results-title">
                             Результаты тестирования
                         </div>
-                        <div style="border-radius: 10px; font-size: 30px" class="percentage">50.0%</div>
+                        <div style="border-radius: 10px" class="percentage">50.0%</div>
                     </div>
                 </div>
 
@@ -833,7 +829,7 @@
                         </div>
                     </div>
 
-                    <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 60px">
+                    <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 90px">
                         <div class="card-gradient" style="background-color: #f1c2a4">Электротехника и энер</div>
                         <div class="card-gradient" style="background-color: #f9a871">
                             Стандартизация, сертификация и метрология (по отраслям)

@@ -7,7 +7,7 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { startQuiz } from '../../api/request.api'
 import { useEffect, useState } from 'react'
 import { QuizStartRequest, QuizResult, Category } from '../../types/quizs'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { setQuizData } from '../../redux/features/quizSlice'
 import Select from 'react-select'
@@ -160,7 +160,28 @@ export default function FormSt() {
 
     return (
         <div className='main-container'>
+            <Link
+                to='/'
+                style={{
+                    marginTop: '20px',
+                    display: 'inline-block',
+                    padding: '10px 20px',
+                    backgroundColor: '#ed9e37', // yashil tugma
+                    color: '#fff',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    fontWeight: 'bold',
+                    fontSize: '16px',
+                    transition: 'background-color 0.3s ease',
+                    textAlign: 'center'
+                }}
+                onMouseOver={e => (e.currentTarget.style.backgroundColor = '#45a049')}
+                onMouseOut={e => (e.currentTarget.style.backgroundColor = '#4CAF50')}
+            >
+                {t('quizResult.backButton')}
+            </Link>
             <LanguageSwitcher />
+
             {/* <div className='quiz-title'>
                 <img src={yellowBg} alt='Background' className='yellow-bg' />
                 <h1>{t('form.title')}</h1>
@@ -219,6 +240,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={20}
                                     name='history_kazakhstan'
                                     placeholder={t('form.point')}
                                     value={formData.history_kazakhstan}
@@ -238,6 +260,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={10}
                                     name='math_literacy'
                                     placeholder={t('form.point')}
                                     value={formData.math_literacy}
@@ -257,6 +280,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={10}
                                     name='reading_literacy'
                                     placeholder={t('form.point')}
                                     value={formData.reading_literacy}
@@ -302,6 +326,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={50}
                                     value={formData.profile_subject_1.score}
                                     onChange={e =>
                                         setFormData(prev => ({
@@ -354,6 +379,7 @@ export default function FormSt() {
                                 <input
                                     type='number'
                                     required
+                                    max={50}
                                     value={formData.profile_subject_2.score}
                                     onChange={e =>
                                         setFormData(prev => ({
