@@ -71,14 +71,13 @@
             }
 
             .card-right {
-                flex: 1;
+               flex: 1;
                 background: #318afd;
                 border-radius: 15px;
                 padding: 20px;
                 color: white;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
             }
 
             .greeting {
@@ -411,6 +410,10 @@
                 margin-top: 5px;
             }
 
+              .middle-section2 {
+                width: 33%;
+            }
+
             .bottom-text {
                 flex: 1;
                 font-size: 20px;
@@ -445,9 +448,11 @@
            
 
             .card-container {
-                max-width: 400px;
+               max-width: 400px;
                 margin: auto;
                 position: relative;
+                height: 100%;
+                align-items: stretch;
             }
 
             .card {
@@ -581,8 +586,7 @@
                 .preparation-card,
 
             .middle-section2 {
-                flex: 1 1 50%; /* grow/shrink, base width */
-                min-width: 250px;
+                 width: 100%;
             }
             }
         </style>
@@ -777,7 +781,7 @@
 
             <!-- Admission Probability Section -->
         <div style="background-image: url('static/public/background.png')" class="container">
-            <div style="margin-inline: auto; max-width: 800px; padding-bottom: 60px" >
+            
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
@@ -792,18 +796,20 @@
                <div class="comparison-section" style="display: flex; justify-content: space-between;">
           
                 <div class="preparation-card without-prep">
-                    <div class="prep-header" style="background-color: #50bced">Без подготовки</div>
+                    <div class="prep-header" style="background-color: #50bced; font-size: 26px; border-radius: 10px">Без подготовки</div>
+                    <div class="card-container">
                   {% for specialization in specialization_probabilities %}
                 <div class="spec-item spec-{{ forloop.counter0|add:1 }} "  style='color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;'>
                     {{ specialization.admission.without_preparation }}%
                 </div>
                 {% endfor %}
                 </div>
+                </div>
                      
                        
                  <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 60px">
                 {% for specialization in specialization_probabilities %}
-                        <div class="card-gradient" style="background-color: #f9a871">
+                        <div class="card-gradient" style="background-color: #f9a871; ">
                                {{ specialization.name }}
                         </div>
                           {% endfor %}
@@ -812,13 +818,14 @@
                       
 
                 <div class="preparation-card with-prep">
-                    <div class="prep-header" style="background-color: #54ab9b">С подготовкой</div>
-
+                    <div class="prep-header" style="background-color: #54ab9b; font-size: 26px; border-radius: 10px">С подготовкой</div>
+         <div class="card-container">
  {% for specialization in specialization_probabilities %}
                     <div class="spec-item aspec-{{ forloop.counter0|add:1 }}" style=" color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
                         {{ specialization.admission.with_preparation }}
                     </div>
                       {% endfor %}
+                </div>
                 </div>
           
         </div>
@@ -835,9 +842,9 @@
                 <div class="bottom-section">
                     <div style="display: flex; flex-direction: column; align-items: center">
                         <div style="color: white" class="bottom-title">ВРЕМЕНИ</div>
-                        <div style="color: white" class="months-number months-badge">
-                        36
-                        </div>
+                       <div id="monthsUntilMay" style="color: white" class="months-number months-badge"></div>
+
+
                         <div style="color: white" class="months-text">МЕСЯЦЕВ</div>
                     </div>
                     <div class="bottom-text">
@@ -845,8 +852,25 @@
                     </div>
                 </div>
             </div>
-            </div>
+          
         </div>
+
+       <script>
+            const today = new Date();
+            const currentMonth = today.getMonth(); // 0-indexed: July = 6
+            const mayMonth = 4; // May = 4 (0-indexed)
+
+            let monthsUntilMay;
+            if (currentMonth <= mayMonth) {
+                monthsUntilMay = mayMonth - currentMonth;
+            } else {
+                monthsUntilMay = 12 - currentMonth + mayMonth;
+            }
+
+            document.getElementById("monthsUntilMay").textContent = monthsUntilMay;
+        </script>
+
+
     </body>
 </html>
 
