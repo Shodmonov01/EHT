@@ -15,7 +15,7 @@
                 background-position: center !important;
                 /* background-repeat: no-repeat !important; */
                 min-height: 100vh !important;
-                font-family: inherit;
+                font-family: 'Montserrat', sans-serif;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
                 margin: 0px !important;
@@ -279,7 +279,7 @@
 
             .main-title {
                 text-align: center;
-                font-size: 32px;
+                font-size: 48px;
                 font-weight: bold;
                 margin: 80px 0px 40px 0px;
                 line-height: 1.3;
@@ -563,6 +563,17 @@
                 gap: 50px;
                 align-items: flex-start;
             }
+
+            .fontRoad {
+                font-family: 'RoadRadio' !important;
+                font-size: 30px;
+                color: white;
+                text-align: center;
+            }
+            .CHARACTERISTIC {
+                margin-block: 60px;
+                font-size: 50px;
+            }
         </style>
     </head>
     <body>
@@ -573,13 +584,8 @@
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
                 <p
-                    style="
-                        color: white;
-                        font-size: 20px;
-                        text-align: center;
-                        text-transform: uppercase;
-                        padding-bottom: 20px;
-                    "
+                    class="fontRoad"
+                    style="color: white; text-align: center; text-transform: uppercase; padding-bottom: 20px"
                 >
                     Диагностика успеваемости ученика по тесту ЕНТ
                 </p>
@@ -669,9 +675,10 @@
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
                 <p
+                    class="fontRoad"
                     style="
                         color: white;
-                        font-size: 20px;
+
                         text-align: center;
                         text-transform: uppercase;
                         padding-bottom: 20px;
@@ -686,7 +693,7 @@
                     что поднимает вопросы к его готовности к экзамену ЕНТ.
                 </div>
 
-                <div style="font-size: 30px" class="title">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
+                <div class="fontRoad CHARACTERISTIC">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
 
                 <div class="section exact-sciences">
                     <div class="section-title">Точные науки:</div>
@@ -740,13 +747,8 @@
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
                 <p
-                    style="
-                        color: white;
-                        font-size: 20px;
-                        text-align: center;
-                        text-transform: uppercase;
-                        padding-bottom: 20px;
-                    "
+                    class="fontRoad"
+                    style="color: white; text-align: center; text-transform: uppercase; padding-bottom: 20px"
                 >
                     Диагностика успеваемости ученика по тесту ЕНТ
                 </p>
@@ -757,35 +759,37 @@
                         border-radius: 15px;
                         width: 200px;
                         padding: 1px;
+                        padding-inline: 20px;
                         color: white;
                         position: relative;
                         bottom: -10px;
                         z-index: 1;
                     "
                 >
-                    <p style="font-size: 24px; text-align: center">Рекомендации</p>
+                    <p style="font-size: 24px; text-align: center; font-weight: 700">Рекомендации</p>
                 </div>
                 <div
                     style="position: relative; z-index: 10; font-size: 20px; line-height: 1.6"
                     class="section exact-sciences"
                 >
-                    <div class="section-content">
-                        Интенсивные занятия с репетиторами: Ребенку требуется индивидуальный подход, предоставляемый
-                        опытными репетиторами по каждому из предметов. Это позволит выявить конкретные слабости и
-                        разработать стратегии для их преодоления. Углубленное изучение предметов: Особое внимание
-                        следует уделить профильным предметам, так как они являются ключевыми компонентами вступительных
-                        экзаменов. Занятия должны быть систематическими, а изучение материала - углубленным.
-                        Индивидуальные планы обучения: Разработка индивидуальных планов обучения для каждого предмета
-                        поможет сосредоточиться на слабых сторонах ребенка, а также сбалансировать его образовательный
-                        процесс. Практика в решении задач: Занятия по решению задач и практика в применении знаний в
-                        реальных ситуациях помогут ребенку лучше усвоить материал и развить навыки применения полученных
-                        знаний. Мотивация и поддержка: Важно создать позитивное обучающее окружение, поддерживая
-                        мотивацию ребенка и помогая ему преодолевать трудности. Родители играют ключевую роль в
-                        моральной поддержке и стимулировании интереса к учебе. Мониторинг прогресса: Регулярный
-                        мониторинг успехов и корректировка плана обучения в соответствии с изменениями в прогрессе
-                        ребенка позволит поддерживать эффективность учебного процесса. Дополнительные занятия,
-                        построенные на персонализированном подходе, смогут помочь ребенку подготовиться к вступительным
-                        экзаменам в для поступления в ВУЗ и повысить свой уровень подготовки в ключевых предметах.
+                    <div style="font-weight: 700" class="section-content">
+                        Интенсивные занятия с репетиторами: <br />
+                        Ребенку требуется индивидуальный подход, предоставляемый опытными репетиторами по каждому из
+                        предметов. Это позволит выявить конкретные слабости и разработать стратегии для их преодоления.
+                        Углубленное изучение предметов: Особое внимание следует уделить профильным предметам, так как
+                        они являются ключевыми компонентами вступительных экзаменов. Занятия должны быть
+                        систематическими, а изучение материала - углубленным. Индивидуальные планы обучения: Разработка
+                        индивидуальных планов обучения для каждого предмета поможет сосредоточиться на слабых сторонах
+                        ребенка, а также сбалансировать его образовательный процесс. Практика в решении задач: Занятия
+                        по решению задач и практика в применении знаний в реальных ситуациях помогут ребенку лучше
+                        усвоить материал и развить навыки применения полученных знаний. Мотивация и поддержка: Важно
+                        создать позитивное обучающее окружение, поддерживая мотивацию ребенка и помогая ему преодолевать
+                        трудности. Родители играют ключевую роль в моральной поддержке и стимулировании интереса к
+                        учебе. Мониторинг прогресса: Регулярный мониторинг успехов и корректировка плана обучения в
+                        соответствии с изменениями в прогрессе ребенка позволит поддерживать эффективность учебного
+                        процесса. Дополнительные занятия, построенные на персонализированном подходе, смогут помочь
+                        ребенку подготовиться к вступительным экзаменам в для поступления в ВУЗ и повысить свой уровень
+                        подготовки в ключевых предметах.
                     </div>
                 </div>
             </div>
@@ -796,9 +800,10 @@
                     <img style="height: 140px" src="../public/logo2.png" alt="" />
                 </div>
                 <p
+                    class="fontRoad"
                     style="
                         color: white;
-                        font-size: 20px;
+
                         text-align: center;
                         text-transform: uppercase;
                         padding-bottom: 20px;
@@ -806,7 +811,7 @@
                 >
                     Диагностика успеваемости ученика по тесту ЕНТ
                 </p>
-                <h1 style="font-size: 36px; font-weight: 700" class="main-title">
+                <h1 style="font-size: 46px; font-weight: 700" class="main-title">
                     Возможность поступить<br />
                     в выбранные специальности
                 </h1>
@@ -819,76 +824,6 @@
                         >
                             Без подготовки
                         </div>
-                        <!-- <div
-                            class=""
-                            style="
-                                background-color: #50bced;
-                                color: white;
-                                padding-inline: 15px;
-                                padding-block: 25px;
-                                margin-bottom: 5px;
-                                border-top-right-radius: 15px;
-                                border-top-left-radius: 15px;
-                                text-align: center;
-                                font-weight: bold;
-                                font-size: 20px;
-                            "
-                        >
-                            10%
-                        </div>
-                        <div
-                            style="
-                                background-color: #a8def8;
-                                color: black;
-                                padding-inline: 15px;
-                                padding-block: 25px;
-                                margin-bottom: 5px;
-                                border-top-right-radius: 15px;
-                                border-top-left-radius: 15px;
-                                text-align: center;
-                                font-weight: bold;
-                                position: relative;
-                                top: -6%;
-                                font-size: 20px;
-                            "
-                        >
-                            5%
-                        </div>
-                        <div
-                            style="
-                                background-color: #d4eefb;
-                                color: black;
-                                padding-inline: 15px;
-                                padding-block: 25px;
-                                margin-bottom: 5px;
-                                border-top-right-radius: 15px;
-                                border-top-left-radius: 15px;
-                                text-align: center;
-                                font-weight: bold;
-                                position: relative;
-                                top: -11%;
-                                font-size: 20px;
-                            "
-                        >
-                            15%
-                        </div>
-                        <div
-                            style="
-                                background-color: #eaf7fd;
-                                color: black;
-                                padding-inline: 15px;
-                                padding-block: 25px;
-                                margin-bottom: 5px;
-                                border-radius: 15px;
-                                text-align: center;
-                                font-weight: bold;
-                                position: relative;
-                                top: -16%;
-                                font-size: 20px;
-                            "
-                        >
-                            15%
-                        </div> -->
 
                         <div class="card-container">
                             <div class="card">10%</div>
