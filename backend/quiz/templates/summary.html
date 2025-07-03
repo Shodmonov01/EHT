@@ -9,6 +9,16 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
                <style>
 
+               .safe-screen-qwwq {
+                    width: 794px; /* A4 width in px at 96dpi */
+                    margin: 0 auto;
+                }
+
+                .container, .safe-screen-qwwq {
+                    break-inside: avoid;
+                    page-break-inside: avoid;
+                }
+
               .spec-1 { background: #4bbcf3; } /* Dark blue */
                 .spec-2 { background: #a3dbf7; } /* Medium blue */
                 .spec-3 { background: #c8e8fb; } /* Light blue */
@@ -30,7 +40,7 @@
                 background-position: center !important;
                 /* background-repeat: no-repeat !important; */
                 min-height: 100vh !important;
-                font-family: inherit;
+                font-family: 'Montserrat', sans-serif;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
                 margin: 0px !important;
@@ -124,11 +134,23 @@
             .main-title {
                 text-align: center;
                 color: white;
-                font-size: 36px;
+                font-size: 48px;
                 font-weight: bold;
                 margin: 40px 0 40px 0;
                 letter-spacing: 2px;
             }
+             .fontRoad {
+                font-family: 'RoadRadio' !important;
+                font-size: 30px;
+                color: white;
+                text-align: center;
+            }
+            
+            .CHARACTERISTIC {
+                margin-block: 60px;
+                font-size: 50px;
+            }
+
 
             .description {
                 color: white;
@@ -592,9 +614,10 @@
         </style>
     </head>
     <body>
-        <div style="width: 100%">
+
+        <div style="width: 100%" class="safe-screen-qwwq" >
             <div style="background-image: url('static/public/background.png')" class="container">
-            {% comment %} <div style="margin-inline: auto; max-width: 800px"> {% endcomment %}
+           
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
@@ -688,10 +711,64 @@
                     </div>
                 </div>
                 
-            {% comment %} </div> {% endcomment %}
+
+               
             </div>
 
-          
+            <div style="background-image: url('static/public/background.png')" class="container">
+                <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
+                    <img style="height: 140px" src="/static/public/logo2.png" alt="" />
+                </div>
+                <p
+                    style="
+                        color: white;
+                        font-size: 20px;
+                        text-align: center;
+                        text-transform: uppercase;
+                        padding-bottom: 20px;
+                    "
+                >
+                    Диагностика успеваемости ученика по тесту ЕНТ
+                </p>
+
+                <div
+                    style="
+                        background-color: #21841a;
+                        border-radius: 15px;
+                        width: 200px;
+                        padding: 1px;
+                        color: white;
+                        position: relative;
+                        bottom: -10px;
+                        z-index: 1;
+                    "
+                >
+                    <p style="font-size: 24px; text-align: center">Рекомендации</p>
+                </div>
+                <div
+                    style="position: relative; z-index: 10; font-size: 20px; line-height: 1.6"
+                    class="section exact-sciences"
+                >
+                    <div class="section-content">
+                        Интенсивные занятия с репетиторами: Ребенку требуется индивидуальный подход, предоставляемый
+                        опытными репетиторами по каждому из предметов. Это позволит выявить конкретные слабости и
+                        разработать стратегии для их преодоления. Углубленное изучение предметов: Особое внимание
+                        следует уделить профильным предметам, так как они являются ключевыми компонентами вступительных
+                        экзаменов. Занятия должны быть систематическими, а изучение материала - углубленным.
+                        Индивидуальные планы обучения: Разработка индивидуальных планов обучения для каждого предмета
+                        поможет сосредоточиться на слабых сторонах ребенка, а также сбалансировать его образовательный
+                        процесс. Практика в решении задач: Занятия по решению задач и практика в применении знаний в
+                        реальных ситуациях помогут ребенку лучше усвоить материал и развить навыки применения полученных
+                        знаний. Мотивация и поддержка: Важно создать позитивное обучающее окружение, поддерживая
+                        мотивацию ребенка и помогая ему преодолевать трудности. Родители играют ключевую роль в
+                        моральной поддержке и стимулировании интереса к учебе. Мониторинг прогресса: Регулярный
+                        мониторинг успехов и корректировка плана обучения в соответствии с изменениями в прогрессе
+                        ребенка позволит поддерживать эффективность учебного процесса. Дополнительные занятия,
+                        построенные на персонализированном подходе, смогут помочь ребенку подготовиться к вступительным
+                        экзаменам в для поступления в ВУЗ и повысить свой уровень подготовки в ключевых предметах.
+                    </div>
+                </div>
+            </div>
 
             <!-- Subject Evaluations Section -->
             <div style="background-image: url('static/public/background.png')" class="container">
@@ -701,7 +778,6 @@
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
 
-               
                 <p
                     style="
                         color: white;
@@ -720,7 +796,7 @@
                     что поднимает вопросы к его готовности к экзамену ЕНТ.
                 </div>
 
-                <div style="font-size: 30px" class="title">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
+                <div class="fontRoad CHARACTERISTIC">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
             
 
                 {% comment %} <p style="color: white; font-size: 20px; text-align: center; text-transform: uppercase; padding-bottom: 20px;">
@@ -777,7 +853,6 @@
             </div>
             
 
-            
 
             <!-- Admission Probability Section -->
         <div style="background-image: url('static/public/background.png')" class="container">
@@ -785,9 +860,7 @@
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
-                <p style="color: white; font-size: 20px; text-align: center; text-transform: uppercase; padding-bottom: 20px;">
-                    Прогноз поступления
-                </p>
+              
                 <h1 class="main-title">
                     Возможность поступить<br />
                     в выбранные специальности
@@ -808,21 +881,29 @@
                      
                        
                  <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 60px">
-                {% for specialization in specialization_probabilities %}
+                {% comment %} {% for specialization in specialization_probabilities %}
                         <div class="card-gradient" style="background-color: #f9a871; ">
                                {{ specialization.name }}
                         </div>
                           {% endfor %}
                        
-                    </div>
+                    </div> {% endcomment %}
+
+                    {% for specialization in specialization_probabilities %}
+                    <div class="card-gradient"
+                            style="background-color: {% if forloop.counter0|divisibleby:2 %}#f1c2a4{% else %}#f9a871{% endif %};">
+                            {{ specialization.name }}
+                        </div>
+                    {% endfor %}
+                        </div>
                       
 
                 <div class="preparation-card with-prep">
                     <div class="prep-header" style="background-color: #54ab9b; font-size: 26px; border-radius: 10px">С подготовкой</div>
          <div class="card-container">
- {% for specialization in specialization_probabilities %}
+                    {% for specialization in specialization_probabilities %}
                     <div class="spec-item aspec-{{ forloop.counter0|add:1 }}" style=" color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
-                        {{ specialization.admission.with_preparation }}
+                        {{ specialization.admission.with_preparation }}%
                     </div>
                       {% endfor %}
                 </div>
@@ -853,7 +934,8 @@
                 </div>
             </div>
           
-        </div>
+     
+
 
        <script>
             const today = new Date();
@@ -869,8 +951,19 @@
 
             document.getElementById("monthsUntilMay").textContent = monthsUntilMay;
         </script>
+        <script>
+            let opt = {
+                filename:     'tesla_summary.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            window.onload = function() {
+                html2pdf().set(opt).from(document.querySelector('.safe-screen-qwwq')).save();                
+            }
+        </script>
 
-
+       
     </body>
 </html>
 
