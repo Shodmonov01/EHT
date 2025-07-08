@@ -1,0 +1,16 @@
+asgiref
+Django
+django-modeltranslation
+django-nested-inline
+djangorestframework
+pillow
+psycopg2-binary
+python-dotenv
+sqlparse
+typing-extensions
+drf_spectacular
+gspread
+oauth2client
+django-nested-admin
+django-cors-headers
+xhtml2pdf
