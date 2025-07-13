@@ -1523,11 +1523,14 @@ from drf_spectacular.utils import extend_schema, OpenApiExample
                 "reading_literacy": 38,
                 "profile_subject_1": {
                     "name": "Физика",
-                    "score": 45
+                    "score": 45,
+                    "spec_id": 1
+
                 },
                 "profile_subject_2": {
                     "name": "Математика",
-                    "score": 47
+                    "score": 47,
+                    "spec_id": 1
                 }
             },
             request_only=True
