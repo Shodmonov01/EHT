@@ -392,8 +392,10 @@ class DiagnosticResultSerializer(serializers.Serializer):
     created_at = serializers.DateTimeField()
 
 class ProfileSubjectSerializer(serializers.Serializer):
+
     name = serializers.CharField()
     score = serializers.IntegerField(min_value=0, max_value=50)
+    spec_id = serializers.IntegerField()
 
 class EntDiagnosisInputSerializer(serializers.Serializer):
     name = serializers.CharField()
