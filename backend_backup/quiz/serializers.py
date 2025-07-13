@@ -405,4 +405,8 @@ class EntDiagnosisInputSerializer(serializers.Serializer):
 
     profile_subject_1 = ProfileSubjectSerializer()
     profile_subject_2 = ProfileSubjectSerializer()
-    
+
+class SpecializetionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Specialization
+        fields = "__all__"

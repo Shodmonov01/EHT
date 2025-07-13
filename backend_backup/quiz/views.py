@@ -1542,6 +1542,7 @@ def ent_diagnosis_analysis(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     data = serializer.validated_data
+    print(data, 'data--')
     total_score = (
         data['history_kazakhstan'] +
         data['math_literacy'] +
@@ -1612,5 +1613,18 @@ def ent_diagnosis_analysis(request):
         },
         "admission_probability": calculate_admission_probability(percentage)
     }
-
+    print(response_data, 'res data000==')
+    sheet = get_google_sheet(197903344)
+    user_token = uuid.uuid4()
+   
+    sheet.append_row([response_data['name'], response_data['phone'], response_data['total_score'],  response_data['percentage'], str(user_token)])
     return Response(response_data, status=status.HTTP_200_OK)
+
+from .serializers import SpecializetionSerializer
+
+@api_view(['GET'])
+def get_specialization(request):
+    specialization = Specialization.objects.all()
+    ser = SpecializetionSerializer(specialization, many=True)
+
+    return Response(ser.data)

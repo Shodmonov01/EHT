@@ -10,7 +10,9 @@ from datetime import datetime, timedelta
 
 
 
-def get_google_sheet():
+
+def get_google_sheet(gid=683090842):
+    print(settings.BASE_DIR, 'base dirrr')
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds_path = os.path.join(settings.BASE_DIR, 'config', 'keys', 'credentials.json')
     print(creds_path, 'creads path')
@@ -22,10 +24,10 @@ def get_google_sheet():
     # Open the Google Sheet by URL
     sheet_url = "https://docs.google.com/spreadsheets/d/1FfooaDunqiVekiudUbfXE9AglxAPsOhvnfQuhERr2Lo/edit"
     spreadsheet = client.open_by_url(sheet_url)
-    print(spreadsheet, 'sp---')
+   
     
     # Get the specific worksheet by gid (683090842 from your URL)
-    worksheet = spreadsheet.get_worksheet_by_id(683090842)
+    worksheet = spreadsheet.get_worksheet_by_id(gid)
     
     print(f"Opened worksheet: {worksheet.title}")  # Debugging
     return worksheet

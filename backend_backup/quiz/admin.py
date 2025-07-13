@@ -30,7 +30,7 @@ class QuestionAdmin(nested_admin.NestedModelAdmin):
     ordering = ['theme__category__name', 'theme__name', 'text']
     search_fields = ['text']
     list_per_page = 50
-    list_display = ['text', "category__name", "correct_answers_count", 'get_category_sets']
+    list_display = ['text', "correct_answers_count", 'get_category_sets']
     raw_id_fields = ['theme']
     inlines = [AnswerInline]
 
@@ -77,7 +77,7 @@ class QuestionAdmin(nested_admin.NestedModelAdmin):
 # --- Admin for SubCategory ---
 class SubCategoryAdmin(admin.ModelAdmin):
     search_fields = ['name']
-    ordering = ['category__name', 'name']
+    ordering = [ 'name']
     list_display = ['name', 'category']
     list_per_page = 50
 

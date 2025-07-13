@@ -18,7 +18,7 @@ CATEGORY_TYPE_SUBJECT = (
 class Category(models.Model):
     name = models.CharField(_("Category Name"), max_length=255)
     type = models.CharField(_("Type"), max_length=8, choices=CATEGORY_TYPE)
-    subject_type = models.CharField(_('Subject_type'), choices=CATEGORY_TYPE_SUBJECT)
+    subject_type = models.CharField(_('Subject_type'), choices=CATEGORY_TYPE_SUBJECT, max_length=50)
 
 
     class Meta:
