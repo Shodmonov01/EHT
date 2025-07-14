@@ -36,12 +36,16 @@ urlpatterns = [
 
 from django.urls import path
 from .views import DiagnosticCreateView, CategoriesListView,\
-      DiagnosticResultView, ListProfileSubjectsView, ent_diagnosis_analysis, get_specialization
+      DiagnosticResultView, ListProfileSubjectsView, ent_diagnosis_analysis,\
+          get_specialization, diagnosis_report_pdf_view, diagnosis_report_view
+
 
 urlpatterns += [
     path('subjects-create/', DiagnosticCreateView.as_view(), name='diagnostic-create'),
     path('subjects/result/<uuid:token>/', DiagnosticResultView.as_view(), name='diagnostic-result'),
     path('profile-subjects', ListProfileSubjectsView.as_view(), name='profile-subjects'),
     path('ent-diagnosis/', ent_diagnosis_analysis, name='ent_diagnosis_analysis'),
-    path('specialization', get_specialization,)
+    path('specialization', get_specialization,),
+    path('diagnosis/report/<str:token>/', diagnosis_report_view, name='diagnosis_report'),
+    path('diagnosis/report/<str:token>/pdf/', diagnosis_report_pdf_view, name='diagnosis_report_pdf'),
 ]

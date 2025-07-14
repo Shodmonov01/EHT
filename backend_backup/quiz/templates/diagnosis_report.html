@@ -1,0 +1,765 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tesla Education | Diagnostic</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+    <style>
+        @font-face {
+            font-family: 'RoadRadio';
+            src: url('../public/roadradio_bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+        body {
+            background: #e0e0e0;
+            font-family: 'Montserrat', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 0 90px;
+            margin-bottom: 0px;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            box-sizing: border-box;
+            color: black;
+            background-image: url('/static/public/A4 - 1.png') !important;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container:last-child {
+            margin-bottom: 0;
+        }
+
+        .top-cards {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 0px;
+            padding: 0 25px 0 25px;
+        }
+
+        .card-left {
+            flex: 1;
+            background: #ff6b35;
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+        }
+
+        .card-right {
+            flex: 1;
+            background: #318afd;
+            border-radius: 15px;
+            padding: 15px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .greeting {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .name-box {
+            background: white;
+            color: black;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .class-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 16px;
+            gap: 10px;
+        }
+
+        .results-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-align: center;
+
+        }
+
+        .percentage {
+            background: rgba(255, 255, 255, 0.9);
+            color: #318afd;
+            padding: 15px;
+            text-align: center;
+            font-size: 36px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+
+        .main-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 30px 0;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        .header {
+            padding: 15px;
+            text-align: justify;
+            font-size: 18px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            color: #fff;
+        }
+
+        .subjects-container {
+            display: flex;
+            margin-bottom: 20px;
+            gap: 0px;
+            position: relative;
+        }
+
+        .subjects-basic,
+        .subjects-profile {
+            flex: 1;
+            border-radius: 15px;
+            padding-top: 10px;
+        }
+
+        .subjects-basic {
+            background: #318afd;
+        }
+
+        .subjects-profile {
+            background: #ffcf54;
+        }
+
+        .subjects-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: white;
+        }
+
+        .subjects-profile .subjects-title {
+            color: black;
+        }
+
+        .subject-row {
+            display: flex;
+            /* justify-content: space-around; */
+            align-items: center;
+            flex-direction: column;
+            margin-bottom: 10px;
+            color: black;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .subject-name {
+            font-weight: bold;
+            font-size: 12px;
+            border-bottom: 1px solid black;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .subject-score {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .total-number {
+            font-size: 48px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .total-label {
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .exact-sciences {
+            background-color: #d2ddec;
+        }
+
+        .natural-sciences {
+            background-color: #ececd2;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .section-content {
+            font-size: 14px;
+            text-align: justify;
+            line-height: 1.5;
+        }
+
+        .info-icon .info-circle {
+            color: rgb(255, 255, 255);
+            background-color: transparent;
+            border-radius: 50%;
+            border: 3px solid rgb(255, 255, 255);
+            font-size: 20px;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fontRoad {
+            font-family: 'RoadRadio', sans-serif !important;
+            font-size: 18px;
+            color: #fff;
+            text-align: center;
+            text-transform: uppercase;
+            padding-bottom: 15px;
+        }
+
+        .CHARACTERISTIC {
+            margin-block: 40px;
+            font-size: 36px;
+        }
+
+        .comparison-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: stretch;
+        }
+
+        .preparation-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .prep-header {
+            border-radius: 10px;
+            padding: 8px 12px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: white;
+        }
+
+        .card-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card,
+        .card2 {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: -20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        .card:first-child,
+        .card2:first-child {
+            margin-top: 0;
+        }
+
+        .card {
+            background-color: #d2e9fb;
+        }
+
+        .card:first-child {
+            background-color: #4bbcf3;
+        }
+
+        .card:nth-child(2) {
+            background-color: #a3dbf7;
+        }
+
+        .card:nth-child(3) {
+            background-color: #c8e8fb;
+        }
+
+        .card:nth-child(4) {
+            background-color: #e9f6fd;
+        }
+
+        .card2 {
+            background-color: #d2e9fb;
+        }
+
+        .card2:first-child {
+            background-color: #54ab9b;
+            color: white;
+        }
+
+        .card2:nth-child(2) {
+            background-color: #aad5cc;
+        }
+
+        .card2:nth-child(3) {
+            background-color: #d5e9e7;
+        }
+
+        .card2:nth-child(4) {
+            background-color: #eaf4f3;
+        }
+
+        .middle-section2 {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-top: 46px;
+        }
+
+        .card-gradient {
+            color: black;
+            padding: 20px 13px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10px;
+            margin-top: -20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            border: 1px solid black;
+            overflow-wrap: break-word;
+        }
+
+        .card-gradient:first-child {
+            margin-top: 0;
+        }
+
+        .notes-section {
+            background: #c8dcf0;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #333;
+        }
+
+        .notes-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .notes-text {
+            line-height: 1.5;
+            font-size: 14px;
+            text-align: justify;
+        }
+
+        .bottom-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .months-badge {
+            background: linear-gradient(135deg, #ff8a65 0%, #ff5722 100%);
+            border-radius: 15px;
+            padding: 10px 15px;
+            text-align: center;
+            min-width: 100px;
+            color: white;
+        }
+
+        .months-number {
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .months-text {
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 5px;
+            color: #fff;
+        }
+
+        .bottom-text {
+            flex: 1;
+            font-size: 14px;
+            line-height: 1.5;
+            text-align: justify;
+            color: #fff;
+        }
+
+        .bottom-title {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        #download-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .container {
+                margin: 0 0 0 0 !important;
+                box-shadow: none;
+                border: none;
+                margin-bottom: 0px !important;
+                page-break-after: always;
+                width: 100%;
+                height: 100%;
+                min-height: auto;
+            }
+
+            .container:last-child {
+                page-break-after: auto;
+            }
+
+            #download-btn {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                width: 100vw;
+                /* Полная ширина области просмотра */
+                min-height: calc(100vw * 1.414);
+                /* Пропорция A4: 297mm / 210mm ≈ 1.414 */
+                transform: scale(calc(100vw / 210mm));
+                /* Масштабирование под ширину viewport */
+                transform-origin: top left;
+                /* Точка масштабирования — верхний левый угол */
+                margin: 0;
+                /* Убираем отступы для полного заполнения экрана */
+                padding: 1cm;
+                /* Сохраняем оригинальный padding */
+                box-sizing: border-box;
+                background-size: cover;
+                /* Сохраняем фон */
+                background-position: center;
+            }
+
+            /* Убираем отступ между страницами на мобильных */
+            .container:last-child {
+                margin-bottom: 0;
+            }
+
+            /* Убираем кнопку скачивания на мобильных */
+            #download-btn {
+                display: none;
+                /* Скрываем кнопку, чтобы не перекрывала контент */
+            }
+
+            /* Убираем лишние отступы у body */
+            body {
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
+                /* Предотвращаем горизонтальную прокрутку */
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content-to-download">
+        <!-- page 1 -->
+        <div class="container">
+            <div style="display: flex; justify-content: center; align-items: center; padding-block: 30px">
+              <img style="height: 120px" src="{% static 'public/logo2.png' %}" alt="Logo" />
+            </div>
+            <p class="fontRoad">Диагностика успеваемости ученика по тесту ЕНТ</p>
+            <div class="top-cards">
+                <div class="card-left">
+                    <div class="greeting">Салем!</div>
+                    <div class="name-box">{{name}}<br /></div>
+                    <div class="class-info">
+                        {% comment %} <span><strong>Класс</strong><br />5</span> {% endcomment %}
+                        <span><strong>Цель</strong><br />Диагностика знаний</span>
+                    </div>
+                </div>
+                <div class="card-right">
+                    <div class="results-title">Результаты тестирования</div>
+                    <div class="percentage">{{percentage}}%</div>
+                </div>
+            </div>
+            <h1 class="main-title">ДИАГНОСТИКА</h1>
+            <p class="header">
+                Представленная диагностика рассматривает академические способности ребенка в по базе ЕНТ. Оценка
+                проведена по шкале, где указано количество набранных баллов по сравнению с максимально возможным.
+                Этот подход позволяет выявить как сильные, так и слабые стороны в структуре, что является ключом к
+                разработке индивидуального плана обучения.
+            </p>
+            <div class="subjects-container">
+                <div class="subjects-basic">
+                    <div class="subjects-title">Основные предметы</div>
+                    <div style="border-radius: 15px; padding: 15px; background-color: #d2ddec; height: 150px;">
+                        <div style="display: flex; justify-content: space-around;  flex-direction: row;">
+                            <div class="subject-row">
+                                <div class="subject-name">Математическая грамотность</div>
+                                <div class="subject-score">{{math_literacy}}/15</div>
+                            </div>
+                            <div class="subject-row">
+                                <div class="subject-name">История Казахстана</div>
+                                <div class="subject-score">{{history_kazakhstan}}/15</div>
+                            </div>
+                            <div class="subject-row">
+                                <div class="subject-name">Грамотность чтения</div>
+                                <div class="subject-score">{{reading_literacy}}/20</div>
+                            </div>
+                        </div>
+                        <!-- <div style="display: flex; justify-content: end; margin-left: 20px;" class="total-number">70/</div> -->
+                        <div class="total-number" style="
+                          position: absolute; 
+                          top: 122px; 
+                          right: 298px; 
+                           
+                          
+                          border-radius: 10px;
+                          font-weight: bold;
+                        ">
+                            {{basic_subjects_total}}/
+                        </div>
+                    </div>
+                </div>
+                <div class="subjects-profile">
+                    <div class="subjects-title">Профильные предметы</div>
+                    <div style="border-radius: 15px; padding: 15px; background-color: #ececd2; height: 150px;">
+                        <div style="display: flex; justify-content: space-around;  flex-direction: row;">
+                            <div class="subject-row">
+                                <div class="subject-name">{{profile_subject_1_name}}</div>
+                                <div class="subject-score">{{profile_subject_1_score}}/45</div>
+                            </div>
+                            <div class="subject-row">
+                                <div class="subject-name">{{profile_subject_2_name}}</div>
+                                <div class="subject-score">{{profile_subject_2_score}}/45</div>
+                            </div>
+                        </div>
+                        <div style="text-align: left; margin-top: 13px;">
+                            <span class="total-number">{{profile_subjects_total}}</span>
+                            <span class="total-label">баллов</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- page 2 -->
+        <div class="container">
+            <div style="display: flex; justify-content: center; align-items: center; padding-block: 30px">
+                <img style="height: 120px" src="{% static 'public/logo2.png' %}" alt="Logo" />
+            </div>
+            <p class="fontRoad">Диагностика успеваемости ученика по тесту ЕНТ</p>
+            <div class="header">
+                Результаты пробного теста свидетельствуют о том, что ребенок столкнулся с серьезными трудностями в
+                освоении материала по его профильным предметам. Его процент правильных ответов составил всего 50,0%,
+                что поднимает вопросы к его готовности к экзамену ЕНТ.
+            </div>
+            <div class="fontRoad CHARACTERISTIC">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
+            <div class="section exact-sciences">
+                <div class="section-title">Точные науки:</div>
+                <div class="section-content">
+                    Учащийся испытывает значительные трудности в понимании основ точных наук, что указывает на
+                    необходимость дополнительной работы над усвоением школьной программы по данным предметам.
+                    Возможно, потребуется индивидуальный подход в обучении и поиск более эффективных методик для
+                    улучшения понимания предмета. Важно мотивировать и поддерживать интерес к изучению, используя
+                    разнообразные образовательные ресурсы.
+                </div>
+            </div>
+            <div class="section natural-sciences">
+                <div class="section-title">Естественные науки:</div>
+                <div class="section-content">
+                    Учащийся испытывает серьезные трудности в освоении гуманитарных наук. Это указывает на
+                    необходимость интенсивного обучения и поиска дополнительных методов изучения, направленных на
+                    повышение и развитие навыков понимания текста и профильных предметов. Важно создать мотивирующую
+                    учебную среду и использовать индивидуальный подход, чтобы пробудить интерес к изучению данных и
+                    культур.
+                </div>
+            </div>
+            <div style="display: flex; justify-content: center; align-items: center; padding-block: 30px; gap: 15px"
+                class="info-icon">
+                <div class="info-circle">!</div>
+                <p style="line-height: 1.4; font-size: 14px; color: #fff;">
+                    Учащийся сталкивается с трудностями как в точных, так и в гуманитарных дисциплинах, что требует
+                    комплексного подхода к обучению и поиска специальных методик для преодоления образовательных
+                    препятствий.
+                </p>
+            </div>
+        </div>
+
+        <!-- page 3 -->
+        <div class="container">
+            <div style="display: flex; justify-content: center; align-items: center; padding-block: 30px">
+                <img style="height: 120px" src="{% static 'public/logo2.png' %}" alt="Logo" />
+            </div>
+            <p class="fontRoad">Диагностика успеваемости ученика по тесту ЕНТ</p>
+            <div
+                style="background-color: #21841a; border-radius: 15px; width: 200px; padding: 5px 15px; color: white; margin: 0 auto  -15px; position: relative; z-index: 1;">
+                <p style="font-size: 20px; text-align: center; font-weight: 700">Рекомендации</p>
+            </div>
+            <div style="position: relative; z-index: 0; font-size: 14px; line-height: 1.5"
+                class="section exact-sciences">
+                <div style="font-weight: 700; padding-top: 15px;" class="section-content">
+                    <strong>Интенсивные занятия с репетиторами:</strong><br />
+                    Ребенку требуется индивидуальный подход, предоставляемый опытными репетиторами по каждому из
+                    предметов. Это позволит выявить конкретные слабости и разработать стратегии для их преодоления.
+                    <br><br>
+                    <strong>Углубленное изучение предметов:</strong><br> Особое внимание следует уделить профильным
+                    предметам, так как
+                    они являются ключевыми компонентами вступительных экзаменов. Занятия должны быть
+                    систематическими, а изучение материала - углубленным.
+                    <br><br>
+                    <strong>Индивидуальные планы обучения:</strong><br> Разработка
+                    индивидуальных планов обучения для каждого предмета поможет сосредоточиться на слабых сторонах
+                    ребенка, а также сбалансировать его образовательный процесс.
+                </div>
+            </div>
+        </div>
+
+        <!-- page 4 -->
+        <div class="container">
+            <div style="display: flex; justify-content: center; align-items: center; padding-block: 30px">
+                <img style="height: 120px" src="{% static 'public/logo2.png' %}" alt="Logo" />
+            </div>
+            <p class="fontRoad">Диагностика успеваемости ученика по тесту ЕНТ</p>
+            <h1 style="font-size: 36px; font-weight: 700" class="main-title">
+                Возможность поступить<br />
+                в выбранные специальности
+            </h1>
+            <div class="comparison-section">
+                <div class="preparation-card">
+                    <div style="background-color: #50bced;" class="prep-header">Без подготовки</div>
+                    <div class="card-container">
+                        <div class="card">{{without_preparation}}%</div>
+                        {% comment %} <div class="card">5%</div>
+                        <div class="card">15%</div>
+                        <div class="card">15%</div> {% endcomment %}
+                    </div>
+                </div>
+                {% comment %} <div class="middle-section2">
+                    <div class="card-gradient" style="background-color: #f1c2a4">Электротехника и энер</div>
+                    <div class="card-gradient" style="background-color: #f9a871">
+                        Стандартизация, сертификация и метрология (по отраслям)
+                    </div>
+                    <div class="card-gradient" style="background-color: #f1c2a4">Механика</div>
+                    <div class="card-gradient" style="background-color: #f9a871">
+                        Коммуникации и коммуникационные технологии
+                    </div>
+                </div> {% endcomment %}
+                <div class="preparation-card">
+                    <div style="background-color: #54ab9b;" class="prep-header">С подготовкой</div>
+                    <div class="card-container">
+                        <div class="card2">{{with_preparation}}%</div>
+                        {% comment %} <div class="card2">5%</div>
+                        <div class="card2">15%</div>
+                        <div class="card2">15%</div> {% endcomment %}
+                    </div>
+                </div>
+            </div>
+            <div class="notes-section">
+                <div class="notes-title">Примечание:</div>
+                <div class="notes-text">
+                    Не все дети могут поступить в лучшие ВУЗы страны, кому-то это вовсе не нужно, подготовка бывает
+                    сложно и не дает результатов. По статистике 10,8% детей поступают без специализированной
+                    подготовки в лучшие ВУЗы страны, и 89,2% поступают со специальной подготовки и правильному
+                    подходу, что включает в себя самодисциплину, целеполагание, подготовку, наставничество и
+                    поддержку родителей, практику решения задач.
+                </div>
+            </div>
+ 
+
+
+
+            {% comment %} <div class="bottom-section">
+                <div class="" style="display: flex; flex-direction: column; align-items: center">
+                    <div style="color: white" class="bottom-title">У ВАС</div>
+                    <div style="color: white" class="months-number months-badge">36</div>
+                    <div style="color: white" class="months-text">МЕСЯЦЕВ</div>
+                </div>
+                <div class="bottom-text">
+                    На подготовку к поступлению в ВУЗы. При подготовке к экзаменам ЕНТ улучшается общий уровень
+                    успеваемости по основным и профильным предметам, и так, как у ребенка и родителей появляется
+                    цель, результат будет быстрый и качественный.
+                </div>
+            </div> {% endcomment %}
+        </div>
+    </div>
+    <button id="download-btn">Download as PDF</button>
+
+    <script>
+        document.getElementById('download-btn').addEventListener('click', function () {
+            const element = document.getElementById('content-to-download');
+            const opt = {
+                margin: 0,
+                filename: 'tesla_diagnostic.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // New Promise-based usage:
+            html2pdf().set(opt).from(element).save();
+        });
+    </script>
+
+</body>
+
+</html>

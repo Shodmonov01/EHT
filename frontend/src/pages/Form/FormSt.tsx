@@ -17,6 +17,14 @@ import Loader from '../../components/Loader'
 import axios from 'axios'
 // import { div } from 'framer-motion/client'
 
+// Добавляем интерфейс для специализации
+interface Specialization {
+    id: number
+    name: string
+    mark: number
+    categories: number[]
+}
+
 export default function FormSt() {
     const { t } = useTranslation()
     const dispatch = useDispatch()
@@ -30,11 +38,13 @@ export default function FormSt() {
         reading_literacy: '',
         profile_subject_1: {
             name: '',
-            score: ''
+            score: '',
+            spec_id: null
         },
         profile_subject_2: {
             name: '',
-            score: ''
+            score: '',
+            spec_id: null
         }
     })
 
@@ -46,6 +56,7 @@ export default function FormSt() {
     console.log('selectedCategory', selectedCategory)
     console.log('currentLanguage', currentLanguage)
 
+    // Запрос для получения предметов
     const {
         data: subject,
         isError,
@@ -54,7 +65,7 @@ export default function FormSt() {
     } = useQuery({
         queryKey: ['subjects', currentLanguage],
         queryFn: async () => {
-            const response = await fetch(`http://176.124.210.145:8088/quiz/subjects`)
+            const response = await fetch(`http://185.191.141.172:8001/quiz/subjects`)
             if (!response.ok) {
                 throw new Error('Network response was not ok')
             }
@@ -64,11 +75,12 @@ export default function FormSt() {
     })
 
     console.log('subject', subject)
+    console.log('specialization', specialization)
 
     const { data: point } = useQuery({
         queryKey: ['points', currentLanguage, selectedCategory],
         queryFn: async () => {
-            const response = await fetch(`http://176.124.210.145:8088/quiz/subjects/result/${token}/`)
+            const response = await fetch(`http://185.191.141.172:8001/quiz/subjects/result/${token}/`)
 
             if (!response.ok) {
                 throw new Error('Network response was not ok')
@@ -84,7 +96,8 @@ export default function FormSt() {
 
     useEffect(() => {
         refetch()
-    }, [currentLanguage, refetch])
+        refetchSpecialization()
+    }, [currentLanguage, refetch, refetchSpecialization])
 
     const { isPending: isStarting } = useMutation<QuizResult, Error, QuizStartRequest>({
         mutationFn: startQuiz,
@@ -115,13 +128,33 @@ export default function FormSt() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
+        // Подготавливаем данные для отправки
+        const dataToSend = {
+            name: formData.name,
+            phone: formData.phone,
+            history_kazakhstan: parseInt(formData.history_kazakhstan),
+            math_literacy: parseInt(formData.math_literacy),
+            reading_literacy: parseInt(formData.reading_literacy),
+            profile_subject_1: {
+                name: formData.profile_subject_1.name,
+                score: parseInt(formData.profile_subject_1.score),
+                spec_id: formData.profile_subject_1.spec_id
+            },
+            profile_subject_2: {
+                name: formData.profile_subject_2.name,
+                score: parseInt(formData.profile_subject_2.score),
+                spec_id: formData.profile_subject_2.spec_id
+            }
+        }
+
         try {
             await axios.post(
-                'http://176.124.210.145:8088/quiz/ent-diagnosis/',
+                'http://185.191.141.172:8001/quiz/ent-diagnosis/',
                 { ...formData },
                 {
                     headers: {
-                        'Accept-Language': currentLanguage
+                        'Accept-Language': currentLanguage,
+                        'Content-Type': 'application/json'
                     }
                 }
             )
@@ -134,23 +167,26 @@ export default function FormSt() {
                 reading_literacy: '',
                 profile_subject_1: {
                     name: '',
-                    score: ''
+                    score: '',
+                    spec_id: null
                 },
                 profile_subject_2: {
                     name: '',
-                    score: ''
+                    score: '',
+                    spec_id: null
                 }
             })
         } catch (error) {
             console.error('Error sending data:', error)
+            alert('Ошибка при отправке данных. Попробуйте еще раз.')
         }
     }
 
-    if (isLoading) {
+    if (isLoading || isSpecializationLoading) {
         return <Loader />
     }
 
-    if (isError) {
+    if (isError || isSpecializationError) {
         return (
             <div className='error-container'>
                 <div className='error'>{t('form.error')}</div>
@@ -301,26 +337,48 @@ export default function FormSt() {
                                         {t('form.prof1')}
                                     </label>
                                 </div>
-                                <Select
-                                    id='category1'
-                                    options={subject?.map((category: Category) => ({
-                                        value: category.id,
-                                        label: category.name
-                                    }))}
-                                    onChange={(selectedOption: any) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            profile_subject_1: {
-                                                ...prev.profile_subject_1,
-                                                name: selectedOption?.label || ''
-                                            }
-                                        }))
-                                    }}
-                                    required
-                                    isDisabled={isStarting}
-                                    className='custom-select'
-                                    placeholder={t('form.selectSubject')}
-                                />
+                                <div style={{ display: 'flex', gap: '20px', justifyContent: 'space-between' }}>
+                                    <Select
+                                        id='category1'
+                                        options={subject?.map((category: Category) => ({
+                                            value: category.id,
+                                            label: category.name
+                                        }))}
+                                        onChange={(selectedOption: any) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                profile_subject_1: {
+                                                    ...prev.profile_subject_1,
+                                                    name: selectedOption?.label || ''
+                                                }
+                                            }))
+                                        }}
+                                        required
+                                        isDisabled={isStarting}
+                                        className='custom-select'
+                                        placeholder={t('form.selectSubject')}
+                                    />
+                                    <Select
+                                        id='specialization1'
+                                        options={specialization?.map((spec: Specialization) => ({
+                                            value: spec.id,
+                                            label: spec.name
+                                        }))}
+                                        onChange={(selectedOption: any) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                profile_subject_1: {
+                                                    ...prev.profile_subject_1,
+                                                    spec_id: selectedOption?.value || null
+                                                }
+                                            }))
+                                        }}
+                                        required
+                                        isDisabled={isStarting}
+                                        className='custom-select'
+                                        placeholder={t('Выберите специальность')}
+                                    />
+                                </div>
                             </div>
                             <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
                                 <input
@@ -354,26 +412,48 @@ export default function FormSt() {
                                         {t('form.prof2')}
                                     </label>
                                 </div>
-                                <Select
-                                    id='category2'
-                                    options={subject?.map((category: Category) => ({
-                                        value: category.id,
-                                        label: category.name
-                                    }))}
-                                    onChange={(selectedOption: any) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            profile_subject_2: {
-                                                ...prev.profile_subject_2,
-                                                name: selectedOption?.label || ''
-                                            }
-                                        }))
-                                    }}
-                                    required
-                                    isDisabled={isStarting}
-                                    className='custom-select'
-                                    placeholder={t('form.selectSubject')}
-                                />
+                                <div style={{ display: 'flex', gap: '20px', justifyContent: 'space-between' }}>
+                                    <Select
+                                        id='category2'
+                                        options={subject?.map((category: Category) => ({
+                                            value: category.id,
+                                            label: category.name
+                                        }))}
+                                        onChange={(selectedOption: any) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                profile_subject_2: {
+                                                    ...prev.profile_subject_2,
+                                                    name: selectedOption?.label || ''
+                                                }
+                                            }))
+                                        }}
+                                        required
+                                        isDisabled={isStarting}
+                                        className='custom-select'
+                                        placeholder={t('form.selectSubject')}
+                                    />
+                                    <Select
+                                        id='specialization2'
+                                        options={specialization?.map((spec: Specialization) => ({
+                                            value: spec.id,
+                                            label: spec.name
+                                        }))}
+                                        onChange={(selectedOption: any) => {
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                profile_subject_2: {
+                                                    ...prev.profile_subject_2,
+                                                    spec_id: selectedOption?.value || null
+                                                }
+                                            }))
+                                        }}
+                                        required
+                                        isDisabled={isStarting}
+                                        className='custom-select'
+                                        placeholder={t('Выберите специальность')}
+                                    />
+                                </div>
                             </div>
                             <div style={{ width: '100%', display: 'flex', alignItems: 'end' }}>
                                 <input

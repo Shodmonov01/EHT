@@ -1509,6 +1509,134 @@ def calculate_admission_probability(percentage):
 
 from drf_spectacular.utils import extend_schema, OpenApiExample
 
+# @extend_schema(
+#     request=EntDiagnosisInputSerializer,
+    
+#     examples=[
+#         OpenApiExample(
+#             name="Пример запроса",
+#             value={
+#                 "name": "Али",
+#                 "phone": "+998901234567",
+#                 "history_kazakhstan": 33,
+#                 "math_literacy": 30,
+#                 "reading_literacy": 38,
+#                 "profile_subject_1": {
+#                     "name": "Физика",
+#                     "score": 45,
+#                     "spec_id": 1
+
+#                 },
+#                 "profile_subject_2": {
+#                     "name": "Математика",
+#                     "score": 47,
+#                     "spec_id": 1
+#                 }
+#             },
+#             request_only=True
+#         )
+#     ],
+#     description="Рассчитывает результаты диагностики по ЕНТ и возвращает анализ"
+# )
+
+# @api_view(['POST'])
+# def ent_diagnosis_analysis(request):
+#     serializer = EntDiagnosisInputSerializer(data=request.data)
+#     if not serializer.is_valid():
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     data = serializer.validated_data
+#     print(data, 'data--')
+#     total_score = (
+#         data['history_kazakhstan'] +
+#         data['math_literacy'] +
+#         data['reading_literacy'] +
+#         data['profile_subject_1']['score'] +
+#         data['profile_subject_2']['score']
+#     )
+#     max_score = 140
+#     percentage = (total_score / max_score) * 100
+
+#     # Levels
+#     reading_level = calculate_subject_level(data['reading_literacy'], 40)
+#     math_level = calculate_subject_level(data['math_literacy'], 40)
+#     history_level = calculate_subject_level(data['history_kazakhstan'], 40)
+#     profile1_level = calculate_subject_level(data['profile_subject_1']['score'], 50)
+#     profile2_level = calculate_subject_level(data['profile_subject_2']['score'], 50)
+
+#     general_level = calculate_group_level(
+#         [data['history_kazakhstan'], data['math_literacy'], data['reading_literacy']], [40, 40, 40]
+#     )
+#     profile_level = calculate_group_level(
+#         [data['profile_subject_1']['score'], data['profile_subject_2']['score']], [50, 50]
+#     )
+
+#     response_data = {
+#         "name": data['name'],
+#         "phone": data['phone'],
+#         "total_score": total_score,
+#         "percentage": round(percentage, 2),
+#         "subject_analysis": {
+#             "reading_literacy": {
+#                 "score": data['reading_literacy'],
+#                 "level": reading_level,
+#                 "recommendation": get_subject_recommendation("reading_literacy", reading_level)
+#             },
+#             "math_literacy": {
+#                 "score": data['math_literacy'],
+#                 "level": math_level,
+#                 "recommendation": get_subject_recommendation("math_literacy", math_level)
+#             },
+#             "history_kazakhstan": {
+#                 "score": data['history_kazakhstan'],
+#                 "level": history_level,
+#                 "recommendation": get_subject_recommendation("history_kazakhstan", history_level)
+#             },
+#             "profile_subject_1": {
+#                 "name": data['profile_subject_1']['name'],
+#                 "score": data['profile_subject_1']['score'],
+#                 "level": profile1_level,
+#                 "recommendation": get_subject_recommendation("profile", profile1_level)
+#             },
+#             "profile_subject_2": {
+#                 "name": data['profile_subject_2']['name'],
+#                 "score": data['profile_subject_2']['score'],
+#                 "level": profile2_level,
+#                 "recommendation": get_subject_recommendation("profile", profile2_level)
+#             }
+#         },
+#         "group_analysis": {
+#             "general_subjects": {
+#                 "level": general_level,
+#                 "recommendation": get_group_recommendation("general", general_level)
+#             },
+#             "profile_subjects": {
+#                 "level": profile_level,
+#                 "recommendation": get_group_recommendation("profile", profile_level)
+#             }
+#         },
+#         "admission_probability": calculate_admission_probability(percentage)
+#     }
+#     print(response_data, 'res data000==')
+#     sheet = get_google_sheet(197903344)
+#     user_token = uuid.uuid4()
+   
+#     sheet.append_row([response_data['name'], response_data['phone'], response_data['total_score'],  response_data['percentage'], str(user_token)])
+#     return Response(response_data, status=status.HTTP_200_OK)
+
+
+# views.py
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse, Http404
+from django.template.loader import render_to_string
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+import uuid
+
+# Your existing view with modification to generate URL
+
 @extend_schema(
     request=EntDiagnosisInputSerializer,
     
@@ -1618,10 +1746,242 @@ def ent_diagnosis_analysis(request):
     }
     print(response_data, 'res data000==')
     sheet = get_google_sheet(197903344)
-    user_token = uuid.uuid4()
+    user_token = str(uuid.uuid4())
    
-    sheet.append_row([response_data['name'], response_data['phone'], response_data['total_score'],  response_data['percentage'], str(user_token)])
+    # Store all necessary data in Google Sheets
+    sheet.append_row([
+        response_data['name'], 
+        response_data['phone'], 
+        response_data['total_score'],  
+        response_data['percentage'], 
+        user_token,
+        # Add additional fields for complete data storage
+        data['history_kazakhstan'],
+        data['math_literacy'], 
+        data['reading_literacy'],
+        data['profile_subject_1']['name'],
+        data['profile_subject_1']['score'],
+        data['profile_subject_2']['name'],
+        data['profile_subject_2']['score'],
+        # Store levels as strings
+        reading_level,
+        math_level,
+        history_level,
+        profile1_level,
+        profile2_level,
+        general_level,
+        profile_level,
+        # Store recommendations as JSON strings or separate fields
+        str(response_data['subject_analysis']),
+        str(response_data['group_analysis']),
+        str(response_data['admission_probability']),
+        f"{BASE_URL}quiz/diagnosis/report/{user_token}/"
+
+    ])
+    
+
+
+    
     return Response(response_data, status=status.HTTP_200_OK)
+import json
+import ast
+
+@extend_schema(
+
+    examples=[
+        OpenApiExample(
+            name="Пример запроса",
+            value={
+                "name": "Али",
+                "phone": "+998901234567",
+                "history_kazakhstan": 33,
+                "math_literacy": 30,
+                "reading_literacy": 38,
+                "profile_subject_1": {
+                    "name": "Физика",
+                    "score": 45,
+                    "spec_id": 1
+
+                },
+                "profile_subject_2": {
+                    "name": "Математика",
+                    "score": 47,
+                    "spec_id": 1
+                }
+            },
+            request_only=True
+        )
+    ],
+    
+)
+
+@api_view(['GET'])
+def diagnosis_report_view(request, token):
+    """
+    View to display the HTML report based on token from Google Sheets
+    """
+    try:
+        # Get data from Google Sheets using the token
+        sheet = get_google_sheet(197903344)
+        all_records = sheet.get_all_records()
+
+        
+        # Find the record with matching token
+        user_data = None
+        for record in all_records:
+            if record.get('token') == token:  # Assuming 'token' is the column name
+                user_data = record
+                break
+        
+        if not user_data:
+            raise Http404("Report not found")
+
+        print('user data: ------ ', user_data)
+        
+        # Extract data from the Google Sheets record
+        context = {
+            'name': user_data.get('name', ''),
+            'phone': user_data.get('phone', ''),
+            'total_score': user_data.get('total_score', 0),
+            'percentage': user_data.get('percentage', 0),
+            'history_kazakhstan': user_data.get('history_kazakhstan', 0),
+            'math_literacy': user_data.get('math_literacy', 0),
+            'reading_literacy': user_data.get('reading_literacy', 0),
+            'profile_subject_1_name': user_data.get('profile_subject_1_name', ''),
+            'profile_subject_1_score': user_data.get('profile_subject_1_score', 0),
+            'profile_subject_2_name': user_data.get('profile_subject_2_name', ''),
+            'profile_subject_2_score': user_data.get('profile_subject_2_score', 0),
+            # Calculate totals for display
+            'basic_subjects_total': int(user_data.get('history_kazakhstan', 0)) + int(user_data.get('math_literacy', 0)) + int(user_data.get('reading_literacy', 0)),
+            'profile_subjects_total': int(user_data.get('profile_subject_1_score', 0)) + int(user_data.get('profile_subject_2_score', 0)),
+            # Add levels and recommendations if stored
+            'reading_level': user_data.get('reading_level', 'средний'),
+            'math_level': user_data.get('math_level', 'средний'),
+            'history_level': user_data.get('history_level', 'средний'),
+            'profile1_level': user_data.get('profile1_level', 'средний'),
+            'profile2_level': user_data.get('profile2_level', 'средний'),
+            'general_level': user_data.get('general_level', 'средний'),
+            'profile_level': user_data.get('profile_level', 'средний'),
+            
+        }
+        admission = ast.literal_eval(user_data['admission_probability'])
+        with_preparation = admission.get('with_preparation', 0)
+        without_preparation = admission.get('without_preparation', 0)
+
+        # Calculate admission probabilities
+        context['with_preparation'] = with_preparation
+        context['without_preparation'] = without_preparation
+        print(context, 'context')
+        return render(request, 'diagnosis_report.html', context)
+        
+    except Exception as e:
+        print(f"Error retrieving report: {e}")
+        raise Http404("Report not found or error occurred")
+
+
+@extend_schema(
+
+    examples=[
+        OpenApiExample(
+            name="Пример запроса",
+            value={
+                "name": "Али",
+                "phone": "+998901234567",
+                "history_kazakhstan": 33,
+                "math_literacy": 30,
+                "reading_literacy": 38,
+                "profile_subject_1": {
+                    "name": "Физика",
+                    "score": 45,
+                    "spec_id": 1
+
+                },
+                "profile_subject_2": {
+                    "name": "Математика",
+                    "score": 47,
+                    "spec_id": 1
+                }
+            },
+            request_only=True
+        )
+    ],
+    
+)
+
+@api_view(['GET'])
+def diagnosis_report_pdf_view(request, token):
+    """
+    View to return PDF version of the report
+    """
+    try:
+        # Get the same data as the HTML view
+        sheet = get_google_sheet(197903344)
+        all_records = sheet.get_all_records()
+        
+        user_data = None
+        for record in all_records:
+            if record.get('token') == token:
+                user_data = record
+                break
+        
+        if not user_data:
+            raise Http404("Report not found")
+        
+        context = {
+            'name': user_data.get('name', ''),
+            'phone': user_data.get('phone', ''),
+            'total_score': user_data.get('total_score', 0),
+            'percentage': user_data.get('percentage', 0),
+            'history_kazakhstan': user_data.get('history_kazakhstan', 0),
+            'math_literacy': user_data.get('math_literacy', 0),
+            'reading_literacy': user_data.get('reading_literacy', 0),
+            'profile_subject_1_name': user_data.get('profile_subject_1_name', ''),
+            'profile_subject_1_score': user_data.get('profile_subject_1_score', 0),
+            'profile_subject_2_name': user_data.get('profile_subject_2_name', ''),
+            'profile_subject_2_score': user_data.get('profile_subject_2_score', 0),
+            'basic_subjects_total': int(user_data.get('history_kazakhstan', 0)) + int(user_data.get('math_literacy', 0)) + int(user_data.get('reading_literacy', 0)),
+            'profile_subjects_total': int(user_data.get('profile_subject_1_score', 0)) + int(user_data.get('profile_subject_2_score', 0)),
+        }
+        
+        context['admission_probability'] = calculate_admission_probability(float(context['percentage']))
+        
+        # Render HTML template
+        html_string = render_to_string('diagnosis_report.html', context)
+        
+        # You can use libraries like weasyprint or reportlab to convert HTML to PDF
+        # For now, return HTML with PDF content-type
+        response = HttpResponse(html_string, content_type='text/html')
+        response['Content-Disposition'] = f'inline; filename="diagnosis_report_{token}.pdf"'
+        
+        return response
+        
+    except Exception as e:
+        print(f"Error generating PDF: {e}")
+        raise Http404("Report not found or error occurred")
+
+# Helper function to calculate admission probability
+def calculate_admission_probability(percentage):
+    """
+    Calculate admission probability based on percentage
+    """
+    # You can customize this logic based on your requirements
+    minimum_threshold = 71.4  # 100 out of 140 = 71.4%
+    
+    if percentage < minimum_threshold:
+        without_preparation = 0
+    else:
+        # Calculate probability based on your formula
+        without_preparation = min(100, ((percentage - minimum_threshold) / (100 - minimum_threshold)) * 100)
+    
+    # With preparation, assume higher probability
+    with_preparation = min(100, without_preparation + 20)  # Add 20% with preparation
+    
+    return {
+        'without_preparation': round(without_preparation, 1),
+        'with_preparation': round(with_preparation, 1)
+    }
+
+
 
 from .serializers import SpecializetionSerializer
 
