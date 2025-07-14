@@ -211,7 +211,7 @@ export default function Form() {
                             }}
                             onClick={() => navigate('/form')}
                         >
-                            кнопка
+                            Уже сдал пробный ЕНТ
                         </button>
                     </div>
                 </div>
