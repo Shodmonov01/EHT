@@ -4,12 +4,27 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Tesla Education | Diagnostic</title>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
-               <style>
 
-              .spec-1 { background: #4bbcf3; } /* Dark blue */
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+        <style>
+
+         @font-face {
+            font-family: 'RoadRadio';
+            src: url('/static/public/roadradio_bold.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+        }
+
+           
+            .container, .card, .card2, .card-gradient, .section {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                }
+
+
+            .spec-1 { background: #4bbcf3; } /* Dark blue */
                 .spec-2 { background: #a3dbf7; } /* Medium blue */
                 .spec-3 { background: #c8e8fb; } /* Light blue */
                 .spec-4 { background: #90caf9; } /* Lighter blue */
@@ -30,21 +45,35 @@
                 background-position: center !important;
                 /* background-repeat: no-repeat !important; */
                 min-height: 100vh !important;
-                font-family: inherit;
+                font-family: 'Montserrat', sans-serif;
                 -webkit-font-smoothing: antialiased;
                 -moz-osx-font-smoothing: grayscale;
                 margin: 0px !important;
             }
 
             .container {
+                
                 background-image: url('/static//public/background.png') !important;
                 background-size: cover !important;
                 background-position: center !important;
                 /* background-repeat: no-repeat !important; */
                 /* width: 210mm; */
                 /* height: 297mm; */
+
+                 width: 100%;
+                box-sizing: border-box;
+                page-break-after: always;
+                break-inside: avoid;
+                padding-inline: 20px; 
                 page-break-after: always;
                 padding-inline: 200px;
+                page-break-inside: avoid;
+                break-inside: avoid;
+
+                box-sizing: border-box;
+                padding-inline: 200px;
+                
+               
             }
 
             .container-row {
@@ -124,11 +153,23 @@
             .main-title {
                 text-align: center;
                 color: white;
-                font-size: 36px;
+                font-size: 48px;
                 font-weight: bold;
                 margin: 40px 0 40px 0;
                 letter-spacing: 2px;
             }
+             .fontRoad {
+                font-family: 'RoadRadio' !important;
+                font-size: 30px;
+                color: white;
+                text-align: center;
+            }
+
+            .CHARACTERISTIC {
+                margin-block: 60px;
+                font-size: 50px;
+            }
+
 
             .description {
                 color: white;
@@ -592,13 +633,17 @@
         </style>
     </head>
     <body>
-        <div style="width: 100%">
+
+        <div style="width: 100%" class="safe-screen-qwwq" >
             <div style="background-image: url('static/public/background.png')" class="container">
-            {% comment %} <div style="margin-inline: auto; max-width: 800px"> {% endcomment %}
+           
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
-                <p style="color: white; font-size: 20px; text-align: center; text-transform: uppercase; padding-bottom: 20px;">
+                 <p
+                    class="fontRoad"
+                    style="color: white; text-align: center; text-transform: uppercase; padding-bottom: 20px"
+                >
                     Диагностика успеваемости ученика по тесту ЕНТ
                 </p>
                 <div class="top-cards">
@@ -631,7 +676,8 @@
                                 border-radius: 15px;
                                 padding: 20px;
                                 background-color: #d2ddec;
-                                height: 170px;
+                                height: auto;
+max-height: 100mm;
                                 position: relative !important;
                                 bottom: 0;
                             ">
@@ -661,7 +707,8 @@
                                 border-radius: 15px;
                                 padding: 20px;
                                 background-color: #ececd2;
-                                height: 170px;
+                                height: auto;
+max-height: 100mm;
                                 position: relative !important;
                                 bottom: 0;
                             ">
@@ -688,10 +735,63 @@
                     </div>
                 </div>
                 
-            {% comment %} </div> {% endcomment %}
+
+               
             </div>
 
-          
+            <div style="background-image: url('static/public/background.png')" class="container">
+                <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
+                    <img style="height: 140px" src="/static/public/logo2.png" alt="" />
+                </div>
+                   <p
+                    class="fontRoad"
+                    style="color: white; text-align: center; text-transform: uppercase; padding-bottom: 20px"
+
+                >
+                    Диагностика успеваемости ученика по тесту ЕНТ
+                </p>
+
+
+                <div
+                    style="
+                        background-color: #21841a;
+                        border-radius: 15px;
+                        width: 200px;
+                        padding: 1px;
+                        color: white;
+                        position: relative;
+                        bottom: -10px;
+                        z-index: 1;
+                        padding-inline: 20px;
+                    "
+                >
+                <p style="font-size: 24px; text-align: center; font-weight: 700">Рекомендации</p>
+                </div>
+                <div
+                    style="position: relative; z-index: 10; font-size: 20px; line-height: 1.6"
+                    class="section exact-sciences"
+                >
+                        <div style="font-weight: 700" class="section-content">
+                        Интенсивные занятия с репетиторами: <br />
+                        Ребенку требуется индивидуальный подход, предоставляемый опытными репетиторами по каждому из
+                        предметов. Это позволит выявить конкретные слабости и разработать стратегии для их преодоления.
+                        Углубленное изучение предметов: Особое внимание следует уделить профильным предметам, так как
+                        они являются ключевыми компонентами вступительных экзаменов. Занятия должны быть
+                        систематическими, а изучение материала - углубленным. Индивидуальные планы обучения: Разработка
+                        индивидуальных планов обучения для каждого предмета поможет сосредоточиться на слабых сторонах
+                        ребенка, а также сбалансировать его образовательный процесс. Практика в решении задач: Занятия
+                        по решению задач и практика в применении знаний в реальных ситуациях помогут ребенку лучше
+                        усвоить материал и развить навыки применения полученных знаний. Мотивация и поддержка: Важно
+                        создать позитивное обучающее окружение, поддерживая мотивацию ребенка и помогая ему преодолевать
+                        трудности. Родители играют ключевую роль в моральной поддержке и стимулировании интереса к
+                        учебе. Мониторинг прогресса: Регулярный мониторинг успехов и корректировка плана обучения в
+                        соответствии с изменениями в прогрессе ребенка позволит поддерживать эффективность учебного
+                        процесса. Дополнительные занятия, построенные на персонализированном подходе, смогут помочь
+                        ребенку подготовиться к вступительным экзаменам в для поступления в ВУЗ и повысить свой уровень
+                        подготовки в ключевых предметах.
+                    </div>
+                </div>
+            </div>
 
             <!-- Subject Evaluations Section -->
             <div style="background-image: url('static/public/background.png')" class="container">
@@ -701,11 +801,10 @@
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
 
-               
                 <p
                     style="
                         color: white;
-                        font-size: 20px;
+                        
                         text-align: center;
                         text-transform: uppercase;
                         padding-bottom: 20px;
@@ -720,36 +819,22 @@
                     что поднимает вопросы к его готовности к экзамену ЕНТ.
                 </div>
 
-                <div style="font-size: 30px" class="title">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
+                <div class="fontRoad CHARACTERISTIC">ОБЩАЯ ХАРАКТЕРИСТИКА</div>
             
 
-                {% comment %} <p style="color: white; font-size: 20px; text-align: center; text-transform: uppercase; padding-bottom: 20px;">
-                    Детальный анализ по предметам
-                </p> {% endcomment %}
 
                 <div class="title">АНАЛИЗ ОСНОВНЫХ ПРЕДМЕТОВ</div>
                 <div class="section exact-sciences">
                     <div class="section-content">{{ general_subjects_analysis.evaluation_text }}</div>
                 </div>
 
-                {% comment %} {% for subject in subject_analysis.general_subjects %}
-                <div class="subject-evaluation">
-                    <h4>{{ subject.name }} - {{ subject.percentage }}%</h4>
-                    <p>{{ subject.evaluation_text }}</p>
-                </div>
-                {% endfor %} {% endcomment %}
 
                 <div class="title">АНАЛИЗ ПРОФИЛЬНЫХ ПРЕДМЕТОВ</div>
                 <div class="section natural-sciences">
                     <div class="section-content">{{ profile_subjects_analysis.evaluation_text }}</div>
                 </div>
 
-                {% comment %} {% for subject in subject_analysis.profile_subjects %}
-                <div class="subject-evaluation">
-                    <h4>{{ subject.name }} - {{ subject.percentage }}%</h4>
-                    <p>{{ subject.evaluation_text }}</p>
-                </div>
-                {% endfor %} {% endcomment %}
+              
 
                 <div
                     style="display: flex; justify-content: center; align-items: center; padding-block: 50px; gap: 20px"
@@ -777,7 +862,6 @@
             </div>
             
 
-            
 
             <!-- Admission Probability Section -->
         <div style="background-image: url('static/public/background.png')" class="container">
@@ -785,57 +869,56 @@
                 <div style="display: flex; justify-content: center; align-items: center; padding-block: 50px">
                     <img style="height: 140px" src="/static/public/logo2.png" alt="" />
                 </div>
-                <p style="color: white; font-size: 20px; text-align: center; text-transform: uppercase; padding-bottom: 20px;">
-                    Прогноз поступления
-                </p>
-                <h1 class="main-title">
-                    Возможность поступить<br />
-                    в выбранные специальности
-                </h1>
+              
+                    <h1 style="font-size: 46px; font-weight: 700" class="main-title">
+                        Возможность поступить<br />
+                        в выбранные специальности
+                    </h1>
 
                <div class="comparison-section" style="display: flex; justify-content: space-between;">
           
-                <div class="preparation-card without-prep">
-                    <div class="prep-header" style="background-color: #50bced; font-size: 26px; border-radius: 10px">Без подготовки</div>
-                    <div class="card-container">
-                  {% for specialization in specialization_probabilities %}
-                <div class="spec-item spec-{{ forloop.counter0|add:1 }} "  style='color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;'>
-                    {{ specialization.admission.without_preparation }}%
-                </div>
-                {% endfor %}
-                </div>
-                </div>
+                    <div class="preparation-card without-prep">
+                        <div class="prep-header" style="background-color: #50bced; font-size: 26px; border-radius: 10px">Без подготовки</div>
+                        <div class="card-container">
+                            {% for specialization in specialization_probabilities %}
+                                    <div class="spec-item spec-{{ forloop.counter0|add:1 }} "  style='color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;'>
+                                        {{ specialization.admission.without_preparation }}%
+                                    </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                      
                        
                  <div class="middle-section2" style="display: flex; flex-direction: column; margin-top: 60px">
-                {% for specialization in specialization_probabilities %}
-                        <div class="card-gradient" style="background-color: #f9a871; ">
-                               {{ specialization.name }}
-                        </div>
-                          {% endfor %}
-                       
-                    </div>
+               
+
+                        {% for specialization in specialization_probabilities %}
+                            <div class="card-gradient"
+                                    style="background-color: {% if forloop.counter0|divisibleby:2 %}#f1c2a4{% else %}#f9a871{% endif %};">
+                                    {{ specialization.name }}
+                                </div>
+                        {% endfor %}
+                  </div>
                       
 
                 <div class="preparation-card with-prep">
                     <div class="prep-header" style="background-color: #54ab9b; font-size: 26px; border-radius: 10px">С подготовкой</div>
-         <div class="card-container">
- {% for specialization in specialization_probabilities %}
-                    <div class="spec-item aspec-{{ forloop.counter0|add:1 }}" style=" color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
-                        {{ specialization.admission.with_preparation }}
+                            <div class="card-container">
+                                    {% for specialization in specialization_probabilities %}
+                                    <div class="spec-item aspec-{{ forloop.counter0|add:1 }}" style=" color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 32px; font-weight: bold;">
+                                        {{ specialization.admission.with_preparation }}%
+                                    </div>
+                                    {% endfor %}
+                            </div>
                     </div>
-                      {% endfor %}
                 </div>
-                </div>
-          
-        </div>
 
                 <div class="notes-section">
                     <div class="notes-title">Примечание:</div>
                     <div class="notes-text">
                         Из {{ total_subjects }} предметов успешно сдано {{ subjects_passed }}. 
-                        Данный анализ показывает, что при текущем уровне подготовки шансы поступления составляют {{ admission_probability.without_preparation.percentage }}%. 
-                        Однако при систематической подготовке с учетом выявленных слабых мест, шансы значительно повышаются до {{ admission_probability.with_preparation.percentage }}%.
+                        Данный анализ показывает, что при текущем уровне подготовки шансы поступления составляют {{ admission_probability.without_preparation }}%. 
+                        Однако при систематической подготовке с учетом выявленных слабых мест, шансы значительно повышаются до {{ admission_probability.with_preparation }}%.
                     </div>
                 </div>
 
@@ -853,7 +936,7 @@
                 </div>
             </div>
           
-        </div>
+     
 
        <script>
             const today = new Date();
@@ -871,6 +954,61 @@
         </script>
 
 
+
+<script>
+    window.onload = () => {
+      // give everything a moment to finish rendering
+      setTimeout(generatePDF, 500);
+    };
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const elements = document.querySelectorAll('.container');
+      const pxToMm = 0.264583; // 1px ≈ 0.264583 mm at 96 dpi
+
+      let pdf;
+      for (let i = 0; i < elements.length; i++) {
+        const el = elements[i];
+
+        // 1) Render this container to canvas
+        const capturedCanvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: null,
+          scrollX: 0,
+          scrollY: 0
+        });
+
+        // 2) Get image data
+        const imgData = capturedCanvas.toDataURL('image/jpeg', 1.0);
+
+        // 3) Measure the container’s on‑screen size
+        const rect = el.getBoundingClientRect();
+        const widthMM  = rect.width  * pxToMm;
+        const heightMM = rect.height * pxToMm;
+        const orientation = widthMM > heightMM ? 'landscape' : 'portrait';
+
+        // 4) Create or add a page of exactly that size
+        if (i === 0) {
+          pdf = new jsPDF({
+            unit: 'mm',
+            format: [ widthMM, heightMM ],
+            orientation
+          });
+        } else {
+          pdf.addPage([ widthMM, heightMM ], orientation);
+        }
+
+        // 5) Draw the image so it fills the page
+        pdf.addImage(imgData, 'JPEG', 0, 0, widthMM, heightMM);
+      }
+
+      // 6) Download
+      pdf.save('tesla_diagnostic_custom_pages.pdf');
+    }
+  </script>
+
+       
     </body>
 </html>
 
