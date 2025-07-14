@@ -54,7 +54,7 @@ export default function FormSt() {
     } = useQuery({
         queryKey: ['subjects', currentLanguage],
         queryFn: async () => {
-            const response = await fetch(`http://176.124.210.145:8088/quiz/subjects`)
+            const response = await fetch(`http://localhost:8000/quiz/subjects`)
             if (!response.ok) {
                 throw new Error('Network response was not ok')
             }
@@ -68,7 +68,7 @@ export default function FormSt() {
     const { data: point } = useQuery({
         queryKey: ['points', currentLanguage, selectedCategory],
         queryFn: async () => {
-            const response = await fetch(`http://176.124.210.145:8088/quiz/subjects/result/${token}/`)
+            const response = await fetch(`http://localhost:8000/quiz/subjects/result/${token}/`)
 
             if (!response.ok) {
                 throw new Error('Network response was not ok')
@@ -117,7 +117,7 @@ export default function FormSt() {
 
         try {
             await axios.post(
-                'http://176.124.210.145:8088/quiz/ent-diagnosis/',
+                'http://localhost:8000/quiz/ent-diagnosis/',
                 { ...formData },
                 {
                     headers: {
